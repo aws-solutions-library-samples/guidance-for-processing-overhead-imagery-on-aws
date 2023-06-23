@@ -1,0 +1,10 @@
+{
+  "id": "1234567890123",
+  "name": "fake-alias",
+  "region": "us-west-1",
+  "prodLike": false,
+  "smInstanceType": "ml.m4.xlarge",
+  "enableAutoscaling": true,
+  "enableMonitoring": true,
+  "enableTesting": true
+}
