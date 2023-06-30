@@ -10,3 +10,6 @@
 [submodule "lib/osml-cdk-constructs"]
 	path = lib/osml-cdk-constructs
 	url = git@github.com:aws-solutions-library-samples/osml-cdk-constructs.git
+[submodule "lib/osml-imagery-toolkit"]
+	path = lib/osml-imagery-toolkit
+	url = git@github.com:aws-solutions-library-samples/osml-imagery-toolkit.git
