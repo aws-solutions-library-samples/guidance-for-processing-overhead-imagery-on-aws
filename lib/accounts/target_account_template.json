@@ -1,0 +1,9 @@
+{
+  "id": "1234567890123",
+  "name": "fake-alias",
+  "region": "us-west-1",
+  "prodLike": false,
+  "enableAutoscaling": true,
+  "enableMonitoring": true,
+  "enableTesting": true
+}
