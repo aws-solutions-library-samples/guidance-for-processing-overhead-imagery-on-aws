@@ -20,18 +20,13 @@ echo "                          |_|                                             
 LOCAL_DIR="$( dirname -- "$0"; )"
 cd "${LOCAL_DIR}/.." || exit 1
 
-echo "Installing nodejs..."
-NODE_VERSION=16
-NODE_URL=https://rpm.nodesource.com/setup_"${NODE_VERSION}".x
-wget -sL "${NODE_URL}" \
-    && ./setup_"${NODE_VERSION}".x \
-    && yum install -y nodejs \
-    && rm ${NODE_VERSION}.x
-
 echo "Installing integration test requirements..."
 python3 -m pip install lib/osml-model-runner-test/
 
 echo "Installing cesium globe package..."
 npm install --prefix lib/osml-cesium-globe/ lib/osml-cesium-globe/
+
+echo "Pulling tumgis/ctb-quantized-mesh for local tile serving..."
+docker pull tumgis/ctb-quantized-mesh
 
 echo "Finished setting up OSML development environment!"
