@@ -23,5 +23,5 @@
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
-  "exclude": ["cdk.out", "build", "node_modules", "dist"]
+  "exclude": ["cdk.out", "build", "node_modules", "dist", "lib/osml-cesium-globe"]
 }
