@@ -20,14 +20,14 @@
 
 ## Installation
 
-If on a MAC without NPM/NodeJS version 16 installed run:
+If on a Mac without NPM/NodeJS version 16 installed, run:
 
 ```bash
 brew install npm
 brew install node@16
 ```
 
-Alternatively, NPM/NodeJS can be installed the NVM
+Alternatively, NPM/NodeJS can be installed through the NVM:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh -o install_nvm.sh | bash
@@ -35,13 +35,13 @@ source ~/.bash_profile
 nvm install 16
 ```
 
-If on a MAC without git-lfs installed run:
+If on a Mac without git-lfs installed, run:
 
 ```bash
 brew install git-lfs
 ```
 
-Otherwise, consult the official git-lfs [installation documentation](https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing)
+Otherwise, consult the official git-lfs [installation documentation](https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing).
 
 Clone the repository, pull lfs files, and sync the submodules:
 ```bash
@@ -51,7 +51,7 @@ git-lfs pull
 git submodule update --init --recursive
 ```
 
-If you want to pull subsequent changes to submodule packages run:
+If you want to pull subsequent changes to submodule packages, run:
 ```bash
 git submodule update --recursive --remote
 ```
@@ -74,7 +74,7 @@ This package uses a number of tools to enforce formatting, linting, and general 
 
 1. Create an AWS account
 2. Create `target_account.json` under `guidance-for-overhead-imagery-inference-on-aws/lib/accounts/`
-3. Copy the below template into `target_account.json` and update your account number, alias, and region
+3. Copy the below template into `target_account.json` and update your account number, alias, and region:
    ```text
    {
        "id": <target account id for deployment>,
@@ -94,7 +94,7 @@ This package uses a number of tools to enforce formatting, linting, and general 
    ```
 5. Pull your latest credentials into `~/.aws/credentials`
 
-6. Go into `guidance-for-overhead-imagery-inference-on-aws` directory and execute the following commands to install npm packages
+6. Go into `guidance-for-overhead-imagery-inference-on-aws` directory and execute the following commands to install npm packages:
    ```
    npm i
    ```
@@ -116,18 +116,18 @@ This package uses a number of tools to enforce formatting, linting, and general 
    ```
    npm run deploy
    ```
-10. If you want to validate the deployment with integration tests.
+10. If you want to validate the deployment with integration tests:
    ```
    npm run setup
    npm run integ
    ```
 
-11. When you are done you can clean up the deployment.
+11. When you are done you can clean up the deployment:
    ```
    npm run destroy
    ```
 ## Usage
-To start a job, place an `ImageRequest` on the `ImageRequestQueue` by going into your AWS Console > Simple Queue System > `ImageRequestQueue` > Send and receive messages > and enter the below sample of an `ImageRequest`
+To start a job, place an `ImageRequest` on the `ImageRequestQueue` by going into your AWS Console > Simple Queue System > `ImageRequestQueue` > Send and receive messages > and enter the provided sample for an `ImageRequest`:
 
 **Sample ImageRequest:**
 
@@ -149,7 +149,7 @@ To start a job, place an `ImageRequest` on the `ImageRequestQueue` by going into
 }
 ```
 
-Below is the detailed image request of what the key/values are:
+Below are additional details about each key-value pair in the image request:
 
 | key                           | value                                                                                                                                                               | type                 | details                                                                                                                                                                                                                                                                                      |
 |-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -162,7 +162,9 @@ Below is the detailed image request of what the key/values are:
 | imageProcessorTileSize        | 512                                                                                                                                                                 | integer              | Tile size represents width x height pixels and split the images into it. ex: `512`                                                                                                                                                                                                           |
 | imageProcessorTileOverlap     | 32                                                                                                                                                                  | integer              | Tile overlap represents the width x height pixels and how much to overlap the existing tile, ex: `32`                                                                                                                                                                                        |
 | imageProcessorTileFormat      | `NTIF / JPEF / PNG / GTIFF`                                                                                                                                         | string               | Tile format to use for tiling. I comes with 4 formats, ex: `GTIFF`                                                                                                                                                                                                                           |
-| imageProcessorTileCompression | `NONE / JPEG / J2K / LZW`                                                                                                                                           | string               | The compression used for the target image. It comes with 4 formats, ex: `NONE`                                                                                                                                                                                                               |
+| imageProcessorTileCompression | `NONE / JPEG / J2K / LZW`                                                                                                                                           | string               | The compression used for the target image. It comes with 4 formats, ex: `NONE`                                                                                                                                                                                                           |
+
+Here is an example of a complete image request:
 
 **Example ImageRequest:**
 ```json
@@ -183,7 +185,7 @@ Below is the detailed image request of what the key/values are:
 }
 ```
 
-Below is some useful info about OSML components:
+Here is some useful information about each of the OSML components:
 
 ### OSML Model Runner
 This package contains an application used to orchestrate the execution of ML models on large satellite images. The
@@ -220,7 +222,7 @@ For more info see [osml-models](https://github.com/aws-solutions-library-samples
 
 ## Troubleshooting
 
-Below are the list of the common problems / errors
+This is a list of common problems / errors to help with troubleshooting:
 
 #### Permission Denied for submodules
 
