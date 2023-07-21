@@ -1,0 +1,12 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16
+  build:
+    commands:
+      - aws s3 rm s3://test-images-${AWS_ACCOUNT}-access-logs --recursive
+      - aws ecr delete-repository --repository-name model-runner-container --force
+      - aws s3api put-bucket-logging --bucket test-images-${AWS_ACCOUNT}-access-logs --bucket-logging-status {}
+      - npm run destroy
+      - echo Destroy completed on `date`
