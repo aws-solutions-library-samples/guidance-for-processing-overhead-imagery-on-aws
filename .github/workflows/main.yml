@@ -58,7 +58,7 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   RunMetaNtfCenterpointTest:
-    needs: RunSmallTifCenterpointTest
+    needs: BuildOSML
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -79,7 +79,7 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   RunLargeTifFloodTest:
-    needs: RunMetaNtfCenterpointTest
+    needs: BuildOSML
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -100,7 +100,7 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   RunTileNtfAircraftTest:
-    needs: RunLargeTifFloodTest
+    needs: BuildOSML
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -121,7 +121,7 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   RunTileTifAircraftTest:
-    needs: RunTileNtfAircraftTest
+    needs: BuildOSML
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -141,3 +141,13 @@ jobs:
             TEST_MODEL
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
+  DestroyOSML:
+    needs: [RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::${{ secrets.OSML_dev }}:role/GithubAction-AssumeRoleWithAction
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
