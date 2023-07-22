@@ -38,6 +38,8 @@ jobs:
           buildspec-override: .github/codebuild/build.yml
   RunSmallTifCenterpointTest:
     needs: BuildOSML
+    concurrency:
+      group: TestOSMLGroupJobs
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -59,6 +61,8 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   RunMetaNtfCenterpointTest:
     needs: BuildOSML
+    concurrency:
+      group: TestOSMLGroupJobs
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -80,6 +84,8 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   RunLargeTifFloodTest:
     needs: BuildOSML
+    concurrency:
+      group: TestOSMLGroupJobs
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -101,6 +107,8 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   RunTileNtfAircraftTest:
     needs: BuildOSML
+    concurrency:
+      group: TestOSMLGroupJobs
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -122,6 +130,8 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   RunTileTifAircraftTest:
     needs: BuildOSML
+    concurrency:
+      group: TestOSMLGroupJobs
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -142,6 +152,7 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   DestroyOSML:
+    if: ${{ always() }}
     needs: [RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest]
     runs-on: ubuntu-latest
     steps:
