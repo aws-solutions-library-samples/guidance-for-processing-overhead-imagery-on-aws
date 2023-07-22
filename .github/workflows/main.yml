@@ -40,6 +40,7 @@ jobs:
     needs: BuildOSML
     concurrency:
       group: TestOSMLGroupJobs
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -63,6 +64,7 @@ jobs:
     needs: BuildOSML
     concurrency:
       group: TestOSMLGroupJobs
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -86,6 +88,7 @@ jobs:
     needs: BuildOSML
     concurrency:
       group: TestOSMLGroupJobs
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -109,6 +112,7 @@ jobs:
     needs: BuildOSML
     concurrency:
       group: TestOSMLGroupJobs
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -132,6 +136,7 @@ jobs:
     needs: BuildOSML
     concurrency:
       group: TestOSMLGroupJobs
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -153,7 +158,7 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   DestroyOSML:
     if: ${{ always() }}
-    needs: [RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest]
+    needs: [BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
