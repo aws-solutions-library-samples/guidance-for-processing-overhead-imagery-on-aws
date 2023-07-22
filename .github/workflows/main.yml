@@ -14,6 +14,9 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: TestOSMLGroupJobs
+
 jobs:
   CheckPendingWorkflow:
     runs-on: ubuntu-latest
@@ -38,9 +41,6 @@ jobs:
           buildspec-override: .github/codebuild/build.yml
   RunSmallTifCenterpointTest:
     needs: BuildOSML
-    concurrency:
-      group: TestOSMLGroupJobs
-      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -62,9 +62,6 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   RunMetaNtfCenterpointTest:
     needs: BuildOSML
-    concurrency:
-      group: TestOSMLGroupJobs
-      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -86,9 +83,6 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   RunLargeTifFloodTest:
     needs: BuildOSML
-    concurrency:
-      group: TestOSMLGroupJobs
-      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -110,9 +104,6 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   RunTileNtfAircraftTest:
     needs: BuildOSML
-    concurrency:
-      group: TestOSMLGroupJobs
-      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -134,9 +125,6 @@ jobs:
           buildspec-override: .github/codebuild/test.yml
   RunTileTifAircraftTest:
     needs: BuildOSML
-    concurrency:
-      group: TestOSMLGroupJobs
-      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
