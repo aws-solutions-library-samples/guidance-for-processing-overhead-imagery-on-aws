@@ -17,17 +17,18 @@ permissions:
 jobs:
   SelectingAccount:
     runs-on: ubuntu-latest
+    outputs:
+      AWS_ACCOUNT_ID: ${{ steps.set-variable.outputs.AWS_ACCOUNT_ID }}
     steps:
     - uses: actions/checkout@v2
     - name: Set Account Variable
       id: set-variable
       run: |
         if [ ${{ github.ref }} != 'refs/heads/main' ]; then
-          echo "aws_account_id=${{ secrets.OSML_dev }}" >> "$GITHUB_ENV"
+          echo "AWS_ACCOUNT_ID=${{ secrets.OSML_dev }}" >> $GITHUB_OUTPUT
         else
-          echo "aws_account_id=${{ secrets.OSML_main }}" >> "$GITHUB_ENV"
+          echo "AWS_ACCOUNT_ID=${{ secrets.OSML_main }}" >> $GITHUB_OUTPUT
         fi
-      shell: bash
   CheckPendingWorkflow:
     needs: SelectingAccount
     runs-on: ubuntu-latest
@@ -36,14 +37,14 @@ jobs:
       with:
         delay: 60000
   BuildOSML:
-    needs: CheckPendingWorkflow
+    needs: [CheckPendingWorkflow, SelectingAccount]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ env.aws_account_id }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ needs.SelectingAccount.outputs.AWS_ACCOUNT_ID }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Deploy and Build OSML
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -51,14 +52,14 @@ jobs:
           project-name: CodeBuild-BuildGithubOSML
           buildspec-override: .github/codebuild/build.yml
   RunSmallTifCenterpointTest:
-    needs: BuildOSML
+    needs: [SelectingAccount, BuildOSML]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ env.aws_account_id }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ needs.SelectingAccount.outputs.AWS_ACCOUNT_ID }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Small Tif using Centerpoint Model
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -72,14 +73,14 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   RunMetaNtfCenterpointTest:
-    needs: RunSmallTifCenterpointTest
+    needs: [SelectingAccount, RunSmallTifCenterpointTest]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ env.aws_account_id }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ needs.SelectingAccount.outputs.AWS_ACCOUNT_ID }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Meta Ntf using Centerpoint Model
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -93,14 +94,14 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   RunLargeTifFloodTest:
-    needs: RunMetaNtfCenterpointTest
+    needs: [SelectingAccount, RunMetaNtfCenterpointTest]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ env.aws_account_id }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ needs.SelectingAccount.outputs.AWS_ACCOUNT_ID }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Large Tif using Flood Model
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -114,14 +115,14 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   RunTileNtfAircraftTest:
-    needs: RunLargeTifFloodTest
+    needs: [SelectingAccount, RunLargeTifFloodTest]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ env.aws_account_id }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ needs.SelectingAccount.outputs.AWS_ACCOUNT_ID }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Tile Ntf using Aircraft Model
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -135,14 +136,14 @@ jobs:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/test.yml
   RunTileTifAircraftTest:
-    needs: RunTileNtfAircraftTest
+    needs: [SelectingAccount, RunTileNtfAircraftTest]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ env.aws_account_id }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ needs.SelectingAccount.outputs.AWS_ACCOUNT_ID }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Tile Tif using Aircraft Model
         uses: aws-actions/aws-codebuild-run-build@v1
