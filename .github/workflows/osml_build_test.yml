@@ -49,7 +49,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', env.ENVIRONMENT)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Small Tif using Centerpoint Model
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -70,7 +70,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', env.ENVIRONMENT)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Meta Ntf using Centerpoint Model
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -91,7 +91,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', env.ENVIRONMENT)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Large Tif using Flood Model
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -112,7 +112,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', env.ENVIRONMENT)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Tile Ntf using Aircraft Model
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -133,7 +133,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', env.ENVIRONMENT)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Run Tile Tif using Aircraft Model
         uses: aws-actions/aws-codebuild-run-build@v1
