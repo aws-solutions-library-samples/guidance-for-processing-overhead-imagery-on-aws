@@ -8,9 +8,9 @@
   "scripts": {
     "build": "tsc",
     "synth": "cdk synth",
-    "deploy": "cdk deploy --all || exit 1",
-    "destroy": "cdk destroy || exit 1",
-    "integ": "python3 lib/osml-model-runner-test/bin/process_image.py --image small --model centerpoint ",
+    "deploy": "cdk deploy --all --require-approval never || exit 1",
+    "destroy": "cdk destroy --force || exit 1",
+    "integ": "python3 lib/osml-model-runner-test/bin/process_image.py --image small --model centerpoint",
     "clean": "bash scripts/dev_clean.sh",
     "setup": "bash scripts/dev_setup.sh",
     "monitor": "bash scripts/dev_monitor.sh",

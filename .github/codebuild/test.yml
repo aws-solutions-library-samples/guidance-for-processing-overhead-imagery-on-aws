@@ -1,0 +1,10 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - sed -i "s/git@github.com:/https:\/\/github.com\//" .gitmodules
+      - git submodule update --init --recursive
+      - python3 -m pip install lib/osml-model-runner-test/
+  build:
+    commands:
+      - ./lib/osml-model-runner-test/bin/run_test.sh ${TEST_IMAGE} ${TEST_MODEL} NITF JPEG ${AWS_DEFAULT_REGION} ${AWS_ACCOUNT}
