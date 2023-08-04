@@ -1,0 +1,36 @@
+name: 'OSML Reusable Test Workflow'
+
+on:
+  workflow_call:
+    inputs:
+      TEST_DESCRIPTION:
+        required: true
+        type: string
+      TEST_IMAGE:
+        required: true
+        type: string
+      TEST_MODEL:
+        required: true
+        type: string
+
+jobs:
+  RunOSMLTest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+      - name: ${{ inputs.TEST_DESCRIPTION }}
+        uses: aws-actions/aws-codebuild-run-build@v1
+        env:
+            TEST_IMAGE: ${{ inputs.TEST_IMAGE }}
+            TEST_MODEL: ${{ inputs.TEST_MODEL }}
+        with:
+          env-vars-for-codebuild: |
+            TEST_IMAGE,
+            TEST_MODEL
+          project-name: CodeBuild-TestGithubOSML
+          buildspec-override: .github/codebuild/test.yml
