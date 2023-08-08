@@ -5,10 +5,6 @@ on:
     branches:
       - dev
       - main
-  push:
-    branches:
-      - dev
-      - main
 
 env:
   AWS_REGION: "us-west-2"
@@ -43,106 +39,41 @@ jobs:
           buildspec-override: .github/codebuild/build.yml
   RunSmallTifCenterpointTest:
     needs: BuildOSML
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-      - name: Run Small Tif using Centerpoint Model
-        uses: aws-actions/aws-codebuild-run-build@v1
-        env:
-            TEST_IMAGE: "small"
-            TEST_MODEL: "centerpoint"
-        with:
-          env-vars-for-codebuild: |
-            TEST_IMAGE,
-            TEST_MODEL
-          project-name: CodeBuild-TestGithubOSML
-          buildspec-override: .github/codebuild/test.yml
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run small.tif using Centerpoint Model"
+      TEST_IMAGE: "small"
+      TEST_MODEL: "centerpoint"
+    secrets: inherit
   RunMetaNtfCenterpointTest:
     needs: RunSmallTifCenterpointTest
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-      - name: Run Meta Ntf using Centerpoint Model
-        uses: aws-actions/aws-codebuild-run-build@v1
-        env:
-            TEST_IMAGE: "meta"
-            TEST_MODEL: "centerpoint"
-        with:
-          env-vars-for-codebuild: |
-            TEST_IMAGE,
-            TEST_MODEL
-          project-name: CodeBuild-TestGithubOSML
-          buildspec-override: .github/codebuild/test.yml
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run meta.ntf using Centerpoint Model"
+      TEST_IMAGE: "meta"
+      TEST_MODEL: "centerpoint"
+    secrets: inherit
   RunLargeTifFloodTest:
     needs: RunMetaNtfCenterpointTest
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-      - name: Run Large Tif using Flood Model
-        uses: aws-actions/aws-codebuild-run-build@v1
-        env:
-            TEST_IMAGE: "large"
-            TEST_MODEL: "flood"
-        with:
-          env-vars-for-codebuild: |
-            TEST_IMAGE,
-            TEST_MODEL
-          project-name: CodeBuild-TestGithubOSML
-          buildspec-override: .github/codebuild/test.yml
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run large.tif using Flood Model"
+      TEST_IMAGE: "large"
+      TEST_MODEL: "flood"
+    secrets: inherit
   RunTileNtfAircraftTest:
     needs: RunLargeTifFloodTest
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-      - name: Run Tile Ntf using Aircraft Model
-        uses: aws-actions/aws-codebuild-run-build@v1
-        env:
-            TEST_IMAGE: "tile_ntf"
-            TEST_MODEL: "aircraft"
-        with:
-          env-vars-for-codebuild: |
-            TEST_IMAGE,
-            TEST_MODEL
-          project-name: CodeBuild-TestGithubOSML
-          buildspec-override: .github/codebuild/test.yml
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run tile.ntf using Aircraft Model"
+      TEST_IMAGE: "tile_ntf"
+      TEST_MODEL: "aircraft"
+    secrets: inherit
   RunTileTifAircraftTest:
     needs: RunTileNtfAircraftTest
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-      - name: Run Tile Tif using Aircraft Model
-        uses: aws-actions/aws-codebuild-run-build@v1
-        env:
-            TEST_IMAGE: "tile_tif"
-            TEST_MODEL: "aircraft"
-        with:
-          env-vars-for-codebuild: |
-            TEST_IMAGE,
-            TEST_MODEL
-          project-name: CodeBuild-TestGithubOSML
-          buildspec-override: .github/codebuild/test.yml
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run tile.tif using Aircraft Model"
+      TEST_IMAGE: "tile_tif"
+      TEST_MODEL: "aircraft"
+    secrets: inherit
