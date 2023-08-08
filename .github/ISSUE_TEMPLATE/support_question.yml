@@ -1,0 +1,13 @@
+name: ❓ Question
+description: General question for OSML
+title: "[Question] "
+labels: "Type: question"
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Question / Clarification
+      description: Please post your question(s) here
+    validations:
+      required: true

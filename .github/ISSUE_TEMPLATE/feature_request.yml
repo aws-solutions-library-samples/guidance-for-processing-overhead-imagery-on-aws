@@ -1,0 +1,48 @@
+name: 💡 Feature Request
+description: Suggest an feature for OSML
+title: "[Feature Request] "
+labels: "Type: enhancement"
+
+body:
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please ensure you have completed all of the following.
+      options:
+        - label: I have searched for [existing feature request](https://github.com/aws-solutions-library-samples/guidance-for-overhead-imagery-inference-on-aws/issues) that already include this feature request, without success.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Feature Request
+      description: A clear and concise description of what the feature does.
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Describe the Use Case
+      description: A clear and concise use case for what problem this feature would solve.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Describe Proposed Solution
+      description: A clear and concise description of what you how you want this feature to be added to OSML.
+
+  - type: textarea
+    id: alternatives-considered
+    attributes:
+      label: Describe Alternatives
+      description: A clear and concise description of any alternative solutions or features you have considered.
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional Information
+      description: List any other information that is relevant to your issue. Stack traces, related issues, suggestions on how to implement, Stack Overflow links, forum links, etc.
