@@ -17,7 +17,7 @@ body:
     id: affected-versions
     attributes:
       label: OSML Branch Version
-      description: Which branch version(s) of OSML does this issue impact?
+      description: Which branch version(s) of OSML does this issue relate to?
       options:
         - main
         - dev
@@ -45,7 +45,7 @@ body:
     id: steps-to-reproduce
     attributes:
       label: Steps to Reproduce
-      description: Please explain the steps required to duplicate this issue.
+      description: Please explain the steps required to replicate this issue.
       placeholder: |
         1.
         2.
