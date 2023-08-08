@@ -41,7 +41,7 @@ jobs:
     needs: BuildOSML
     uses: ./.github/workflows/osml_reusable_test.yml
     with:
-      TEST_DESCRIPTION: "Run Small Tif using Centerpoint Model"
+      TEST_DESCRIPTION: "Run small.tif using Centerpoint Model"
       TEST_IMAGE: "small"
       TEST_MODEL: "centerpoint"
     secrets: inherit
@@ -49,7 +49,7 @@ jobs:
     needs: RunSmallTifCenterpointTest
     uses: ./.github/workflows/osml_reusable_test.yml
     with:
-      TEST_DESCRIPTION: "Run Meta Tif using Centerpoint Model"
+      TEST_DESCRIPTION: "Run meta.ntf using Centerpoint Model"
       TEST_IMAGE: "meta"
       TEST_MODEL: "centerpoint"
     secrets: inherit
@@ -57,7 +57,7 @@ jobs:
     needs: RunMetaNtfCenterpointTest
     uses: ./.github/workflows/osml_reusable_test.yml
     with:
-      TEST_DESCRIPTION: "Run Large Tif using Flood Model"
+      TEST_DESCRIPTION: "Run large.tif using Flood Model"
       TEST_IMAGE: "large"
       TEST_MODEL: "flood"
     secrets: inherit
@@ -65,7 +65,7 @@ jobs:
     needs: RunLargeTifFloodTest
     uses: ./.github/workflows/osml_reusable_test.yml
     with:
-      TEST_DESCRIPTION: "Run Tile Ntf using Aircraft Model"
+      TEST_DESCRIPTION: "Run tile.ntf using Aircraft Model"
       TEST_IMAGE: "tile_ntf"
       TEST_MODEL: "aircraft"
     secrets: inherit
@@ -73,7 +73,7 @@ jobs:
     needs: RunTileNtfAircraftTest
     uses: ./.github/workflows/osml_reusable_test.yml
     with:
-      TEST_DESCRIPTION: "Run Tile Tif using Aircraft Model"
+      TEST_DESCRIPTION: "Run tile.tif using Aircraft Model"
       TEST_IMAGE: "tile_tif"
       TEST_MODEL: "aircraft"
     secrets: inherit
