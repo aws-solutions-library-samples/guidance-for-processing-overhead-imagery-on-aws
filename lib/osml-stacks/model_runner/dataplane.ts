@@ -3,10 +3,7 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MRDataplane } from "osml-cdk-constructs/lib/model_runner/mr_dataplane"
-import { OSMLAccount } from "osml-cdk-constructs/lib/osml/osml_account"
-import { MRTesting } from "osml-cdk-constructs/lib/model_runner/mr_testing"
-import { MRMonitoring } from "osml-cdk-constructs/lib/model_runner/mr_monitoring"
+import { MRDataplane, OSMLAccount, MRTesting, MRMonitoring } from "osml-cdk-constructs"
 
 export interface MRDataplaneStackProps extends StackProps {
   // target deployment environment
