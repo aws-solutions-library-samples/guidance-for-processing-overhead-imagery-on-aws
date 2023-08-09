@@ -142,7 +142,7 @@ This package uses a number of tools to enforce formatting, linting, and general 
 
 ### Deploying Local osml-cdk-constructs
 
-By default this package uses the osml-cdk-constructs defined in the [official NPM repository](https://www.npmjs.com/package/osml-cdk-constructs?activeTab=readme). If you wish to make changes to the `lib/osml-cdk-constructs` submodule in this project and what to use those changes when deploying, then follow these steps to switch out the remote NPM package for the local package.
+By default this package uses the osml-cdk-constructs defined in the [official NPM repository](https://www.npmjs.com/package/osml-cdk-constructs?activeTab=readme). If you wish to make changes to the `lib/osml-cdk-constructs` submodule in this project and want to use those changes when deploying, then follow these steps to switch out the remote NPM package for the local package.
 
 1. In `package.json`, locate `osml-cdk-constructs` under devDependencies. By default it points to the latest NPM package version, but swap out the version number with `"file:lib/osml-cdk-constructs"`. This will tell package.json to use the local package instead. The dependency will now look like this:
 
