@@ -1,7 +1,7 @@
 name: ❓ Question
 description: General question for OSML
-title: "[Question] "
-labels: "Type: question"
+labels: "question"
+projects: "aws-solutions-library-samples/5"
 
 body:
   - type: textarea
