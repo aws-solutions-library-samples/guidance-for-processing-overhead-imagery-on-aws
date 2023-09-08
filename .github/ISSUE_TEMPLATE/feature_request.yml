@@ -1,7 +1,7 @@
 name: 💡 Feature Request
 description: Suggest an feature for OSML
 title: "[Feature Request] "
-labels: "Type: enhancement"
+labels: "enhancement"
 
 body:
   - type: checkboxes
