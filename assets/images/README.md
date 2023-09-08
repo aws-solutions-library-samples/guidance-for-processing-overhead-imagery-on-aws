@@ -22,3 +22,9 @@ functionality, along with performance when handling tiling a heavier image.
 ## meta.ntf
 This is a small NITF image with classification metadata embedded in it. It is used to test model runners ability to
 parse that metadata and embedded in the corresponding FeatureCollection output properties.
+
+## sicd-capella-chip.ntf / sicd-umbra-chip
+This is a small chip sicd-capella/sicd-umbra image which is taken from large capella/umbra imagery. It is used to test the model runners ability to parse that metadata and embedded in the corresponding FeatureCollection output properties. These images were taken from: [capella](https://radiantearth.github.io/stac-browser/#/external/capella-open-data.s3.us-west-2.amazonaws.com/stac/capella-open-data-by-datetime/capella-open-data-2021/capella-open-data-2021-8/capella-open-data-2021-8-7/CAPELLA_C03_SP_SICD_HH_20210807095836_20210807095839/CAPELLA_C03_SP_SICD_HH_20210807095836_20210807095839.json?.language=en&.asset=asset-HH) and [umbra](https://umbra.space/open-data)
+
+## sicd-interferometric-hh.nitf
+This is a larger Nitf image which is taken from this website: https://github.com/ngageoint/six-library/wiki/Sample-SICDs, this is to ensure that the OSML can handle a large SAR data. 
