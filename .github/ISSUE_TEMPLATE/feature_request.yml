@@ -2,6 +2,7 @@ name: 💡 Feature Request
 description: Suggest an feature for OSML
 title: "[Feature Request] "
 labels: "enhancement"
+projects: "aws-solutions-library-samples/5"
 
 body:
   - type: checkboxes

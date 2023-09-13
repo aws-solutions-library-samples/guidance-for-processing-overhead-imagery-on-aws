@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - sed -i "s/git@github.com:/https:\/\/github.com\//" .gitmodules
+      - git submodule update --init --recursive
+      - npm i
+      - npm install -g aws-cdk
+  build:
+    commands:
+      - npm run destroy
