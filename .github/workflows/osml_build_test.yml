@@ -78,7 +78,8 @@ jobs:
       TEST_MODEL: "aircraft"
     secrets: inherit
   DestroyOSML:
-    needs: CheckPendingWorkflow
+    if: ${{ always() }}
+    needs: [ BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest ]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
