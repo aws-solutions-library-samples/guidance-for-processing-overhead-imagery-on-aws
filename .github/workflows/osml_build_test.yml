@@ -77,3 +77,19 @@ jobs:
       TEST_IMAGE: "tile_tif"
       TEST_MODEL: "aircraft"
     secrets: inherit
+  DestroyOSML:
+    if: ${{ always() }}
+    needs: [ BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+      - name: Destroy OSML stack(s)
+        uses: aws-actions/aws-codebuild-run-build@v1
+        with:
+          project-name: CodeBuild-BuildGithubOSML
+          buildspec-override: .github/codebuild/destroy.yml
