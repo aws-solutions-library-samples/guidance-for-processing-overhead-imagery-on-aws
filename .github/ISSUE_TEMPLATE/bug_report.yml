@@ -1,7 +1,8 @@
 name: 🐛 Bug Report
 description: Create a report to help us improve OSML
 title: "[Bug] "
-labels: "Type: bug"
+labels: "bug"
+projects: "aws-solutions-library-samples/5"
 
 body:
   - type: checkboxes
