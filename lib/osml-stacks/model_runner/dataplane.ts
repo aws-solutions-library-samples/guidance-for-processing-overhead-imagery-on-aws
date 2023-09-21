@@ -3,8 +3,7 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MRDataplane, OSMLAccount, MRTesting, MRMonitoring } from "osml-cdk-constructs"
-import { IRole } from "aws-cdk-lib/aws-iam";
+import { MRDataplane, OSMLAccount, MRTesting, MRMonitoring, MRTaskRole, MRSMRole } from "osml-cdk-constructs";
 
 export interface MRDataplaneStackProps extends StackProps {
   // target deployment environment
@@ -20,8 +19,8 @@ export interface MRDataplaneStackProps extends StackProps {
   readonly tags?: {
     [key: string]: string;
   };
-  mrTaskRole?: IRole;
-  mrSmRole?: IRole;
+  mrTaskRole?: MRTaskRole;
+  mrSmRole?: MRSMRole;
 }
 
 /**
@@ -49,7 +48,7 @@ export class MRDataplaneStack extends Stack {
     this.resources = new MRDataplane(this, "MRDataplane", {
       account: props.account,
       enableAutoscaling: props.account.enableAutoscaling,
-      taskRole: props.mrTaskRole
+      taskRole: props.mrTaskRole?.role
     });
 
     // if we have enabled testing resources, create the model runner testing resources
@@ -60,7 +59,7 @@ export class MRDataplaneStack extends Stack {
         osmlVpc: this.resources.osmlVpc,
         imageStatusTopic: this.resources.imageStatusTopic.topic,
         regionStatusTopic: this.resources.imageStatusTopic.topic,
-        smRole: props.mrSmRole
+        smRole: props.mrSmRole?.role,
       });
     }
 
