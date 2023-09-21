@@ -1,8 +1,5 @@
 version: 0.2
 phases:
-  install:
-    runtime-versions:
-      nodejs: 16
   pre_build:
     commands:
       - sed -i "s/git@github.com:/https:\/\/github.com\//" .gitmodules
@@ -11,15 +8,12 @@ phases:
       - sed -i "s/fake-alias/$NAME/" lib/accounts/target_account.json
       - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json
       - cat lib/accounts/target_account.json
-      - yum install -y git-lfs
-      - git-lfs pull
       - git submodule update --init --recursive
       - npm i
       - npm install -g aws-cdk
   build:
     commands:
-      - cdk bootstrap --force
-      - npm run deploy
+      - npm run destroy
   post_build:
     commands:
-      - echo Build completed on `date`
+      - echo Destroy completed on `date`
