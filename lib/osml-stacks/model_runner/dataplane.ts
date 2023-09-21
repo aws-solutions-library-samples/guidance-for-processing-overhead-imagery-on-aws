@@ -3,7 +3,14 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MRDataplane, OSMLAccount, MRTesting, MRMonitoring, MRTaskRole, MRSMRole } from "osml-cdk-constructs";
+import {
+  MRDataplane,
+  OSMLAccount,
+  MRTesting,
+  MRMonitoring,
+  MRTaskRole,
+  MRSMRole
+} from "osml-cdk-constructs";
 
 export interface MRDataplaneStackProps extends StackProps {
   // target deployment environment
@@ -23,9 +30,6 @@ export interface MRDataplaneStackProps extends StackProps {
   mrSmRole?: MRSMRole;
 }
 
-/**
- * The stack required to create DDB resources
- */
 export class MRDataplaneStack extends Stack {
   public resources: MRDataplane;
   public testingResources: MRTesting;
@@ -59,7 +63,7 @@ export class MRDataplaneStack extends Stack {
         osmlVpc: this.resources.osmlVpc,
         imageStatusTopic: this.resources.imageStatusTopic.topic,
         regionStatusTopic: this.resources.imageStatusTopic.topic,
-        smRole: props.mrSmRole?.role,
+        smRole: props.mrSmRole?.role
       });
     }
 

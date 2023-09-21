@@ -3,7 +3,7 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import {MRSMRole, MRTaskRole, OSMLAccount} from "osml-cdk-constructs"
+import { MRSMRole, MRTaskRole, OSMLAccount } from "osml-cdk-constructs";
 
 export interface MRRolesStackProps extends StackProps {
   // target deployment environment
@@ -54,6 +54,5 @@ export class MRRolesStack extends Stack {
         roleName: "MRSMRole"
       });
     }
-
   }
 }
