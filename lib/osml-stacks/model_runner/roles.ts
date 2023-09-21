@@ -3,8 +3,7 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import {MRSMRole, MRTaskRole, OSMLAccount} from "osml-cdk-constructs"
-import {IRole} from "aws-cdk-lib/aws-iam";
+import { MRSMRole, MRTaskRole, OSMLAccount } from "osml-cdk-constructs";
 
 export interface MRRolesStackProps extends StackProps {
   // target deployment environment
@@ -26,8 +25,8 @@ export interface MRRolesStackProps extends StackProps {
  * The stack required to OSML Roles
  */
 export class MRRolesStack extends Stack {
-  public mrTaskRole: IRole;
-  public mrSmRole: IRole;
+  public mrTaskRole: MRTaskRole;
+  public mrSmRole: MRSMRole;
 
   /**
    * Constructor for the dataplane cdk stack
@@ -46,15 +45,14 @@ export class MRRolesStack extends Stack {
     this.mrTaskRole = new MRTaskRole(this, "MRTaskRole", {
       account: props.account,
       roleName: "MRTaskRole"
-    }).role;
+    });
 
     // if we have enabled testing resources, create a SageMaker role for endpoints
     if (props.account.enableTesting) {
       this.mrSmRole = new MRSMRole(this, "MRSMRole", {
         account: props.account,
         roleName: "MRSMRole"
-      }).role;
+      });
     }
-
   }
 }

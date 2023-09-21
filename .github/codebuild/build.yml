@@ -12,7 +12,7 @@ phases:
       - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json
       - cat lib/accounts/target_account.json
       - yum install -y git-lfs
-      - git-lfs pull 
+      - git-lfs pull
       - git submodule update --init --recursive
       - npm i
       - npm install -g aws-cdk
