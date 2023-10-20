@@ -1,0 +1,41 @@
+name: Update Submodules
+
+on:
+  workflow_dispatch:
+    inputs:  
+      DISPATCH_REPO_NAME:
+        required: true
+        type: string
+      DISPATCH_REPO_SHA:
+        required: true
+        type: string
+
+jobs:
+  update_submodules:
+    name: Update Submodules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          submodules: true
+          fetch-depth: 0
+      - name: Checkout ${{ github.ref_name }} branch for each of the submodules
+        run: |
+          git submodule update --init --recursive --remote lib/${{ inputs.DISPATCH_REPO_NAME }}
+          git submodule set-branch --branch ${{ github.ref_name }} lib/${{ inputs.DISPATCH_REPO_NAME }}
+          cd lib/${{ inputs.DISPATCH_REPO_NAME }}
+          git checkout ${{ github.ref_name }}
+          cd ../../
+          git checkout .gitmodules
+      - name: Run Git Status
+        run: git status
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          base: ${{ github.ref_name }}
+          branch: Updates/submodule-${{ inputs.DISPATCH_REPO_NAME }}-updates
+          title: "release: ${{ inputs.DISPATCH_REPO_NAME }}@${{ github.ref_name }} - ${{inputs.DISPATCH_REPO_SHA}}"
+          commit-message: "release: ${{ inputs.DISPATCH_REPO_NAME }}@${{ github.ref_name }} - ${{inputs.DISPATCH_REPO_SHA}}"
+          labels: automated-bot
