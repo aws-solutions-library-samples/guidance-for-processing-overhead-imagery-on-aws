@@ -1,14 +1,8 @@
 name: Update Submodules
 
 on:
-  workflow_dispatch:
-    inputs:  
-      DISPATCH_REPO_NAME:
-        required: true
-        type: string
-      DISPATCH_REPO_SHA:
-        required: true
-        type: string
+  pull_request:
+    branches: ["dev"]
 
 jobs:
   update_submodules:
@@ -23,9 +17,9 @@ jobs:
           fetch-depth: 0
       - name: Checkout ${{ github.ref_name }} branch for each of the submodules
         run: |
-          git submodule update --init --recursive --remote lib/${{ inputs.DISPATCH_REPO_NAME }}
-          git submodule set-branch --branch ${{ github.ref_name }} lib/${{ inputs.DISPATCH_REPO_NAME }}
-          cd lib/${{ inputs.DISPATCH_REPO_NAME }}
+          git submodule update --init --recursive --remote lib/osml-model-runner
+          git submodule set-branch --branch ${{ github.ref_name }} lib/osml-model-runner
+          cd lib/osml-model-runner
           git checkout ${{ github.ref_name }}
           cd ../../
           git checkout .gitmodules
@@ -36,6 +30,6 @@ jobs:
         with:
           base: ${{ github.ref_name }}
           branch: Updates/submodule-${{ inputs.DISPATCH_REPO_NAME }}-updates
-          title: "release: ${{ inputs.DISPATCH_REPO_NAME }}@${{ github.ref_name }} - ${{inputs.DISPATCH_REPO_SHA}}"
-          commit-message: "release: ${{ inputs.DISPATCH_REPO_NAME }}@${{ github.ref_name }} - ${{inputs.DISPATCH_REPO_SHA}}"
+          title: "release: osml-model-runner@${{ github.ref_name }} - commit_Id"
+          commit-message: "release: osml-model-runner@${{ github.ref_name }} - commit_Id"
           labels: automated-bot
