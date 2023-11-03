@@ -10,6 +10,7 @@ phases:
       - sed -i "s/1234567890123/$AWS_ACCOUNT/" lib/accounts/target_account.json
       - sed -i "s/fake-alias/$NAME/" lib/accounts/target_account.json
       - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json
+      - if [[ "${BASE_REF}" -eq "dev" ]]; then sed -i '$s/}/,\n"isDev":true}/' lib/accounts/target_account.json; fi
       - cat lib/accounts/target_account.json
       - yum install -y git-lfs
       - git-lfs pull

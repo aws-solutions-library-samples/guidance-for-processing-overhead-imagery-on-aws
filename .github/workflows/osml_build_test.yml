@@ -37,6 +37,10 @@ jobs:
         with:
           project-name: CodeBuild-BuildGithubOSML
           buildspec-override: .github/codebuild/build.yml
+          env-vars-for-codebuild: |
+            BASE_REF
+        env:
+          BASE_REF: ${{ github.base_ref }}
   RunSmallTifCenterpointTest:
     needs: BuildOSML
     uses: ./.github/workflows/osml_reusable_test.yml
