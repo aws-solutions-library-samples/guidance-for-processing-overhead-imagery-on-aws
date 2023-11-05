@@ -1,5 +1,4 @@
-# guidance-for-overhead-imagery-inference-on-aws
-
+[//]: # (# guidance-for-overhead-imagery-inference-on-aws)
 ### Table of Contents
 
 * [Installation](#installation)
@@ -22,17 +21,17 @@
 
 ## Installation
 
-If on a Mac without NPM/NodeJS version 16 installed, run:
+If on a Mac without NPM/Node.js version 16 installed, run:
 
 ```bash
 brew install npm
 brew install node@16
 ```
 
-Alternatively, NPM/NodeJS can be installed through the NVM:
+Alternatively, NPM/Node.js can be installed through the NVM:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh -o install_nvm.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
 source ~/.bash_profile
 nvm install 16
 ```
@@ -45,19 +44,12 @@ brew install git-lfs
 
 Otherwise, consult the official git-lfs [installation documentation](https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing).
 
-Clone the repository, pull lfs files, and sync the submodules:
+Clone the repository and pull lfs files for deployment:
 
 ```bash
 git clone https://github.com/aws-solutions-library-samples/guidance-for-overhead-imagery-inference-on-aws.git
 cd guidance-for-overhead-imagery-inference-on-aws
 git-lfs pull
-git submodule update --init --recursive
-```
-
-If you want to pull subsequent changes to submodule packages, run:
-
-```bash
-git submodule update --recursive --remote
 ```
 
 ## Linting/Formatting
@@ -134,7 +126,7 @@ This package uses a number of tools to enforce formatting, linting, and general 
    npm run integ
    ```
 
-11. When you are done you can clean up the deployment:
+11. When you are done, you can clean up the deployment:
 
    ```
    npm run destroy
@@ -142,26 +134,43 @@ This package uses a number of tools to enforce formatting, linting, and general 
 
 ### Deploying Local osml-cdk-constructs
 
-By default this package uses the osml-cdk-constructs defined in the [official NPM repository](https://www.npmjs.com/package/osml-cdk-constructs?activeTab=readme). If you wish to make changes to the `lib/osml-cdk-constructs` submodule in this project and want to use those changes when deploying, then follow these steps to switch out the remote NPM package for the local package.
+By default, this package uses the osml-cdk-constructs defined in
+the [official NPM repository](https://www.npmjs.com/package/osml-cdk-constructs?activeTab=readme).
+If you wish to make changes to the `lib/osml-cdk-constructs`
+submodule in this project and want to use those changes when
+deploying, then follow these steps to switch out the remote NPM
+package for the local package.
 
-1. In `package.json`, locate `osml-cdk-constructs` under `devDependencies`. By default it points to the latest NPM package version, but swap out the version number with `"file:lib/osml-cdk-constructs"`. This will tell package.json to use the local package instead. The dependency will now look like this:
+1. Pull down the submodules for development
+    ```bash
+    git submodule update --recursive --remote
+    git-lfs clone --recurse-submodules
+    ```
 
-```
-"osml-cdk-constructs": "file:lib/osml-cdk-constructs"
-```
+   If you want to pull subsequent changes to submodule packages, run:
 
-2. Update the imports in `lib/osml-stacks/model_runner/dataplane.ts`. By default all CDK constructs are pulled from the `osml-cdk-constructs` npm package, but now they must be imported by file path. Delete the existing `osml-cdk-constructs` import and replace it with the following:
+    ```bash
+    git submodule update --init --recursive
+    ```
 
-```
-import { MRDataplane } from "osml-cdk-constructs/lib/model_runner/mr_dataplane"
-import { OSMLAccount } from "osml-cdk-constructs/lib/osml/osml_account"
-import { MRTesting } from "osml-cdk-constructs/lib/model_runner/mr_testing"
-import { MRMonitoring } from "osml-cdk-constructs/lib/model_runner/mr_monitoring"
-```
+2. In `package.json`, locate `osml-cdk-constructs` under `devDependencies`. By default, it points to the latest NPM package version, but swaps out the version number with `"file:lib/osml-cdk-constructs"`. This will tell package.json to use the local package instead. The dependency will now look like this:
 
-3. Execute `npm i` to make sure everything is installed and building correctly.
+    ```bash
+    "osml-cdk-constructs": "file:lib/osml-cdk-constructs"
+    ```
 
-4. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
+3. Update the imports in `lib/osml-stacks/model_runner/mr-dataplane.ts`. By default, all CDK constructs are pulled from the `osml-cdk-constructs` npm package, but now they must be imported by file path. Delete the existing `osml-cdk-constructs` import and replace it with the following:
+
+    ```bash
+    import { MRDataplane } from "osml-cdk-constructs/lib/model_runner/mr_dataplane"
+    import { OSMLAccount } from "osml-cdk-constructs/lib/osml/osml_account"
+    import { MRTesting } from "osml-cdk-constructs/lib/model_runner/mr_testing"
+    import { MRMonitoring } from "osml-cdk-constructs/lib/model_runner/mr_monitoring"
+    ```
+
+4. Execute ```npm i``` to make sure everything is installed and building correctly.
+
+5. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
 
 
 ## Usage
@@ -190,18 +199,18 @@ To start a job, place an `ImageRequest` on the `ImageRequestQueue` by going into
 
 Below are additional details about each key-value pair in the image request:
 
-| key                           | value                                                                                                                                                               | type                 | details                                                                                                                                                                                                                                                                                      |
-|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| jobId                         | `<job_id>`                                                                                                                                                          | string               | Unique id for a job, ex: `testId1`                                                                                                                                                                                                                                                           |
-| jobName                       | `<job_name>`                                                                                                                                                        | string               | Name of the job, ex: `jobtest-testId1`                                                                                                                                                                                                                                                       |
-| jobArn                        | `arn:aws:oversightml:<YOUR REGION>:<YOUR ACCOUNT #>:ipj/<job_name>`                                                                                                 | string               | Arn which is responsible for communiticating with OSML service. Insert your region, account #, and job_name. ex: `arn:aws:oversightml:us-west-2:0123456789:ipj/jobtest-testid1`                                                                                                              |
-| imageUrls                     | `["<image_url>"]`                                                                                                                                                   | list[string]         | List of S3 image path, which can be found by going to your S3 bucket, ex: `s3://test-images-0123456789/tile.tif`                                                                                                                                                                             |
+| key                           | value                                                                                                                                                                | type                 | details                                                                                                                                                                                                                                                                                      |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| jobId                         | `<job_id>`                                                                                                                                                           | string               | Unique id for a job, ex: `testId1`                                                                                                                                                                                                                                                           |
+| jobName                       | `<job_name>`                                                                                                                                                         | string               | Name of the job, ex: `jobtest-testId1`                                                                                                                                                                                                                                                       |
+| jobArn                        | `arn:aws:oversightml:<YOUR REGION>:<YOUR ACCOUNT #>:ipj/<job_name>`                                                                                                  | string               | Arn which is responsible for communicating with OSML service. Insert your region, account #, and job_name. ex: `arn:aws:oversightml:us-west-2:0123456789:ipj/jobtest-testid1`                                                                                                                |
+| imageUrls                     | `["<image_url>"]`                                                                                                                                                    | list[string]         | List of S3 image path, which can be found by going to your S3 bucket, ex: `s3://test-images-0123456789/tile.tif`                                                                                                                                                                             |
 | outputs                       | ```{"type": "S3", "bucket": "<result_bucket_name>", "prefix": "<job_name>/"},```</br> ```{"type": "Kinesis", "stream": "<result_stream_name>", "batchSize": 1000}``` | dict[string, string] | Once the OSML has processed an image request, it will output its GeoJson files into two services, Kinesis and S3. The Kinesis and S3 are defined in `osml-cdk-constructs` package which can be found there. ex: `"bucket":"test-results-0123456789"` and `"stream":"test-stream-0123456789"` |
-| imageProcessor                | ```{"name": "<sagemaker_endpoint_name>", "type": "SM_ENDPOINT"}```                                                                                                  | dict[string, string] | Select a model that you want to run your image request against, you can find the list of models by going to AWS Console > SageMaker Console > Click `Inference` (left sidebar) > Click `Endpoints` > Copy the name of any model. ex: `aircraft`                                              |
-| imageProcessorTileSize        | 512                                                                                                                                                                 | integer              | Tile size represents width x height pixels and split the images into it. ex: `512`                                                                                                                                                                                                           |
-| imageProcessorTileOverlap     | 32                                                                                                                                                                  | integer              | Tile overlap represents the width x height pixels and how much to overlap the existing tile, ex: `32`                                                                                                                                                                                        |
-| imageProcessorTileFormat      | `NTIF / JPEF / PNG / GTIFF`                                                                                                                                         | string               | Tile format to use for tiling. I comes with 4 formats, ex: `GTIFF`                                                                                                                                                                                                                           |
-| imageProcessorTileCompression | `NONE / JPEG / J2K / LZW`                                                                                                                                           | string               | The compression used for the target image. It comes with 4 formats, ex: `NONE`                                                                                                                                                                                                           |
+| imageProcessor                | ```{"name": "<sagemaker_endpoint_name>", "type": "SM_ENDPOINT"}```                                                                                                   | dict[string, string] | Select a model that you want to run your image request against, you can find the list of models by going to AWS Console > SageMaker Console > Click `Inference` (left sidebar) > Click `Endpoints` > Copy the name of any model. ex: `aircraft`                                              |
+| imageProcessorTileSize        | 512                                                                                                                                                                  | integer              | Tile size represents width x height pixels and split the images into it. ex: `512`                                                                                                                                                                                                           |
+| imageProcessorTileOverlap     | 32                                                                                                                                                                   | integer              | Tile overlap represents the width x height pixels and how much to overlap the existing tile, ex: `32`                                                                                                                                                                                        |
+| imageProcessorTileFormat      | `NTIF / JPEF / PNG / GTIFF`                                                                                                                                          | string               | Tile format to use for tiling. I comes with 4 formats, ex: `GTIFF`                                                                                                                                                                                                                           |
+| imageProcessorTileCompression | `NONE / JPEG / J2K / LZW`                                                                                                                                            | string               | The compression used for the target image. It comes with 4 formats, ex: `NONE`                                                                                                                                                                                                               |
 
 Here is an example of a complete image request:
 
@@ -274,7 +283,9 @@ If you are facing a permission denied issue where you are trying to `git submodu
 
 #### Exit code: 137; Deployment failed: Error: Failed to build asset
 
-If you are facing this error while trying to execute `npm run deploy`, it indiciates that Docker is running out of memory and requires additional ram to support it. You can increase memory by completing the following steps:
+If you are facing this error while trying to execute `npm run deploy`,
+it indicates that Docker is running out of memory and requires additional ram to support it.
+You can increase memory by completing the following steps:
 
 1. Open Docker UI
 2. Click `Settings` gear icon on top-right
