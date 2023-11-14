@@ -28,19 +28,20 @@ const targetEnv = {
   region: targetAccount.region
 };
 
-// deploy model runner's vpc resources
-const vpcStack = new MRVpcStack(app, `${targetAccount.name}-MRVpc`, {
-  env: targetEnv,
-  account: targetAccount,
-  description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-});
-
 // deploy the required roles for model runner
 const rolesStack = new MRRolesStack(app, `${targetAccount.name}-MRRoles`, {
   env: targetEnv,
   account: targetAccount,
   description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
 });
+
+// deploy model runner's vpc resources
+const vpcStack = new MRVpcStack(app, `${targetAccount.name}-MRVpc`, {
+  env: targetEnv,
+  account: targetAccount,
+  description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
+});
+vpcStack.addDependency(rolesStack);
 
 // deploy the required roles for model runner
 const mrAppContainerStack = new MRAppContainerStack(
