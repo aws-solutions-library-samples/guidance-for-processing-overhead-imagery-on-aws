@@ -1,8 +1,10 @@
 {
   "id": "1234567890123",
-  "name": "fake-alias",
-  "region": "us-west-1",
+  "name": "OSML",
+  "region": "us-west-2",
   "prodLike": false,
+  "buildAppContainer": true,
+  "buildModelContainer": true,
   "enableAutoscaling": true,
   "enableMonitoring": true,
   "enableTesting": true

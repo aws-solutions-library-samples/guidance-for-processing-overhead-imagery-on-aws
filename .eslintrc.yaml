@@ -36,6 +36,7 @@ rules:
   "@typescript-eslint/no-inferrable-types": off
   "@typescript-eslint/no-non-null-assertion": off
   "@typescript-eslint/require-await": error
+  "@typescript-eslint/no-empty-function": off
   "jest/no-done-callback": off
 
 settings:
