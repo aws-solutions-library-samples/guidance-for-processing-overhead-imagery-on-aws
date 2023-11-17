@@ -15,7 +15,7 @@
     "lint": "pre-commit run --all-files",
     "watch": "tsc -w",
     "prepare": "npm run-script build",
-    "integ:aircraft": "python3 lib/osml-model-runner-test/bin/process_image.py --image tile_tiff --model aircraft",
+    "integ:aircraft": "python3 lib/osml-model-runner-test/bin/process_image.py --image tile_tif --model aircraft",
     "integ:centerpoint": "python3 lib/osml-model-runner-test/bin/process_image.py --image small --model centerpoint",
     "integ:flood": "python3 lib/osml-model-runner-test/bin/process_image.py --image large --model flood",
     "mr:docker-build": "docker build lib/osml-model-runner/. -t osml-model-runner:local",
