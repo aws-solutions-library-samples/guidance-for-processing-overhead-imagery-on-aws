@@ -9,8 +9,8 @@ import "source-map-support/register";
 import { App } from "aws-cdk-lib";
 
 import targetAccount from "../lib/accounts/target_account.json";
-import { MRAppContainerStack } from "../lib/osml-stacks/model_runner/mr-app-container";
 import { MRAutoScalingStack } from "../lib/osml-stacks/model_runner/mr-autoscaling";
+import { MRContainerStack } from "../lib/osml-stacks/model_runner/mr-container";
 import { MRDataplaneStack } from "../lib/osml-stacks/model_runner/mr-dataplane";
 import { MRImageryStack } from "../lib/osml-stacks/model_runner/mr-imagery";
 import { MRModelContainerStack } from "../lib/osml-stacks/model_runner/mr-model-container";
@@ -19,6 +19,8 @@ import { MRMonitoringStack } from "../lib/osml-stacks/model_runner/mr-monitoring
 import { MRRolesStack } from "../lib/osml-stacks/model_runner/mr-roles";
 import { MRSyncStack } from "../lib/osml-stacks/model_runner/mr-sync";
 import { MRVpcStack } from "../lib/osml-stacks/model_runner/mr-vpc";
+import { TSContainerStack } from "../lib/osml-stacks/tile_server/ts-container";
+import { TSDataplaneStack } from "../lib/osml-stacks/tile_server/ts-dataplane";
 
 // set up the default CDK app
 const app = new App();
@@ -29,7 +31,7 @@ const targetEnv = {
 };
 
 // deploy the required roles for model runner
-const rolesStack = new MRRolesStack(app, `${targetAccount.name}-MRRoles`, {
+const mrRoleStack = new MRRolesStack(app, `${targetAccount.name}-MRRoles`, {
   env: targetEnv,
   account: targetAccount,
   description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
@@ -41,12 +43,12 @@ const vpcStack = new MRVpcStack(app, `${targetAccount.name}-MRVpc`, {
   account: targetAccount,
   description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
 });
-vpcStack.addDependency(rolesStack);
+vpcStack.addDependency(mrRoleStack);
 
 // deploy the required roles for model runner
-const mrAppContainerStack = new MRAppContainerStack(
+const mrAppContainerStack = new MRContainerStack(
   app,
-  `${targetAccount.name}-MRAppContainer`,
+  `${targetAccount.name}-MRContainer`,
   {
     env: targetEnv,
     account: targetAccount,
@@ -63,13 +65,13 @@ const dataplaneStack = new MRDataplaneStack(
     env: targetEnv,
     account: targetAccount,
     description: "Guidance for Overhead Imagery Inference on AWS (SO9240)",
-    taskRole: rolesStack.mrTaskRole.role,
+    taskRole: mrRoleStack.mrTaskRole.role,
     osmlVpc: vpcStack.resources,
     mrContainerImage: mrAppContainerStack.resources.containerImage
   }
 );
 dataplaneStack.addDependency(mrAppContainerStack);
-dataplaneStack.addDependency(rolesStack);
+dataplaneStack.addDependency(mrRoleStack);
 dataplaneStack.addDependency(vpcStack);
 
 if (targetAccount.enableAutoscaling) {
@@ -107,14 +109,14 @@ if (targetAccount.enableTesting) {
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
-      mrSmRole: rolesStack.mrSmRole,
+      mrSmRole: mrRoleStack.mrSmRole,
       modelContainerUri: modelContainerStack.resources.containerUri,
       modelContainerImage: modelContainerStack.resources.containerImage
     }
   );
   modelEndpointsStack.addDependency(modelContainerStack);
   modelEndpointsStack.addDependency(vpcStack);
-  modelEndpointsStack.addDependency(rolesStack);
+  modelEndpointsStack.addDependency(mrRoleStack);
 
   // deploy output syncs for model runner
   const syncStack = new MRSyncStack(app, `${targetAccount.name}-MRSync`, {
@@ -155,6 +157,32 @@ if (targetAccount.enableMonitoring) {
   );
   monitoringStack.addDependency(dataplaneStack);
 }
+
+// deploy the required roles for model runner
+const tileServerContainerStack = new TSContainerStack(
+  app,
+  `${targetAccount.name}-TSContainer`,
+  {
+    env: targetEnv,
+    account: targetAccount,
+    osmlVpc: vpcStack.resources,
+    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
+  }
+);
+
+// deploy model runner's data plane resources
+const tsDataplaneStack = new TSDataplaneStack(
+  app,
+  `${targetAccount.name}-TSDataplane`,
+  {
+    env: targetEnv,
+    account: targetAccount,
+    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)",
+    osmlVpc: vpcStack.resources,
+    containerImage: tileServerContainerStack.resources.containerImage
+  }
+);
+tsDataplaneStack.addDependency(tileServerContainerStack);
 
 // build the cdk app deployment
 app.synth();

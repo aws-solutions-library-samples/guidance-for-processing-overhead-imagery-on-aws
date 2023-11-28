@@ -16,3 +16,6 @@
 [submodule "lib/osml-cesium-globe"]
 	path = lib/osml-cesium-globe
 	url = git@github.com:aws-solutions-library-samples/osml-cesium-globe.git
+[submodule "lib/osml-tile-server"]
+	path = lib/osml-tile-server
+	url = git@github.com:aws-solutions-library-samples/osml-tile-server.git

@@ -11,7 +11,7 @@ export interface MRAppContainerStackProps extends StackProps {
   readonly osmlVpc: OSMLVpc;
 }
 
-export class MRAppContainerStack extends Stack {
+export class MRContainerStack extends Stack {
   public resources: MRAppContainer;
 
   /**
@@ -28,7 +28,7 @@ export class MRAppContainerStack extends Stack {
     });
 
     // Create the model runner ECR container image
-    this.resources = new MRAppContainer(this, "MRAppRepo", {
+    this.resources = new MRAppContainer(this, "MRContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc
     });

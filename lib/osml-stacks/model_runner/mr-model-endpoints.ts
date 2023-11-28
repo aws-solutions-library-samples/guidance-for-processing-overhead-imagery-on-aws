@@ -37,13 +37,17 @@ export class MRModelEndpointsStack extends Stack {
       ...props
     });
 
+    const config = new MRModelEndpointsConfig();
+    config.SM_GPU_INSTANCE_TYPE = "ml.g5.2xlarge";
+
     // create required model runner testing resources
-    this.resources = new MREndpoints(this, "MRModelEndpoints", {
+    this.resources = new MREndpoints(this, "MREndpoints", {
       account: props.account,
       osmlVpc: props.osmlVpc,
       smRole: props.mrSmRole?.role,
       modelContainerUri: props.modelContainerUri,
-      modelContainerImage: props.modelContainerImage
+      modelContainerImage: props.modelContainerImage,
+      mrModelEndpointsConfig: config
     });
   }
 }
