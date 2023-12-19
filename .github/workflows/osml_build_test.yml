@@ -81,9 +81,41 @@ jobs:
       TEST_IMAGE: "tile_tif"
       TEST_MODEL: "aircraft"
     secrets: inherit
+  RunSICDCapellaChipNtfTest:
+    needs: RunTileTifAircraftTest
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run sicd-capella-chip.ntf using Centerpoint Model"
+      TEST_IMAGE: "sicd_capella_chip_ntf"
+      TEST_MODEL: "centerpoint"
+    secrets: inherit
+  RunSICDUmbraChipNtfTest:
+    needs: RunSICDCapellaChipNtfTest
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run sicd-umbra-chip.ntf using Centerpoint Model"
+      TEST_IMAGE: "sicd_umbra_chip_ntf"
+      TEST_MODEL: "centerpoint"
+    secrets: inherit
+  RunSICDInterferometricHhNtfTest:
+    needs: RunSICDUmbraChipNtfTest
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run sicd-interferometric-hh.nitf using Centerpoint Model"
+      TEST_IMAGE: "sicd_interferometric_hh_ntf"
+      TEST_MODEL: "centerpoint"
+    secrets: inherit
+  RunWBIDTest:
+    needs: RunSICDInterferometricHhNtfTest
+    uses: ./.github/workflows/osml_reusable_test.yml
+    with:
+      TEST_DESCRIPTION: "Run wbid.nitf using Centerpoint Model"
+      TEST_IMAGE: "wbid"
+      TEST_MODEL: "centerpoint"
+    secrets: inherit
   DestroyOSML:
     if: ${{ always() }}
-    needs: [ BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest ]
+    needs: [ BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest, RunSICDCapellaChipNtfTest, RunSICDUmbraChipNtfTest, RunSICDInterferometricHhNtfTest, RunWBIDTest ]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
