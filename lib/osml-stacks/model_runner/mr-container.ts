@@ -3,7 +3,12 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MRAppContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
+
+import {
+  MRContainer,
+  OSMLAccount,
+  OSMLVpc
+} from "../../osml-cdk-constructs/lib";
 
 export interface MRAppContainerStackProps extends StackProps {
   readonly env: Environment;
@@ -12,7 +17,7 @@ export interface MRAppContainerStackProps extends StackProps {
 }
 
 export class MRContainerStack extends Stack {
-  public resources: MRAppContainer;
+  public resources: MRContainer;
 
   /**
    * Constructor for the model runner container cdk stack
@@ -28,7 +33,7 @@ export class MRContainerStack extends Stack {
     });
 
     // Create the model runner ECR container image
-    this.resources = new MRAppContainer(this, "MRContainer", {
+    this.resources = new MRContainer(this, "MRContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc
     });
