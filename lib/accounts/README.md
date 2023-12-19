@@ -11,7 +11,7 @@ in place rebuild your project to generate stack targets for your account.
   name: "INSERT YOUR ALIAS", // alias to tag your stacks with
   region: "INSERT YOUR REGION", // region you want to deploy into
   prodLike: false, // if you want to retain resources and enable stack termination protections set to true
-  buildAppContainer: fakse, // enable building local app container
+  buildAppContainer: false, // enable building local app container
   buildModelContainer: false, // enable building local model container
   enableAutoscaling: true, // enable autoscaling on the ECS cluster
   enableMonitoring: true, // enable monitoring and dashboards for the service
