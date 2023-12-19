@@ -5,9 +5,7 @@
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { ContainerImage } from "aws-cdk-lib/aws-ecs";
 import { IRole } from "aws-cdk-lib/aws-iam";
-import { OSMLVpc } from "osml-cdk-constructs";
-
-import { OSMLAccount, TSDataplane } from "../../osml-cdk-constructs/lib";
+import { OSMLAccount, OSMLVpc, TSDataplane } from "osml-cdk-constructs";
 
 export interface TSDataplaneStackProps extends StackProps {
   readonly env: Environment;

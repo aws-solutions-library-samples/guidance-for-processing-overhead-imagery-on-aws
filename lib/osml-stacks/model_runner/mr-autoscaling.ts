@@ -19,7 +19,7 @@ export class MRAutoScalingStack extends Stack {
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MRDataplaneStack object
+   * @returns the created MRAutoScalingStack object
    */
   constructor(parent: App, name: string, props: MRAutoScalingStackProps) {
     super(parent, name, {
@@ -27,7 +27,7 @@ export class MRAutoScalingStack extends Stack {
       ...props
     });
 
-    // create required model runner testing resources
+    // Create required model runner testing resources
     this.resources = new MRAutoScaling(this, "MRAutoscaling", {
       account: props.account,
       mrDataplane: props.mrDataplane

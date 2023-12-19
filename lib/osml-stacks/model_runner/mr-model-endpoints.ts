@@ -5,9 +5,8 @@
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { ContainerImage } from "aws-cdk-lib/aws-ecs";
 import {
+  MESMRole,
   MREndpoints,
-  MRModelEndpointsConfig,
-  MRSMRole,
   OSMLAccount,
   OSMLVpc
 } from "osml-cdk-constructs";
@@ -16,7 +15,7 @@ export interface MRModelEndpointsStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
-  readonly mrSmRole?: MRSMRole;
+  readonly mrSmRole?: MESMRole;
   readonly modelContainerUri: string;
   readonly modelContainerImage: ContainerImage;
 }
@@ -37,17 +36,13 @@ export class MRModelEndpointsStack extends Stack {
       ...props
     });
 
-    const config = new MRModelEndpointsConfig();
-    config.SM_GPU_INSTANCE_TYPE = "ml.g5.2xlarge";
-
-    // create required model runner testing resources
+    // Create required model runner testing endpoints
     this.resources = new MREndpoints(this, "MREndpoints", {
       account: props.account,
       osmlVpc: props.osmlVpc,
       smRole: props.mrSmRole?.role,
       modelContainerUri: props.modelContainerUri,
-      modelContainerImage: props.modelContainerImage,
-      mrModelEndpointsConfig: config
+      modelContainerImage: props.modelContainerImage
     });
   }
 }

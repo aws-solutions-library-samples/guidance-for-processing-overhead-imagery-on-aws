@@ -3,12 +3,7 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-
-import {
-  MRContainer,
-  OSMLAccount,
-  OSMLVpc
-} from "../../osml-cdk-constructs/lib";
+import { MRContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
 
 export interface MRAppContainerStackProps extends StackProps {
   readonly env: Environment;
@@ -24,7 +19,7 @@ export class MRContainerStack extends Stack {
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MREcrStack object
+   * @returns the created MRContainerStack object
    */
   constructor(parent: App, name: string, props: MRAppContainerStackProps) {
     super(parent, name, {

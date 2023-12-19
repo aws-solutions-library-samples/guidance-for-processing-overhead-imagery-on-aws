@@ -18,7 +18,7 @@ export class MRSyncStack extends Stack {
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MRDataplaneStack object
+   * @returns the created MRSyncStack object
    */
   constructor(parent: App, name: string, props: MRSyncStackProps) {
     super(parent, name, {
@@ -26,7 +26,7 @@ export class MRSyncStack extends Stack {
       ...props
     });
 
-    // create required model runner testing resources
+    // Create required model runner testing resources
     this.resources = new MRSync(this, "MRSync", {
       account: props.account
     });
