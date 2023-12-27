@@ -5,8 +5,10 @@ phases:
       nodejs: 16
   pre_build:
     commands:
+      - cp package.json package_tmp.json
       - sed -i "s/git@github.com:/https:\/\/github.com\//" .gitmodules
       - if [[ "${BASE_REF}" -eq "dev" ]]; then jq '(.buildModelContainer, .buildAppContainer) = true' lib/accounts/target_account_template.json > lib/accounts/target_account.json; fi
+      - if [[ "${BASE_REF}" -eq "dev" ]]; then jq '(.devDependencies."osml-cdk-constructs") = "file:lib/osml-cdk-constructs"' package_tmp.json > package.json; fi
       - sed -i "s/1234567890123/$AWS_ACCOUNT/" lib/accounts/target_account.json
       - sed -i "s/fake-alias/$NAME/" lib/accounts/target_account.json
       - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json

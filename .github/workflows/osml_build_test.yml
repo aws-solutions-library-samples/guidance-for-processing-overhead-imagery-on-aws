@@ -20,8 +20,8 @@ jobs:
     steps:
     - uses: ahmadnassri/action-workflow-queue@v1
       with:
-        delay: 60000
-        timeout: 1800000
+        delay: 600000
+        timeout: 3600000
   BuildOSML:
     needs: CheckPendingWorkflow
     runs-on: ubuntu-latest
