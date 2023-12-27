@@ -16,6 +16,7 @@ phases:
       - yum install -y git-lfs
       - git-lfs pull
       - git submodule update --init --recursive
+      - npm install lib/osml-cdk-constructs
       - npm i
       - npm install -g aws-cdk
   build:
