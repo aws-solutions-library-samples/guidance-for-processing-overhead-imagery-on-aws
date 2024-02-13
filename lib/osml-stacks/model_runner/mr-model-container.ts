@@ -9,6 +9,7 @@ export interface MRModelContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
+  readonly buildFromSource: boolean;
 }
 
 export class MRModelContainerStack extends Stack {
@@ -30,7 +31,8 @@ export class MRModelContainerStack extends Stack {
     // Create required model runner testing resources
     this.resources = new MEContainer(this, "MEContainer", {
       account: props.account,
-      osmlVpc: props.osmlVpc
+      osmlVpc: props.osmlVpc,
+      buildFromSource: props.buildFromSource
     });
   }
 }

@@ -9,6 +9,7 @@ export interface MRAppContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
+  readonly buildFromSource: boolean;
 }
 
 export class TSContainerStack extends Stack {
@@ -30,7 +31,8 @@ export class TSContainerStack extends Stack {
     // Create the model runner ECR container image
     this.resources = new TSContainer(this, "TSContainer", {
       account: props.account,
-      osmlVpc: props.osmlVpc
+      osmlVpc: props.osmlVpc,
+      buildFromSource: props.buildFromSource
     });
   }
 }

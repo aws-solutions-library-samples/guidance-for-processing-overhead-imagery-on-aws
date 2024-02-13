@@ -13,7 +13,7 @@ export interface MRVpcStackProps extends StackProps {
   readonly targetSubnets?: string[];
 }
 
-export class MRVpcStack extends Stack {
+export class OSMLVpcStack extends Stack {
   public resources: OSMLVpc;
 
   /**
@@ -21,7 +21,7 @@ export class MRVpcStack extends Stack {
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MRVpcStack object
+   * @returns the created OSMLVpcStack object
    */
   constructor(parent: App, name: string, props: MRVpcStackProps) {
     super(parent, name, {
@@ -30,7 +30,7 @@ export class MRVpcStack extends Stack {
     });
 
     // Create required model runner testing resources
-    this.resources = new OSMLVpc(this, "MRVpc", {
+    this.resources = new OSMLVpc(this, "OSMLVpc", {
       vpcId: props.account.vpcId,
       account: props.account,
       vpcName: props.vpcName,

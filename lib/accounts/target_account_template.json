@@ -3,9 +3,6 @@
   "name": "OSML",
   "region": "us-west-2",
   "prodLike": false,
-  "buildAppContainer": true,
-  "buildModelContainer": true,
-  "enableAutoscaling": true,
-  "enableMonitoring": true,
-  "enableTesting": true
+  "deployModelRunner": true,
+  "deployTileServer": true
 }

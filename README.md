@@ -5,11 +5,12 @@
 * [Linting/Formatting](#lintingformatting)
 * [Deployment](#deployment)
   * [Deploying Local osml-cdk-constructs](#deploying-local-osml-cdk-constructs)
-* [Usage](#usage)
+* [Usage](#model-runner-usage)
   * [OSML Model Runner](#osml-model-runner)
   * [OSML Model Runner Test](#osml-model-runner-test)
   * [OSML Cesium Globe](#osml-cesium-globe)
   * [OSML Models](#osml-models)
+  * [OSML Tile Server](#osml-tile-server)
 * [Useful Commands](#useful-commands)
 * [Troubleshooting](#troubleshooting)
   * [Permission Denied for submodules](#permission-denied-for-submodules)
@@ -77,9 +78,8 @@ This package uses a number of tools to enforce formatting, linting, and general 
        "name": <unique name for stacks>,
        "region": <target region for deployment>,
        "prodLike": <false || true marks resource retention>
-       "enableAutoscaling": <false || true enable autoscaling>,
-       "enableMonitoring": <false || true enable monitoring dashboards>,
-       "enableTesting": <false || true enable testing infrastructure>
+       "deployModelRunner": <false || true deploy model runner>,
+       "deployTileServer": <false || true deploy tile server>
    }
    ```
 
@@ -156,24 +156,15 @@ package for the local package.
 2. In `package.json`, locate `osml-cdk-constructs` under `devDependencies`. By default, it points to the latest NPM package version, but swaps out the version number with `"file:lib/osml-cdk-constructs"`. This will tell package.json to use the local package instead. The dependency will now look like this:
 
     ```bash
-    "osml-cdk-constructs": "file:lib/osml-cdk-constructs"
+    "osml-cdk-constructs": "file:lib/osml-cdk-constructs",
     ```
 
-3. Update the imports in `lib/osml-stacks/model_runner/mr-dataplane.ts`. By default, all CDK constructs are pulled from the `osml-cdk-constructs` npm package, but now they must be imported by file path. Delete the existing `osml-cdk-constructs` import and replace it with the following:
+3. Execute ```npm i``` to make sure everything is installed and building correctly.
 
-    ```bash
-    import { MRDataplane } from "osml-cdk-constructs/lib/model_runner/mr_dataplane"
-    import { OSMLAccount } from "osml-cdk-constructs/lib/osml/osml_account"
-    import { MRTesting } from "osml-cdk-constructs/lib/model_runner/mr_testing"
-    import { MRMonitoring } from "osml-cdk-constructs/lib/model_runner/mr_monitoring"
-    ```
-
-4. Execute ```npm i``` to make sure everything is installed and building correctly.
-
-5. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
+4. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
 
 
-## Usage
+## Model Runner Usage
 
 To start a job, place an `ImageRequest` on the `ImageRequestQueue` by going into your AWS Console > Simple Queue System > `ImageRequestQueue` > Send and receive messages > and enter the provided sample for an `ImageRequest`:
 
@@ -260,9 +251,18 @@ For more info see [osml-cesium-globe](https://github.com/aws-solutions-library-s
 
 ### OSML Models
 
-This package contains sample models that can be used to test OversightML installations without incurring high compute costs typically associated with complex Computer Vision models. These models implement an interface compatible with SageMaker and are suitable for deployment as endpoints with CPU instances.
+This package contains sample models that can be used to test OversightML installations without incurring high compute 
+costs typically associated with complex Computer Vision models. These models implement an interface compatible with 
+SageMaker and are suitable for deployment as endpoints with CPU instances.
 
 For more info see [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
+
+### OSML Tile Server
+
+The OversightML Tile Server is a lightweight, cloud-based tile server which allows you to quickly pass an image from S3 
+bucket to get metadata, image statistics, and set of tiles in real-time.
+
+For more info on usage see [osml-model-runner](https://github.com/aws-solutions-library-samples/osml-tile-server)
 
 ## Useful Commands
 

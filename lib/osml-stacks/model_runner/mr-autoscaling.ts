@@ -3,7 +3,12 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MRAutoScaling, MRDataplane, OSMLAccount } from "osml-cdk-constructs";
+import {
+  MRAutoScaling,
+  MRAutoscalingConfig,
+  MRDataplane,
+  OSMLAccount
+} from "osml-cdk-constructs";
 
 export interface MRAutoScalingStackProps extends StackProps {
   readonly env: Environment;
@@ -26,11 +31,15 @@ export class MRAutoScalingStack extends Stack {
       terminationProtection: props.account.prodLike,
       ...props
     });
+    const config = new MRAutoscalingConfig();
+    config.MR_AUTOSCALING_TASK_MIN_COUNT = 5;
+    config.MR_AUTOSCALING_TASK_MAX_COUNT = 5;
 
     // Create required model runner testing resources
     this.resources = new MRAutoScaling(this, "MRAutoscaling", {
       account: props.account,
-      mrDataplane: props.mrDataplane
+      mrDataplane: props.mrDataplane,
+      mrAutoscalingConfig: config
     });
   }
 }

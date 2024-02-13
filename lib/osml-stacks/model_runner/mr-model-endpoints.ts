@@ -7,6 +7,7 @@ import { ContainerImage } from "aws-cdk-lib/aws-ecs";
 import {
   MESMRole,
   MREndpoints,
+  MRModelEndpointsConfig,
   OSMLAccount,
   OSMLVpc
 } from "osml-cdk-constructs";
