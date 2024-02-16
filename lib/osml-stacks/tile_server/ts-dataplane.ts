@@ -19,7 +19,7 @@ export class TSDataplaneStack extends Stack {
   public resources: TSDataplane;
 
   /**
-   * Constructor for the model runner dataplane cdk stack
+   * Constructor for the tile server dataplane cdk stack
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
@@ -31,7 +31,7 @@ export class TSDataplaneStack extends Stack {
       ...props
     });
 
-    // Create the model runner application dataplane
+    // Create the tile server application dataplane
     this.resources = new TSDataplane(this, "TSDataplane", {
       account: props.account,
       taskRole: props.taskRole,

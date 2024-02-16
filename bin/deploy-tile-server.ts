@@ -36,7 +36,7 @@ export function deployTileServer(
       osmlVpc: vpcStack.resources,
       buildFromSource: buildFromSource,
       description:
-        "Deployment configuration for the tile server container, providing guidance for overhead imagery inference on AWS."
+        "Deployment configuration for the Tile Server container, Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
 
@@ -50,7 +50,7 @@ export function deployTileServer(
       env: targetEnv,
       account: targetAccount,
       description:
-        "Deployment configuration for the tile server's data plane, facilitating overhead imagery inference on AWS.",
+        "Deployment configuration for the Tile Server's data plane, Guidance for Overhead Imagery Inference on AWS (SO9240)",
       osmlVpc: vpcStack.resources,
       containerImage: tileServerContainerStack.resources.containerImage
     }

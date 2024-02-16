@@ -2,7 +2,7 @@ name: Update Submodules
 
 on:
   workflow_dispatch:
-    inputs:  
+    inputs:
       DISPATCH_REPO_NAME:
         required: true
         type: string

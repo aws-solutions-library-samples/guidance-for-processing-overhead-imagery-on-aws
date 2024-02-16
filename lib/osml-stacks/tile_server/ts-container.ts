@@ -16,7 +16,7 @@ export class TSContainerStack extends Stack {
   public resources: TSContainer;
 
   /**
-   * Constructor for the model runner container cdk stack
+   * Constructor for the tile server container cdk stack
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
@@ -28,7 +28,7 @@ export class TSContainerStack extends Stack {
       ...props
     });
 
-    // Create the model runner ECR container image
+    // Create the tile server ECR container image
     this.resources = new TSContainer(this, "TSContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc,

@@ -74,7 +74,8 @@ export function deployModelRuner(
     {
       env: targetEnv,
       account: targetAccount,
-      mrDataplane: mrDataplaneStack.resources
+      mrDataplane: mrDataplaneStack.resources,
+      description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
   mrAutoScalingStack.addDependency(mrDataplaneStack);
@@ -102,7 +103,8 @@ export function deployModelRuner(
       osmlVpc: vpcStack.resources,
       mrSmRole: mrRoleStack.mrSmRole,
       modelContainerUri: modelContainerStack.resources.containerUri,
-      modelContainerImage: modelContainerStack.resources.containerImage
+      modelContainerImage: modelContainerStack.resources.containerImage,
+      description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
   modelEndpointsStack.addDependency(vpcStack);
@@ -121,7 +123,8 @@ export function deployModelRuner(
     {
       env: targetEnv,
       account: targetAccount,
-      vpc: vpcStack.resources.vpc
+      vpc: vpcStack.resources.vpc,
+      description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
   imageryStack.addDependency(syncStack);
