@@ -66,6 +66,7 @@ export function deployModelRuner(
   );
   mrDataplaneStack.addDependency(vpcStack);
   mrDataplaneStack.addDependency(mrContainerStack);
+  mrDataplaneStack.addDependency(mrRoleStack);
 
   // Deployment for auto-scaling configuration for model runner
   const mrAutoScalingStack = new MRAutoScalingStack(
@@ -109,6 +110,7 @@ export function deployModelRuner(
   );
   modelEndpointsStack.addDependency(vpcStack);
   modelEndpointsStack.addDependency(modelContainerStack);
+  modelEndpointsStack.addDependency(mrRoleStack);
 
   // Output syncs for writing model runner results
   const syncStack = new MRSyncStack(app, `${targetAccount.name}-MRSync`, {
