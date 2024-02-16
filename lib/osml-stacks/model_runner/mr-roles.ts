@@ -15,7 +15,7 @@ export interface MRRolesStackProps extends StackProps {
  */
 export class MRRolesStack extends Stack {
   public mrTaskRole: MRTaskRole;
-  public mrSmRole: MESMRole;
+  public meSMRole: MESMRole;
 
   /**
    * Constructor for the model runner roles cdk stack
@@ -37,7 +37,7 @@ export class MRRolesStack extends Stack {
     });
 
     // Create a SageMaker role for endpoints
-    this.mrSmRole = new MESMRole(this, "MESMRole", {
+    this.meSMRole = new MESMRole(this, "MESMRole", {
       account: props.account,
       roleName: "MESMRole"
     });

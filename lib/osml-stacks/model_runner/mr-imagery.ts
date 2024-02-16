@@ -4,13 +4,12 @@
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { IVpc } from "aws-cdk-lib/aws-ec2";
-import { MEContainer, MRImagery, OSMLAccount } from "osml-cdk-constructs";
+import { MRImagery, OSMLAccount } from "osml-cdk-constructs";
 
 export interface MRImageryStackProps extends StackProps {
   env: Environment;
   account: OSMLAccount;
   vpc: IVpc;
-  mrSmRole?: MEContainer;
 }
 
 export class MRImageryStack extends Stack {

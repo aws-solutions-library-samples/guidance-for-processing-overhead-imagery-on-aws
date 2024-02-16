@@ -101,7 +101,7 @@ export function deployModelRuner(
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
-      mrSmRole: mrRoleStack.mrSmRole,
+      mrSmRole: mrRoleStack.meSMRole,
       modelContainerUri: modelContainerStack.resources.containerUri,
       modelContainerImage: modelContainerStack.resources.containerImage,
       description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
