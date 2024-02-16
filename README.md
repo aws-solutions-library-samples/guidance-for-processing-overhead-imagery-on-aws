@@ -15,6 +15,7 @@
 * [Troubleshooting](#troubleshooting)
   * [Permission Denied for submodules](#permission-denied-for-submodules)
   * [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset-)
+  * [error TS2307: Cannot find module ‘osml-cdk-constructs](#error-ts2307-cannot-find-module-osml-cdk-constructs)
 * [Support & Feedback](#support--feedback)
   * [Supporting OSML Repositories](#supporting-osml-repositories)
 * [Security](#security)
@@ -251,18 +252,18 @@ For more info see [osml-cesium-globe](https://github.com/aws-solutions-library-s
 
 ### OSML Models
 
-This package contains sample models that can be used to test OversightML installations without incurring high compute 
-costs typically associated with complex Computer Vision models. These models implement an interface compatible with 
+This package contains sample models that can be used to test OversightML installations without incurring high compute
+costs typically associated with complex Computer Vision models. These models implement an interface compatible with
 SageMaker and are suitable for deployment as endpoints with CPU instances.
 
 For more info see [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
 
 ### OSML Tile Server
 
-The OversightML Tile Server is a lightweight, cloud-based tile server which allows you to quickly pass an image from S3 
+The OversightML Tile Server is a lightweight, cloud-based tile server which allows you to quickly pass an image from S3
 bucket to get metadata, image statistics, and set of tiles in real-time.
 
-For more info on usage see [osml-model-runner](https://github.com/aws-solutions-library-samples/osml-tile-server)
+For more info on usage see [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
 
 ## Useful Commands
 
@@ -293,9 +294,19 @@ You can increase memory by completing the following steps:
 4. Click `Advanced` on the left sidebar menu
 5. Find `Memory` and adjust it to 12 GB
 
+#### error TS2307: Cannot find module ‘osml-cdk-constructs’
+
+If you encounter an error while running `npm i` that leads to an error:
+
+> error TS2307: Cannot find module ‘osml-cdk-constructs’ or its corresponding type declarations.
+
+Please execute the following command and try again:
+
+> npm install osml-cdk-constructs
+
 ## Support & Feedback
 
-To post feedback, submit feature ideas, or report bugs, please use the [Issues](https://github.com/aws-solutions-library-samples/osml-cdk-constructs/issues) section of this GitHub repo.
+To post feedback, submit feature ideas, or report bugs, please use the [Issues](https://github.com/aws-solutions-library-samples/guidance-for-overhead-imagery-inference-on-aws/issues) section of this GitHub repo.
 
 If you are interested in contributing to OversightML Model Runner, see the [CONTRIBUTING](CONTRIBUTING.md) guide.
 
@@ -307,6 +318,7 @@ If you are interested in contributing to OversightML Model Runner, see the [CONT
 * [osml-model-runner](https://github.com/aws-solutions-library-samples/osml-model-runner)
 * [osml-model-runner-test](https://github.com/aws-solutions-library-samples/osml-model-runner-test)
 * [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
+* [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
 
 ## Security
 

@@ -30,10 +30,26 @@ const vpcStack = new OSMLVpcStack(app, `${targetAccount.name}-OSMLVpc`, {
 });
 
 // Deploy the model runner application within the initialized VPC.
-deployModelRuner(app, targetEnv, targetAccount, vpcStack, true);
+if (targetAccount.deployModelRunner) {
+  deployModelRuner(
+    app,
+    targetEnv,
+    targetAccount,
+    vpcStack,
+    true
+  );
+}
 
 // Deploy the tile server application within the same VPC.
-deployTileServer(app, targetEnv, targetAccount, vpcStack, true);
+if (targetAccount.deployTileServer) {
+  deployTileServer(
+    app,
+    targetEnv,
+    targetAccount,
+    vpcStack,
+    true
+  );
+}
 
 // Finalize the CDK app deployment by synthesizing the CloudFormation templates.
 app.synth();
