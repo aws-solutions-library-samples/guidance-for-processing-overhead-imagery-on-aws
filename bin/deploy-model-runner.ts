@@ -124,6 +124,7 @@ export function deployModelRuner(
       vpc: vpcStack.resources.vpc
     }
   );
+  imageryStack.addDependency(syncStack);
   imageryStack.addDependency(vpcStack);
 
   // Deploy a monitoring dashboard for the model runner.
