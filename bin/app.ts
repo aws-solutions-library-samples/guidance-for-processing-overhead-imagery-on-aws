@@ -14,6 +14,9 @@ import { deployRoles } from "./deploy-roles";
 import { deployTileServer } from "./deploy-tile-server";
 import { deployVpc } from "./deploy-vpc";
 
+// Determine if the ENV instructs to globally build from source.
+const buildFromSource = process.env.BUILD_FROM_SOURCE?.toLowerCase() === "true";
+
 // Initialize the default CDK application.
 const app = new App();
 
@@ -34,12 +37,19 @@ const vpcStack = deployVpc(app, targetEnv, targetAccount, osmlRolesStack);
 
 // Deploy the model runner application within the initialized VPC.
 if (targetAccount.deployModelRunner) {
-  deployModelRuner(app, targetEnv, targetAccount, vpcStack, osmlRolesStack);
+  deployModelRuner(
+    app,
+    targetEnv,
+    targetAccount,
+    vpcStack,
+    osmlRolesStack,
+    buildFromSource
+  );
 }
 
 // Deploy the tile server application within the same VPC.
 if (targetAccount.deployTileServer) {
-  deployTileServer(app, targetEnv, targetAccount, vpcStack);
+  deployTileServer(app, targetEnv, targetAccount, vpcStack, buildFromSource);
 }
 
 // Finalize the CDK app deployment by synthesizing the CloudFormation templates.

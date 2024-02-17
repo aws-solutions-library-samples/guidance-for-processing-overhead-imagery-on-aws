@@ -6,7 +6,8 @@ phases:
   pre_build:
     commands:
       - sed -i "s/git@github.com:/https:\/\/github.com\//" .gitmodules
-      - if [[ "${BASE_REF}" -eq "dev" ]]; then jq '(.buildFromSource) = true' lib/accounts/target_account_template.json > lib/accounts/target_account.json; fi
+      - cp lib/accounts/target_account_template.json lib/accounts/target_account.json
+      - if [[ "${BASE_REF}" -eq "dev" ]]; then export BUILD_FROM_SOURCE=true; fi
       - sed -i "s/1234567890123/$AWS_ACCOUNT/" lib/accounts/target_account.json
       - sed -i "s/fake-alias/$NAME/" lib/accounts/target_account.json
       - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json

@@ -92,15 +92,21 @@ This package uses a number of tools to enforce formatting, linting, and general 
    export NAME=<unique name for stacks>
    ```
 
-5. Pull your latest credentials into `~/.aws/credentials`
+5. Optional, export the following enviornment variable if you wish to build your containers from source using the submodules.
 
-6. Go into `guidance-for-overhead-imagery-inference-on-aws` directory and execute the following commands to install npm packages:
+   ```
+   export BUILD_FROM_SOURCE=true
+   ```
+
+6. Pull your latest credentials into `~/.aws/credentials`
+
+7. Go into `guidance-for-overhead-imagery-inference-on-aws` directory and execute the following commands to install npm packages:
 
    ```
    npm i
    ```
 
-7. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
+8. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
 
    ```
    npm install -g aws-cdk
@@ -108,26 +114,26 @@ This package uses a number of tools to enforce formatting, linting, and general 
    cdk bootstrap
    ```
 
-8. Make sure Docker is running on your machine:
+9. Make sure Docker is running on your machine:
 
    ```
    dockerd
    ```
 
-9. Then deploy the stacks to your commercial account:
+10. Then deploy the stacks to your commercial account:
 
-   ```
-   npm run deploy
-   ```
+    ```
+    npm run deploy
+    ```
 
-10. If you want to validate the deployment with integration tests:
+11. If you want to validate the deployment with integration tests:
 
    ```
    npm run setup
    npm run integ
    ```
 
-11. When you are done, you can clean up the deployment:
+12. When you are done, you can clean up the deployment:
 
    ```
    npm run destroy
