@@ -11,7 +11,7 @@ export interface MRDataplaneStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
-  readonly taskRole: IRole;
+  readonly taskRole: IRole | undefined;
   readonly mrContainerImage: ContainerImage;
 }
 

@@ -7,13 +7,12 @@
 import "source-map-support/register";
 
 import { App, Environment } from "aws-cdk-lib";
-import { Vpc } from "aws-cdk-lib/aws-ec2";
 
 import targetAccount from "../lib/accounts/target_account.json";
-import { MRRolesStack } from "../lib/osml-stacks/model_runner/mr-roles";
-import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
 import { deployModelRuner } from "./deploy-model-runner";
+import { deployRoles } from "./deploy-roles";
 import { deployTileServer } from "./deploy-tile-server";
+import { deployVpc } from "./deploy-vpc";
 
 // Initialize the default CDK application.
 const app = new App();
@@ -24,43 +23,24 @@ const targetEnv: Environment = {
   region: targetAccount.region
 };
 
-let vpcStack = undefined;
+// Deploy an optional role sstack to build if we are deploying model runner.
+let osmlRolesStack = undefined;
+if (targetAccount.deployModelRunner) {
+  osmlRolesStack = deployRoles(app, targetEnv, targetAccount);
+}
+
+// Deploy required OSML networking infrastructure.
+const vpcStack = deployVpc(app, targetEnv, targetAccount, osmlRolesStack);
 
 // Deploy the model runner application within the initialized VPC.
 if (targetAccount.deployModelRunner) {
-  // Deploy the required roles for the model runner application.
-  const mrRoleStack = new MRRolesStack(app, `${targetAccount.name}-MRRoles`, {
-    env: targetEnv,
-    account: targetAccount,
-    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-  });
-
-  // Deploy the Virtual Private Cloud (VPC) resources for OversightML
-  vpcStack = createVpcStack();
-
-  vpcStack.addDependency(mrRoleStack);
-
-  deployModelRuner(app, targetEnv, targetAccount, vpcStack, mrRoleStack, true);
+  deployModelRuner(app, targetEnv, targetAccount, vpcStack, osmlRolesStack);
 }
 
 // Deploy the tile server application within the same VPC.
 if (targetAccount.deployTileServer) {
-  if (!vpcStack) {
-    vpcStack = createVpcStack();
-  }
-
-  deployTileServer(app, targetEnv, targetAccount, vpcStack, true);
+  deployTileServer(app, targetEnv, targetAccount, vpcStack);
 }
 
 // Finalize the CDK app deployment by synthesizing the CloudFormation templates.
 app.synth();
-
-export function createVpcStack() {
-  // Deploy the Virtual Private Cloud (VPC) resources for OversightML
-  const vpcStack = new OSMLVpcStack(app, `${targetAccount.name}-OSMLVpc`, {
-    env: targetEnv,
-    account: targetAccount,
-    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-  });
-  return vpcStack;
-}

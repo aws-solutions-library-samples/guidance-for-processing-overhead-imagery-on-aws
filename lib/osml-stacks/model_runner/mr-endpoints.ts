@@ -7,18 +7,20 @@ import { ContainerImage } from "aws-cdk-lib/aws-ecs";
 import {
   MESMRole,
   MREndpoints,
-  MRModelEndpointsConfig,
   OSMLAccount,
   OSMLVpc
 } from "osml-cdk-constructs";
+
+import { MEHTTPRole } from "../../osml-cdk-constructs/lib/osml/model_endpoint/roles/me_http_role";
 
 export interface MRModelEndpointsStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
-  readonly mrSmRole?: MESMRole;
-  readonly modelContainerUri: string;
-  readonly modelContainerImage: ContainerImage;
+  readonly containerUri: string;
+  readonly containerImage: ContainerImage;
+  readonly meSMRole?: MESMRole;
+  readonly meHTTPRole?: MEHTTPRole;
 }
 
 export class MRModelEndpointsStack extends Stack {
@@ -41,9 +43,10 @@ export class MRModelEndpointsStack extends Stack {
     this.resources = new MREndpoints(this, "MREndpoints", {
       account: props.account,
       osmlVpc: props.osmlVpc,
-      smRole: props.mrSmRole?.role,
-      modelContainerUri: props.modelContainerUri,
-      modelContainerImage: props.modelContainerImage
+      smRole: props.meSMRole?.role,
+      httpEndpointRole: props.meHTTPRole?.role,
+      modelContainerUri: props.containerUri,
+      modelContainerImage: props.containerImage
     });
   }
 }

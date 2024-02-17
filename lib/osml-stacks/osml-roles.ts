@@ -5,7 +5,9 @@
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { MESMRole, MRTaskRole, OSMLAccount } from "osml-cdk-constructs";
 
-export interface MRRolesStackProps extends StackProps {
+import { MEHTTPRole } from "../osml-cdk-constructs/lib/osml/model_endpoint/roles/me_http_role";
+
+export interface OSMLStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
 }
@@ -13,9 +15,10 @@ export interface MRRolesStackProps extends StackProps {
 /**
  * The stack required to OSML Roles
  */
-export class MRRolesStack extends Stack {
+export class OSMLRolesStack extends Stack {
   public mrTaskRole: MRTaskRole;
   public meSMRole: MESMRole;
+  public httpEndpointRole: MEHTTPRole;
 
   /**
    * Constructor for the model runner roles cdk stack
@@ -24,22 +27,28 @@ export class MRRolesStack extends Stack {
    * @param props the properties required to create the stack.
    * @returns Stack the created MRRolesStack object
    */
-  constructor(parent: App, name: string, props: MRRolesStackProps) {
+  constructor(parent: App, name: string, props: OSMLStackProps) {
     super(parent, name, {
       terminationProtection: props.account.prodLike,
       ...props
     });
 
-    // Create the model runner operation role
+    // Create the model runner Fargate task role
     this.mrTaskRole = new MRTaskRole(this, "MRTaskRole", {
       account: props.account,
-      roleName: "MRTaskRole"
+      roleName: "OSMLMRTaskRole"
     });
 
-    // Create a SageMaker role for endpoints
+    // Create a SageMaker role for model hosted endpoints
     this.meSMRole = new MESMRole(this, "MESMRole", {
       account: props.account,
-      roleName: "MESMRole"
+      roleName: "OSMLSageMakerEndpointRole"
+    });
+
+    // Create a new role for the HTTP endpoint
+    this.httpEndpointRole = new MEHTTPRole(this, "HTTPEndpointTaskRole", {
+      account: props.account,
+      roleName: "OSMLHTTPEndpointTaskRole"
     });
   }
 }

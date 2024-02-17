@@ -4,12 +4,12 @@ import { OSMLAccount } from "osml-cdk-constructs";
 import { MRAutoScalingStack } from "../lib/osml-stacks/model_runner/mr-autoscaling";
 import { MRContainerStack } from "../lib/osml-stacks/model_runner/mr-container";
 import { MRDataplaneStack } from "../lib/osml-stacks/model_runner/mr-dataplane";
+import { MRModelEndpointsStack } from "../lib/osml-stacks/model_runner/mr-endpoints";
 import { MRImageryStack } from "../lib/osml-stacks/model_runner/mr-imagery";
 import { MRModelContainerStack } from "../lib/osml-stacks/model_runner/mr-model-container";
-import { MRModelEndpointsStack } from "../lib/osml-stacks/model_runner/mr-model-endpoints";
-import { MRMonitoringStack } from "../lib/osml-stacks/model_runner/mr-monitoring";
-import { MRRolesStack } from "../lib/osml-stacks/model_runner/mr-roles";
 import { MRSyncStack } from "../lib/osml-stacks/model_runner/mr-sync";
+import { MRMonitoringStack } from "../lib/osml-stacks/osml-monitoring";
+import { OSMLRolesStack } from "../lib/osml-stacks/osml-roles";
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
 
 /**
@@ -21,7 +21,7 @@ import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
  * @param targetEnv The target deployment environment, including account and region.
  * @param targetAccount Details of the target AWS account where the stacks are deployed, including configurations for autoscaling and testing.
  * @param vpcStack An instance of `OSMLVpcStack` to be used by other stacks for network configurations.
- * @param mrRoleStack An instance of `MRRolesStack` to be used by other stacks for roles configurations.
+ * @param osmlRolesStack An instance of `OSMLRolesStack` to be used by other stacks for roles configurations.
  * @param buildFromSource Whether or not to build the model runner container from source
  */
 export function deployModelRuner(
@@ -29,7 +29,7 @@ export function deployModelRuner(
   targetEnv: Environment,
   targetAccount: OSMLAccount,
   vpcStack: OSMLVpcStack,
-  mrRoleStack: MRRolesStack,
+  osmlRolesStack: OSMLRolesStack | undefined,
   buildFromSource: boolean = false
 ) {
   // Deploy container stack for the model runner application.
@@ -53,14 +53,16 @@ export function deployModelRuner(
       env: targetEnv,
       account: targetAccount,
       description: "Guidance for Overhead Imagery Inference on AWS (SO9240)",
-      taskRole: mrRoleStack.mrTaskRole.role,
+      taskRole: osmlRolesStack?.mrTaskRole.role,
       osmlVpc: vpcStack.resources,
       mrContainerImage: mrContainerStack.resources.containerImage
     }
   );
   mrDataplaneStack.addDependency(vpcStack);
   mrDataplaneStack.addDependency(mrContainerStack);
-  mrDataplaneStack.addDependency(mrRoleStack);
+  if (osmlRolesStack) {
+    mrDataplaneStack.addDependency(osmlRolesStack);
+  }
 
   // Deployment for auto-scaling configuration for model runner
   const mrAutoScalingStack = new MRAutoScalingStack(
@@ -96,15 +98,19 @@ export function deployModelRuner(
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
-      mrSmRole: mrRoleStack.meSMRole,
-      modelContainerUri: modelContainerStack.resources.containerUri,
-      modelContainerImage: modelContainerStack.resources.containerImage,
+      meSMRole: osmlRolesStack?.meSMRole,
+      meHTTPRole: osmlRolesStack?.httpEndpointRole,
+      containerUri: modelContainerStack.resources.containerUri,
+      containerImage: modelContainerStack.resources.containerImage,
       description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
   modelEndpointsStack.addDependency(vpcStack);
   modelEndpointsStack.addDependency(modelContainerStack);
-  modelEndpointsStack.addDependency(mrRoleStack);
+
+  if (osmlRolesStack) {
+    modelEndpointsStack.addDependency(osmlRolesStack);
+  }
 
   // Output syncs for writing model runner results
   const syncStack = new MRSyncStack(app, `${targetAccount.name}-MRSync`, {
