@@ -7,15 +7,12 @@
 import "source-map-support/register";
 
 import { App, Environment } from "aws-cdk-lib";
-
-import {
-  Vpc
-} from "aws-cdk-lib/aws-ec2";
+import { Vpc } from "aws-cdk-lib/aws-ec2";
 
 import targetAccount from "../lib/accounts/target_account.json";
+import { MRRolesStack } from "../lib/osml-stacks/model_runner/mr-roles";
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
 import { deployModelRuner } from "./deploy-model-runner";
-import { MRRolesStack } from "../lib/osml-stacks/model_runner/mr-roles";
 import { deployTileServer } from "./deploy-tile-server";
 
 // Initialize the default CDK application.
@@ -39,33 +36,20 @@ if (targetAccount.deployModelRunner) {
   });
 
   // Deploy the Virtual Private Cloud (VPC) resources for OversightML
-  vpcStack = createVpcStack()
+  vpcStack = createVpcStack();
 
   vpcStack.addDependency(mrRoleStack);
 
-  deployModelRuner(
-    app,
-    targetEnv,
-    targetAccount,
-    vpcStack,
-    mrRoleStack,
-    true
-  );
+  deployModelRuner(app, targetEnv, targetAccount, vpcStack, mrRoleStack, true);
 }
 
 // Deploy the tile server application within the same VPC.
 if (targetAccount.deployTileServer) {
-  if (!vpcStack){
-    vpcStack = createVpcStack()
+  if (!vpcStack) {
+    vpcStack = createVpcStack();
   }
 
-  deployTileServer(
-    app,
-    targetEnv,
-    targetAccount,
-    vpcStack,
-    true
-  );
+  deployTileServer(app, targetEnv, targetAccount, vpcStack, true);
 }
 
 // Finalize the CDK app deployment by synthesizing the CloudFormation templates.
