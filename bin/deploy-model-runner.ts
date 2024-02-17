@@ -21,6 +21,7 @@ import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
  * @param targetEnv The target deployment environment, including account and region.
  * @param targetAccount Details of the target AWS account where the stacks are deployed, including configurations for autoscaling and testing.
  * @param vpcStack An instance of `OSMLVpcStack` to be used by other stacks for network configurations.
+ * @param mrRoleStack An instance of `MRRolesStack` to be used by other stacks for roles configurations.
  * @param buildFromSource Whether or not to build the model runner container from source
  */
 export function deployModelRuner(
@@ -28,16 +29,9 @@ export function deployModelRuner(
   targetEnv: Environment,
   targetAccount: OSMLAccount,
   vpcStack: OSMLVpcStack,
+  mrRoleStack: MRRolesStack,
   buildFromSource: boolean = false
 ) {
-  // Deploy the required roles for the model runner application.
-  const mrRoleStack = new MRRolesStack(app, `${targetAccount.name}-MRRoles`, {
-    env: targetEnv,
-    account: targetAccount,
-    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-  });
-  vpcStack.addDependency(mrRoleStack);
-
   // Deploy container stack for the model runner application.
   const mrContainerStack = new MRContainerStack(
     app,

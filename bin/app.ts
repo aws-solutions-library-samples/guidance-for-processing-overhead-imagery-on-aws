@@ -8,9 +8,14 @@ import "source-map-support/register";
 
 import { App, Environment } from "aws-cdk-lib";
 
+import {
+  Vpc
+} from "aws-cdk-lib/aws-ec2";
+
 import targetAccount from "../lib/accounts/target_account.json";
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
 import { deployModelRuner } from "./deploy-model-runner";
+import { MRRolesStack } from "../lib/osml-stacks/model_runner/mr-roles";
 import { deployTileServer } from "./deploy-tile-server";
 
 // Initialize the default CDK application.
@@ -22,26 +27,38 @@ const targetEnv: Environment = {
   region: targetAccount.region
 };
 
-// Deploy the Virtual Private Cloud (VPC) resources for OversightML
-const vpcStack = new OSMLVpcStack(app, `${targetAccount.name}-OSMLVpc`, {
-  env: targetEnv,
-  account: targetAccount,
-  description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-});
+let vpcStack = undefined;
 
 // Deploy the model runner application within the initialized VPC.
 if (targetAccount.deployModelRunner) {
+  // Deploy the required roles for the model runner application.
+  const mrRoleStack = new MRRolesStack(app, `${targetAccount.name}-MRRoles`, {
+    env: targetEnv,
+    account: targetAccount,
+    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
+  });
+
+  // Deploy the Virtual Private Cloud (VPC) resources for OversightML
+  vpcStack = createVpcStack()
+
+  vpcStack.addDependency(mrRoleStack);
+
   deployModelRuner(
     app,
     targetEnv,
     targetAccount,
     vpcStack,
+    mrRoleStack,
     true
   );
 }
 
 // Deploy the tile server application within the same VPC.
 if (targetAccount.deployTileServer) {
+  if (!vpcStack){
+    vpcStack = createVpcStack()
+  }
+
   deployTileServer(
     app,
     targetEnv,
@@ -53,3 +70,13 @@ if (targetAccount.deployTileServer) {
 
 // Finalize the CDK app deployment by synthesizing the CloudFormation templates.
 app.synth();
+
+export function createVpcStack() {
+  // Deploy the Virtual Private Cloud (VPC) resources for OversightML
+  const vpcStack = new OSMLVpcStack(app, `${targetAccount.name}-OSMLVpc`, {
+    env: targetEnv,
+    account: targetAccount,
+    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
+  });
+  return vpcStack;
+}
