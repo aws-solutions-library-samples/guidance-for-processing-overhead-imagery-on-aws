@@ -12,6 +12,7 @@ on:
 
 jobs:
   update_submodules:
+    if: ${{ github.ref_name == ‘refs/heads/dev’ }}
     name: Update Submodules
     runs-on: ubuntu-latest
     steps:
