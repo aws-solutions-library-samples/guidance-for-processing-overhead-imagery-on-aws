@@ -3,33 +3,33 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MEContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
+import { OSMLAccount, OSMLVpc, TSContainer } from "osml-cdk-constructs";
 
-export interface MRModelContainerStackProps extends StackProps {
+export interface MRAppContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
   readonly buildFromSource: boolean;
 }
 
-export class MRModelContainerStack extends Stack {
-  public resources: MEContainer;
+export class TSContainerStack extends Stack {
+  public resources: TSContainer;
 
   /**
-   * Constructor for the model container ECR assets
+   * Constructor for the tile server container cdk stack
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MRModelContainerStack object
+   * @returns the created TSContainerStack object
    */
-  constructor(parent: App, name: string, props: MRModelContainerStackProps) {
+  constructor(parent: App, name: string, props: MRAppContainerStackProps) {
     super(parent, name, {
       terminationProtection: props.account.prodLike,
       ...props
     });
 
-    // Create required model runner testing resources
-    this.resources = new MEContainer(this, "MEContainer", {
+    // Create the tile server ECR container image
+    this.resources = new TSContainer(this, "TSContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc,
       buildFromSource: props.buildFromSource

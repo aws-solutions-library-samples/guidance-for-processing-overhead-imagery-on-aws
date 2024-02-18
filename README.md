@@ -5,15 +5,17 @@
 * [Linting/Formatting](#lintingformatting)
 * [Deployment](#deployment)
   * [Deploying Local osml-cdk-constructs](#deploying-local-osml-cdk-constructs)
-* [Usage](#usage)
+* [Usage](#model-runner-usage)
   * [OSML Model Runner](#osml-model-runner)
   * [OSML Model Runner Test](#osml-model-runner-test)
   * [OSML Cesium Globe](#osml-cesium-globe)
   * [OSML Models](#osml-models)
+  * [OSML Tile Server](#osml-tile-server)
 * [Useful Commands](#useful-commands)
 * [Troubleshooting](#troubleshooting)
   * [Permission Denied for submodules](#permission-denied-for-submodules)
   * [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset-)
+  * [error TS2307: Cannot find module ‘osml-cdk-constructs](#error-ts2307-cannot-find-module-osml-cdk-constructs)
 * [Support & Feedback](#support--feedback)
   * [Supporting OSML Repositories](#supporting-osml-repositories)
 * [Security](#security)
@@ -77,9 +79,8 @@ This package uses a number of tools to enforce formatting, linting, and general 
        "name": <unique name for stacks>,
        "region": <target region for deployment>,
        "prodLike": <false || true marks resource retention>
-       "enableAutoscaling": <false || true enable autoscaling>,
-       "enableMonitoring": <false || true enable monitoring dashboards>,
-       "enableTesting": <false || true enable testing infrastructure>
+       "deployModelRunner": <false || true deploy model runner>,
+       "deployTileServer": <false || true deploy tile server>
    }
    ```
 
@@ -91,15 +92,21 @@ This package uses a number of tools to enforce formatting, linting, and general 
    export NAME=<unique name for stacks>
    ```
 
-5. Pull your latest credentials into `~/.aws/credentials`
+5. Optional, export the following enviornment variable if you wish to build your containers from source using the submodules.
 
-6. Go into `guidance-for-overhead-imagery-inference-on-aws` directory and execute the following commands to install npm packages:
+   ```
+   export BUILD_FROM_SOURCE=true
+   ```
+
+6. Pull your latest credentials into `~/.aws/credentials`
+
+7. Go into `guidance-for-overhead-imagery-inference-on-aws` directory and execute the following commands to install npm packages:
 
    ```
    npm i
    ```
 
-7. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
+8. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
 
    ```
    npm install -g aws-cdk
@@ -107,26 +114,26 @@ This package uses a number of tools to enforce formatting, linting, and general 
    cdk bootstrap
    ```
 
-8. Make sure Docker is running on your machine:
+9. Make sure Docker is running on your machine:
 
    ```
    dockerd
    ```
 
-9. Then deploy the stacks to your commercial account:
+10. Then deploy the stacks to your commercial account:
 
-   ```
-   npm run deploy
-   ```
+    ```
+    npm run deploy
+    ```
 
-10. If you want to validate the deployment with integration tests:
+11. If you want to validate the deployment with integration tests:
 
    ```
    npm run setup
    npm run integ
    ```
 
-11. When you are done, you can clean up the deployment:
+12. When you are done, you can clean up the deployment:
 
    ```
    npm run destroy
@@ -156,24 +163,15 @@ package for the local package.
 2. In `package.json`, locate `osml-cdk-constructs` under `devDependencies`. By default, it points to the latest NPM package version, but swaps out the version number with `"file:lib/osml-cdk-constructs"`. This will tell package.json to use the local package instead. The dependency will now look like this:
 
     ```bash
-    "osml-cdk-constructs": "file:lib/osml-cdk-constructs"
+    "osml-cdk-constructs": "file:lib/osml-cdk-constructs",
     ```
 
-3. Update the imports in `lib/osml-stacks/model_runner/mr-dataplane.ts`. By default, all CDK constructs are pulled from the `osml-cdk-constructs` npm package, but now they must be imported by file path. Delete the existing `osml-cdk-constructs` import and replace it with the following:
+3. Execute ```npm i``` to make sure everything is installed and building correctly.
 
-    ```bash
-    import { MRDataplane } from "osml-cdk-constructs/lib/model_runner/mr_dataplane"
-    import { OSMLAccount } from "osml-cdk-constructs/lib/osml/osml_account"
-    import { MRTesting } from "osml-cdk-constructs/lib/model_runner/mr_testing"
-    import { MRMonitoring } from "osml-cdk-constructs/lib/model_runner/mr_monitoring"
-    ```
-
-4. Execute ```npm i``` to make sure everything is installed and building correctly.
-
-5. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
+4. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
 
 
-## Usage
+## Model Runner Usage
 
 To start a job, place an `ImageRequest` on the `ImageRequestQueue` by going into your AWS Console > Simple Queue System > `ImageRequestQueue` > Send and receive messages > and enter the provided sample for an `ImageRequest`:
 
@@ -260,9 +258,18 @@ For more info see [osml-cesium-globe](https://github.com/aws-solutions-library-s
 
 ### OSML Models
 
-This package contains sample models that can be used to test OversightML installations without incurring high compute costs typically associated with complex Computer Vision models. These models implement an interface compatible with SageMaker and are suitable for deployment as endpoints with CPU instances.
+This package contains sample models that can be used to test OversightML installations without incurring high compute
+costs typically associated with complex Computer Vision models. These models implement an interface compatible with
+SageMaker and are suitable for deployment as endpoints with CPU instances.
 
 For more info see [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
+
+### OSML Tile Server
+
+The OversightML Tile Server is a lightweight, cloud-based tile server which allows you to quickly pass an image from S3
+bucket to get metadata, image statistics, and set of tiles in real-time.
+
+For more info on usage see [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
 
 ## Useful Commands
 
@@ -293,9 +300,19 @@ You can increase memory by completing the following steps:
 4. Click `Advanced` on the left sidebar menu
 5. Find `Memory` and adjust it to 12 GB
 
+#### error TS2307: Cannot find module ‘osml-cdk-constructs’
+
+If you encounter an error while running `npm i` that leads to an error:
+
+> error TS2307: Cannot find module ‘osml-cdk-constructs’ or its corresponding type declarations.
+
+Please execute the following command and try again:
+
+> npm install osml-cdk-constructs
+
 ## Support & Feedback
 
-To post feedback, submit feature ideas, or report bugs, please use the [Issues](https://github.com/aws-solutions-library-samples/osml-cdk-constructs/issues) section of this GitHub repo.
+To post feedback, submit feature ideas, or report bugs, please use the [Issues](https://github.com/aws-solutions-library-samples/guidance-for-overhead-imagery-inference-on-aws/issues) section of this GitHub repo.
 
 If you are interested in contributing to OversightML Model Runner, see the [CONTRIBUTING](CONTRIBUTING.md) guide.
 
@@ -307,6 +324,7 @@ If you are interested in contributing to OversightML Model Runner, see the [CONT
 * [osml-model-runner](https://github.com/aws-solutions-library-samples/osml-model-runner)
 * [osml-model-runner-test](https://github.com/aws-solutions-library-samples/osml-model-runner-test)
 * [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
+* [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
 
 ## Security
 

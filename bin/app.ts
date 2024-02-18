@@ -6,155 +6,51 @@
 
 import "source-map-support/register";
 
-import { App } from "aws-cdk-lib";
+import { App, Environment } from "aws-cdk-lib";
 
 import targetAccount from "../lib/accounts/target_account.json";
-import { MRAppContainerStack } from "../lib/osml-stacks/model_runner/mr-app-container";
-import { MRAutoScalingStack } from "../lib/osml-stacks/model_runner/mr-autoscaling";
-import { MRDataplaneStack } from "../lib/osml-stacks/model_runner/mr-dataplane";
-import { MRImageryStack } from "../lib/osml-stacks/model_runner/mr-imagery";
-import { MRModelContainerStack } from "../lib/osml-stacks/model_runner/mr-model-container";
-import { MRModelEndpointsStack } from "../lib/osml-stacks/model_runner/mr-model-endpoints";
-import { MRMonitoringStack } from "../lib/osml-stacks/model_runner/mr-monitoring";
-import { MRRolesStack } from "../lib/osml-stacks/model_runner/mr-roles";
-import { MRSyncStack } from "../lib/osml-stacks/model_runner/mr-sync";
-import { MRVpcStack } from "../lib/osml-stacks/model_runner/mr-vpc";
+import { deployModelRuner } from "./deploy-model-runner";
+import { deployRoles } from "./deploy-roles";
+import { deployTileServer } from "./deploy-tile-server";
+import { deployVpc } from "./deploy-vpc";
 
-// set up the default CDK app
+// Determine if the ENV instructs to globally build from source.
+const buildFromSource = process.env.BUILD_FROM_SOURCE?.toLowerCase() === "true";
+
+// Initialize the default CDK application.
 const app = new App();
 
-const targetEnv = {
+// Define the target AWS environment using account details from the configuration.
+const targetEnv: Environment = {
   account: targetAccount.id,
   region: targetAccount.region
 };
 
-// deploy the required roles for model runner
-const rolesStack = new MRRolesStack(app, `${targetAccount.name}-MRRoles`, {
-  env: targetEnv,
-  account: targetAccount,
-  description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-});
-
-// deploy model runner's vpc resources
-const vpcStack = new MRVpcStack(app, `${targetAccount.name}-MRVpc`, {
-  env: targetEnv,
-  account: targetAccount,
-  description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-});
-vpcStack.addDependency(rolesStack);
-
-// deploy the required roles for model runner
-const mrAppContainerStack = new MRAppContainerStack(
-  app,
-  `${targetAccount.name}-MRAppContainer`,
-  {
-    env: targetEnv,
-    account: targetAccount,
-    osmlVpc: vpcStack.resources,
-    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-  }
-);
-
-// deploy model runner's data plane resources
-const dataplaneStack = new MRDataplaneStack(
-  app,
-  `${targetAccount.name}-MRDataplane`,
-  {
-    env: targetEnv,
-    account: targetAccount,
-    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)",
-    taskRole: rolesStack.mrTaskRole.role,
-    osmlVpc: vpcStack.resources,
-    mrContainerImage: mrAppContainerStack.resources.containerImage
-  }
-);
-dataplaneStack.addDependency(mrAppContainerStack);
-dataplaneStack.addDependency(rolesStack);
-dataplaneStack.addDependency(vpcStack);
-
-if (targetAccount.enableAutoscaling) {
-  // deploy autoscaling for the model runner service
-  const autoscalingStack = new MRAutoScalingStack(
-    app,
-    `${targetAccount.name}-MRAutoscaling`,
-    {
-      env: targetEnv,
-      account: targetAccount,
-      mrDataplane: dataplaneStack.resources
-    }
-  );
-  autoscalingStack.addDependency(dataplaneStack);
+// Deploy an optional role sstack to build if we are deploying model runner.
+let osmlRolesStack = undefined;
+if (targetAccount.deployModelRunner) {
+  osmlRolesStack = deployRoles(app, targetEnv, targetAccount);
 }
 
-if (targetAccount.enableTesting) {
-  // deploy the required roles for model runner
-  const modelContainerStack = new MRModelContainerStack(
-    app,
-    `${targetAccount.name}-MRModelContainer`,
-    {
-      env: targetEnv,
-      account: targetAccount,
-      osmlVpc: vpcStack.resources,
-      description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
-    }
-  );
+// Deploy required OSML networking infrastructure.
+const vpcStack = deployVpc(app, targetEnv, targetAccount, osmlRolesStack);
 
-  // deploy model endpoints for model runner
-  const modelEndpointsStack = new MRModelEndpointsStack(
+// Deploy the model runner application within the initialized VPC.
+if (targetAccount.deployModelRunner) {
+  deployModelRuner(
     app,
-    `${targetAccount.name}-MRModelEndpoints`,
-    {
-      env: targetEnv,
-      account: targetAccount,
-      osmlVpc: vpcStack.resources,
-      mrSmRole: rolesStack.mrSmRole,
-      modelContainerUri: modelContainerStack.resources.containerUri,
-      modelContainerImage: modelContainerStack.resources.containerImage
-    }
+    targetEnv,
+    targetAccount,
+    vpcStack,
+    osmlRolesStack,
+    buildFromSource
   );
-  modelEndpointsStack.addDependency(modelContainerStack);
-  modelEndpointsStack.addDependency(vpcStack);
-  modelEndpointsStack.addDependency(rolesStack);
-
-  // deploy output syncs for model runner
-  const syncStack = new MRSyncStack(app, `${targetAccount.name}-MRSync`, {
-    env: targetEnv,
-    account: targetAccount
-  });
-
-  // deploy test imagery for model runner
-  const imageryStack = new MRImageryStack(
-    app,
-    `${targetAccount.name}-MRImagery`,
-    {
-      env: targetEnv,
-      account: targetAccount,
-      vpc: vpcStack.resources.vpc
-    }
-  );
-  imageryStack.addDependency(vpcStack);
 }
 
-if (targetAccount.enableMonitoring) {
-  // deploy a monitoring dashboard model runner
-  // updates your target model accordingly if you
-  // wish to monitor it with this dashboard
-  const monitoringStack = new MRMonitoringStack(
-    app,
-    `${targetAccount.name}-MRMonitoring`,
-    {
-      env: {
-        account: targetAccount.id,
-        region: targetAccount.region
-      },
-      account: targetAccount,
-      description: "Guidance for Overhead Imagery Inference on AWS (SO9240)",
-      mrDataplane: dataplaneStack.resources,
-      targetModel: "aircraft"
-    }
-  );
-  monitoringStack.addDependency(dataplaneStack);
+// Deploy the tile server application within the same VPC.
+if (targetAccount.deployTileServer) {
+  deployTileServer(app, targetEnv, targetAccount, vpcStack, buildFromSource);
 }
 
-// build the cdk app deployment
+// Finalize the CDK app deployment by synthesizing the CloudFormation templates.
 app.synth();

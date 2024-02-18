@@ -3,23 +3,24 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MRAppContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
+import { MRContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
 
 export interface MRAppContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
+  readonly buildFromSource?: boolean;
 }
 
-export class MRAppContainerStack extends Stack {
-  public resources: MRAppContainer;
+export class MRContainerStack extends Stack {
+  public resources: MRContainer;
 
   /**
    * Constructor for the model runner container cdk stack
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MREcrStack object
+   * @returns the created MRContainerStack object
    */
   constructor(parent: App, name: string, props: MRAppContainerStackProps) {
     super(parent, name, {
@@ -28,9 +29,10 @@ export class MRAppContainerStack extends Stack {
     });
 
     // Create the model runner ECR container image
-    this.resources = new MRAppContainer(this, "MRAppRepo", {
+    this.resources = new MRContainer(this, "MRContainer", {
       account: props.account,
-      osmlVpc: props.osmlVpc
+      osmlVpc: props.osmlVpc,
+      buildFromSource: props.buildFromSource
     });
   }
 }

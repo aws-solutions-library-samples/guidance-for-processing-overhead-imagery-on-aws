@@ -4,13 +4,12 @@
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { IVpc } from "aws-cdk-lib/aws-ec2";
-import { MRImagery, MRSMRole, OSMLAccount } from "osml-cdk-constructs";
+import { MRImagery, OSMLAccount } from "osml-cdk-constructs";
 
 export interface MRImageryStackProps extends StackProps {
   env: Environment;
   account: OSMLAccount;
   vpc: IVpc;
-  mrSmRole?: MRSMRole;
 }
 
 export class MRImageryStack extends Stack {
@@ -21,7 +20,7 @@ export class MRImageryStack extends Stack {
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MRDataplaneStack object
+   * @returns the created MRImageryStack object
    */
   constructor(parent: App, name: string, props: MRImageryStackProps) {
     super(parent, name, {
@@ -29,7 +28,7 @@ export class MRImageryStack extends Stack {
       ...props
     });
 
-    // create required model runner testing resources
+    // Create required model runner testing resources
     this.resources = new MRImagery(this, "MRImagery", {
       account: props.account,
       vpc: props.vpc

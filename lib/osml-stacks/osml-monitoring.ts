@@ -19,13 +19,15 @@ export class MRMonitoringStack extends Stack {
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MRDataplaneStack object
+   * @returns the created MRMonitoringStack object
    */
   constructor(parent: App, name: string, props: MRMonitoringStackProps) {
     super(parent, name, {
       terminationProtection: props.account.prodLike,
       ...props
     });
+
+    // Create required model runner monitoring dashboard
     this.resources = new MRMonitoring(this, "MRMonitoring", {
       account: props.account,
       imageRequestQueue: props.mrDataplane.imageRequestQueue.queue,
