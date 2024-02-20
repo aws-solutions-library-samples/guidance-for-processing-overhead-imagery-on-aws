@@ -115,7 +115,7 @@ jobs:
       TEST_MODEL: "centerpoint"
     secrets: inherit
   DestroyOSML:
-    if: ${{ always() }}
+    if: ${{ false }}
     needs: [ BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest, RunSICDCapellaChipNtfTest, RunSICDUmbraChipNtfTest, RunSICDInterferometricHhNtfTest, RunWBIDTest ]
     runs-on: ubuntu-latest
     steps:
