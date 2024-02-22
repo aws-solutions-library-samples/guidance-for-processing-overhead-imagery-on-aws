@@ -13,8 +13,9 @@
   * [OSML Tile Server](#osml-tile-server)
 * [Useful Commands](#useful-commands)
 * [Troubleshooting](#troubleshooting)
+  * [MemorySize value failed to satisfy constraint](#memorysize-value-failed-to-satisfy-constraint)
   * [Permission Denied for submodules](#permission-denied-for-submodules)
-  * [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset-)
+  * [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset)
   * [error TS2307: Cannot find module ‘osml-cdk-constructs](#error-ts2307-cannot-find-module-osml-cdk-constructs)
 * [Support & Feedback](#support--feedback)
   * [Supporting OSML Repositories](#supporting-osml-repositories)
@@ -128,16 +129,16 @@ This package uses a number of tools to enforce formatting, linting, and general 
 
 11. If you want to validate the deployment with integration tests:
 
-   ```
-   npm run setup
-   npm run integ
-   ```
+    ```
+    npm run setup
+    npm run integ
+    ```
 
 12. When you are done, you can clean up the deployment:
 
-   ```
-   npm run destroy
-   ```
+    ```
+    npm run destroy
+    ```
 
 ### Deploying Local osml-cdk-constructs
 
@@ -283,6 +284,26 @@ For more info on usage see [osml-tile-server](https://github.com/aws-solutions-l
 ## Troubleshooting
 
 This is a list of common problems / errors to help with troubleshooting:
+
+#### MemorySize value failed to satisfy constraint
+
+If you encounter an issue where the deployment is reporting this error:
+
+```
+"'MemorySize' value failed to satisfy constraint: Member must have value less than or equal to 3008 
+```
+
+The restriction stems from the limitations of your AWS account. To address this issue, you'll need to access your AWS Account
+1. Go to Service Quotas
+2. Select `AWS Services` on left sidebar
+3. Find and select `AWS Lambda`
+   - Select `Concurrent executions`
+   - Click `Request increase at account-level` on top right corner
+   - Find `Increase quota value` section and increase it to `1000`
+   - Then submit it.
+4. This process may require up to 24 hours to complete. 
+
+To access further details regarding this matter, please visit: [AWS Lambda Memory Quotas](https://docs.aws.amazon.com/lambda/latest/dg/troubleshooting-deployment.html#troubleshooting-deployment-quotas) and [AWS Service Quotas](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html). 
 
 #### Permission Denied for submodules
 
