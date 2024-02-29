@@ -6,13 +6,15 @@
 
 import "source-map-support/register";
 
-import { App, Environment } from "aws-cdk-lib";
+import { App, Environment, Aspects } from "aws-cdk-lib";
 
 import targetAccount from "../lib/accounts/target_account.json";
 import { deployModelRuner } from "./deploy-model-runner";
 import { deployRoles } from "./deploy-roles";
 import { deployTileServer } from "./deploy-tile-server";
 import { deployVpc } from "./deploy-vpc";
+import { AwsSolutionsChecks, NIST80053R5Checks } from 'cdk-nag'
+
 
 // Determine if the ENV instructs to globally build from source.
 const buildFromSource = process.env.BUILD_FROM_SOURCE?.toLowerCase() === "true";
@@ -51,6 +53,10 @@ if (targetAccount.deployModelRunner) {
 if (targetAccount.deployTileServer) {
   deployTileServer(app, targetEnv, targetAccount, vpcStack, buildFromSource);
 }
+
+// Comply CDK constructs with AWS Recommended Security & NIST Security 
+// Aspects.of(app).add(new AwsSolutionsChecks());
+// Aspects.of(app).add(new NIST80053R5Checks());
 
 // Finalize the CDK app deployment by synthesizing the CloudFormation templates.
 app.synth();

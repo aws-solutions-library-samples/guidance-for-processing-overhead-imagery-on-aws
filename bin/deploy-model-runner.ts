@@ -1,5 +1,5 @@
 import { App, Environment } from "aws-cdk-lib";
-import { OSMLAccount } from "osml-cdk-constructs";
+import { OSMLAccount, OSMLCommonPolicy } from "osml-cdk-constructs";
 
 import { MRAutoScalingStack } from "../lib/osml-stacks/model_runner/mr-autoscaling";
 import { MRContainerStack } from "../lib/osml-stacks/model_runner/mr-container";
@@ -11,6 +11,7 @@ import { MRSyncStack } from "../lib/osml-stacks/model_runner/mr-sync";
 import { MRMonitoringStack } from "../lib/osml-stacks/osml-monitoring";
 import { OSMLRolesStack } from "../lib/osml-stacks/osml-roles";
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
+import { MRCommonPolicyStack } from "../lib/osml-stacks/model_runner/mr-common-policy"
 
 /**
  * Deploys all necessary stacks for the OversightML Model Runner application within the specified AWS CDK application.
@@ -45,6 +46,12 @@ export function deployModelRuner(
     }
   );
 
+  const commonManagedPolicyStack = new MRCommonPolicyStack(app, `${targetAccount.name}-MRCommonPolicy`, {
+    env: targetEnv,
+    account: targetAccount,
+    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)",
+  });
+
   // Deploy the data plane resources for the model runner.
   const mrDataplaneStack = new MRDataplaneStack(
     app,
@@ -55,7 +62,8 @@ export function deployModelRuner(
       description: "Guidance for Overhead Imagery Inference on AWS (SO9240)",
       taskRole: osmlRolesStack?.mrTaskRole.role,
       osmlVpc: vpcStack.resources,
-      mrContainerImage: mrContainerStack.resources.containerImage
+      mrContainerImage: mrContainerStack.resources.containerImage,
+      commonManagedPolicy: commonManagedPolicyStack.resources.policy
     }
   );
   mrDataplaneStack.addDependency(vpcStack);
@@ -102,7 +110,8 @@ export function deployModelRuner(
       meHTTPRole: osmlRolesStack?.httpEndpointRole,
       containerUri: modelContainerStack.resources.containerUri,
       containerImage: modelContainerStack.resources.containerImage,
-      description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
+      description: "Guidance for Overhead Imagery Inference on AWS (SO9240)",
+      commonManagedPolicy: commonManagedPolicyStack.resources.policy
     }
   );
   modelEndpointsStack.addDependency(vpcStack);

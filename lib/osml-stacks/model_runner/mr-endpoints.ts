@@ -4,14 +4,14 @@
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { ContainerImage } from "aws-cdk-lib/aws-ecs";
+import { IManagedPolicy } from "aws-cdk-lib/aws-iam";
 import {
   MESMRole,
   MREndpoints,
   OSMLAccount,
-  OSMLVpc
+  OSMLVpc,
+  MEHTTPRole
 } from "osml-cdk-constructs";
-
-import { MEHTTPRole } from "../../osml-cdk-constructs/lib/osml/model_endpoint/roles/me_http_role";
 
 export interface MRModelEndpointsStackProps extends StackProps {
   readonly env: Environment;
@@ -21,6 +21,7 @@ export interface MRModelEndpointsStackProps extends StackProps {
   readonly containerImage: ContainerImage;
   readonly meSMRole?: MESMRole;
   readonly meHTTPRole?: MEHTTPRole;
+  readonly commonManagedPolicy: IManagedPolicy
 }
 
 export class MRModelEndpointsStack extends Stack {
@@ -46,7 +47,8 @@ export class MRModelEndpointsStack extends Stack {
       smRole: props.meSMRole?.role,
       httpEndpointRole: props.meHTTPRole?.role,
       modelContainerUri: props.containerUri,
-      modelContainerImage: props.containerImage
+      modelContainerImage: props.containerImage,
+      commonManagedPolicy: props.commonManagedPolicy
     });
   }
 }

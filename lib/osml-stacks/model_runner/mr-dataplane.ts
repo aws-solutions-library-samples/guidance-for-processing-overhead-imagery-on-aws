@@ -4,8 +4,8 @@
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { ContainerImage } from "aws-cdk-lib/aws-ecs";
-import { IRole } from "aws-cdk-lib/aws-iam";
-import { MRDataplane, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
+import { IManagedPolicy, IRole } from "aws-cdk-lib/aws-iam";
+import { MRDataplane, OSMLAccount, OSMLVpc, OSMLCommonPolicy } from "osml-cdk-constructs";
 
 export interface MRDataplaneStackProps extends StackProps {
   readonly env: Environment;
@@ -13,6 +13,7 @@ export interface MRDataplaneStackProps extends StackProps {
   readonly osmlVpc: OSMLVpc;
   readonly taskRole: IRole | undefined;
   readonly mrContainerImage: ContainerImage;
+  readonly commonManagedPolicy: IManagedPolicy;
 }
 
 export class MRDataplaneStack extends Stack {
@@ -36,7 +37,8 @@ export class MRDataplaneStack extends Stack {
       account: props.account,
       taskRole: props.taskRole,
       osmlVpc: props.osmlVpc,
-      mrContainerImage: props.mrContainerImage
+      mrContainerImage: props.mrContainerImage,
+      commonManagedPolicy: props.commonManagedPolicy
     });
   }
 }

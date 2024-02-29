@@ -3,6 +3,8 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
+import { FlowLog, FlowLogResourceType, FlowLogDestination } from "aws-cdk-lib/aws-ec2";
+import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
 
 export interface MRVpcStackProps extends StackProps {
