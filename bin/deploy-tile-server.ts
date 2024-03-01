@@ -93,7 +93,6 @@ export function deployTileServer(
       osmlVpc: vpcStack.resources,
       tsEndpoint: tsEndpoint,
       tsTestImageBucket: tsTestImageryBucket,
-      tsTestImageKey: "small.tif",
       buildFromSource: buildFromSource,
       description:
         "Tile Server test runner, Guidance for Overhead Imagery Inference on AWS (SO9240)"
