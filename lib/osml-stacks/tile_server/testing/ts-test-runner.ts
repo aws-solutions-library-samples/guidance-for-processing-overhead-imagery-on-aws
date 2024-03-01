@@ -12,7 +12,6 @@ export interface TSTestRunnerStackProps extends StackProps {
   readonly buildFromSource: boolean;
   readonly tsEndpoint: string;
   readonly tsTestImageBucket: string;
-  readonly tsTestImageKey: string;
 }
 
 export class TSTestRunnerStack extends Stack {
@@ -37,7 +36,6 @@ export class TSTestRunnerStack extends Stack {
       osmlVpc: props.osmlVpc,
       tsEndpoint: props.tsEndpoint,
       tsTestImageBucket: props.tsTestImageBucket,
-      tsTestImageKey: props.tsTestImageKey,
       buildFromSource: props.buildFromSource
     });
   }
