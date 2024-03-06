@@ -290,7 +290,7 @@ This is a list of common problems / errors to help with troubleshooting:
 If you encounter an issue where the deployment is reporting this error:
 
 ```
-"'MemorySize' value failed to satisfy constraint: Member must have value less than or equal to 3008 
+"'MemorySize' value failed to satisfy constraint: Member must have value less than or equal to 3008
 ```
 
 The restriction stems from the limitations of your AWS account. To address this issue, you'll need to access your AWS Account
@@ -301,9 +301,9 @@ The restriction stems from the limitations of your AWS account. To address this 
    - Click `Request increase at account-level` on top right corner
    - Find `Increase quota value` section and increase it to `1000`
    - Then submit it.
-4. This process may require up to 24 hours to complete. 
+4. This process may require up to 24 hours to complete.
 
-To access further details regarding this matter, please visit: [AWS Lambda Memory Quotas](https://docs.aws.amazon.com/lambda/latest/dg/troubleshooting-deployment.html#troubleshooting-deployment-quotas) and [AWS Service Quotas](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html). 
+To access further details regarding this matter, please visit: [AWS Lambda Memory Quotas](https://docs.aws.amazon.com/lambda/latest/dg/troubleshooting-deployment.html#troubleshooting-deployment-quotas) and [AWS Service Quotas](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html).
 
 #### Permission Denied for submodules
 
