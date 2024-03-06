@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2023 Amazon.com, Inc. or its affiliates.
+ * Copyright 2023-2024 Amazon.com, Inc. or its affiliates.
  */
 
 import "source-map-support/register";

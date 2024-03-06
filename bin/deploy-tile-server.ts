@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023-2024 Amazon.com, Inc. or its affiliates.
+ */
+
 import { App, Environment } from "aws-cdk-lib";
 import { OSMLAccount } from "osml-cdk-constructs";
 

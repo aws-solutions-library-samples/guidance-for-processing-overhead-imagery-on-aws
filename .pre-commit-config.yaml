@@ -53,3 +53,37 @@ repos:
       - id: prettier
         files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
         types: [ file ]
+
+  - repo: https://github.com/sbrunner/pre-commit-copyright
+    rev: 0.7.0
+    hooks:
+      - id: copyright
+        name: update copyright
+        exclude: |
+          (?x)^(
+            ^\..+|
+            .+\.md|
+            documentation/.*|
+            lib/accounts/.*|
+            cdk.json|
+            jest.config.ts|
+            LICENSE|
+            package.json|
+            package-lock.json|
+            tsconfig.json|
+          )$
+      - id: copyright-required
+        name: require copyright
+        exclude: |
+          (?x)^(
+            ^\..+|
+            .+\.md|
+            documentation/.*|
+            lib/accounts/.*|
+            cdk.json|
+            jest.config.ts|
+            LICENSE|
+            package.json|
+            package-lock.json|
+            tsconfig.json|
+          )$
