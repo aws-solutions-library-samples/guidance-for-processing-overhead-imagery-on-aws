@@ -18,6 +18,7 @@
     "integ:aircraft": "python3 lib/osml-model-runner-test/bin/process_image.py --image tile_tif --model aircraft",
     "integ:centerpoint": "python3 lib/osml-model-runner-test/bin/process_image.py --image small --model centerpoint",
     "integ:flood": "python3 lib/osml-model-runner-test/bin/process_image.py --image large --model flood",
+    "integ:meta": "python3 lib/osml-model-runner-test/bin/process_image.py --image meta --model centerpoint",
     "mr:docker-build": "docker build lib/osml-model-runner/. -t osml-model-runner:local",
     "mr:docker-run": "bash lib/osml-model-runner/scripts/run_container.sh",
     "mr:monitor": "bash scripts/dev_monitor.sh",
