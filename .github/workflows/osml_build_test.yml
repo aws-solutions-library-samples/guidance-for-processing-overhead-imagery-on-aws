@@ -20,8 +20,8 @@ jobs:
     steps:
     - uses: ahmadnassri/action-workflow-queue@v1
       with:
-        delay: 60000
-        timeout: 1800000
+        delay: 300000
+        timeout: 7200000
   BuildOSML:
     needs: CheckPendingWorkflow
     runs-on: ubuntu-latest
@@ -115,8 +115,8 @@ jobs:
       TEST_MODEL: "centerpoint"
     secrets: inherit
   DestroyOSML:
-    if: ${{ always() }}
-    needs: [ BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest, RunSICDCapellaChipNtfTest, RunSICDUmbraChipNtfTest, RunSICDInterferometricHhNtfTest, RunWBIDTest ]
+    if: ${{ always() && ( needs.CheckPendingWorkflow.result == 'success' )}}
+    needs: [ CheckPendingWorkflow, BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest, RunSICDCapellaChipNtfTest, RunSICDUmbraChipNtfTest, RunSICDInterferometricHhNtfTest, RunWBIDTest ]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
