@@ -16,11 +16,11 @@ export class TSImageryStack extends Stack {
   public resources: TSImagery;
 
   /**
-   * Constructor for the model runner test imagery deployment cdk stack
+   * Constructor for the tile server test imagery deployment cdk stack
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created MRImageryStack object
+   * @returns the created TSImageryStack object
    */
   constructor(parent: App, name: string, props: TSImageryStackProps) {
     super(parent, name, {
