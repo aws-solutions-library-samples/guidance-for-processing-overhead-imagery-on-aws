@@ -1,7 +1,7 @@
 name: 'Build and Test OSML'
 
 on:
-  pull_request:
+  push:
     branches:
       - dev
       - main

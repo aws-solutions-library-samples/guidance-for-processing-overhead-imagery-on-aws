@@ -6,7 +6,8 @@
 
 import "source-map-support/register";
 
-import { App, Environment } from "aws-cdk-lib";
+import { App, Aspects, Environment } from "aws-cdk-lib";
+import { AwsSolutionsChecks, NIST80053R5Checks } from "cdk-nag";
 
 import targetAccount from "../lib/accounts/target_account.json";
 import { deployModelRuner } from "./deploy-model-runner";
@@ -16,6 +17,9 @@ import { deployVpc } from "./deploy-vpc";
 
 // Determine if the ENV instructs to globally build from source.
 const buildFromSource = process.env.BUILD_FROM_SOURCE?.toLowerCase() === "true";
+
+// Determine if we want to run CDK-Nag at Application Level
+const runCDKNagOnAppLevel = process.env.RUN_CDK_NAG?.toLowerCase() === "true";
 
 // Initialize the default CDK application.
 const app = new App();
@@ -50,6 +54,12 @@ if (targetAccount.deployModelRunner) {
 // Deploy the tile server application within the same VPC.
 if (targetAccount.deployTileServer) {
   deployTileServer(app, targetEnv, targetAccount, vpcStack, buildFromSource);
+}
+
+// Comply CDK constructs with AWS Recommended Security & NIST Security
+if (runCDKNagOnAppLevel && targetAccount.prodLike) {
+  Aspects.of(app).add(new AwsSolutionsChecks());
+  Aspects.of(app).add(new NIST80053R5Checks());
 }
 
 // Finalize the CDK app deployment by synthesizing the CloudFormation templates.
