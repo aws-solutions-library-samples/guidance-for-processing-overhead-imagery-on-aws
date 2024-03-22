@@ -48,6 +48,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           comment-title: "Please review the existing CDK-Nag (NIST / AWS) Violations!"
           comment-style: table
+          artifacts-branch: artifacts/cdk-nag-reports
           artifacts: |
             NIST.800.53.R5-violations.md
             AwsSolutions-violations.md
