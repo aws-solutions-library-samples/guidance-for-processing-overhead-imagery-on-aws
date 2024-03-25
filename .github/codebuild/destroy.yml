@@ -3,12 +3,25 @@ phases:
   pre_build:
     commands:
       - sed -i "s/git@github.com:/https:\/\/github.com\//" .gitmodules
+      - git submodule update --init --recursive
+      - |
+        if [[ "${BASE_REF}" -eq "dev" ]]; then
+          export BUILD_FROM_SOURCE=true
+          cp package.json package_tmp.json;
+          jq '(.devDependencies."osml-cdk-constructs") = "file:lib/osml-cdk-constructs"' package_tmp.json > package.json;
+          cat package.json;
+          cd lib/osml-cdk-constructs;
+          npm i;
+          npm i --save-dev @types/jest;
+          npm run build;
+          cd ../../;
+          rm package_tmp.json;
+        fi
       - cp lib/accounts/target_account_template.json lib/accounts/target_account.json
       - sed -i "s/1234567890123/$AWS_ACCOUNT/" lib/accounts/target_account.json
       - sed -i "s/fake-alias/$NAME/" lib/accounts/target_account.json
       - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json
       - cat lib/accounts/target_account.json
-      - git submodule update --init --recursive
       - npm i
       - npm install -g aws-cdk
   build:
