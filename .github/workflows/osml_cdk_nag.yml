@@ -54,14 +54,14 @@ jobs:
               repo: context.repo.repo,
               body: `Please review the existing CDK-Nag Violations!
             <details close>
-
             <summary>AwsSolutions Violation(s)</summary>
+            
             ${awsFile}
             </details>
 
             <details close>
-
             <summary>NIST.800.53.R5 Violation(s)</summary>
+            
             ${nistFile}
             </details>
               `
