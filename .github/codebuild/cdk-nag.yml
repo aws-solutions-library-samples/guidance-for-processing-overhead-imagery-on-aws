@@ -49,8 +49,8 @@ phases:
       - csv2md AwsSolutions-violations.csv > AwsSolutions-violations-${UNIQUE_FILE_ID}.md
       - cat NIST.800.53.R5-violations-${UNIQUE_FILE_ID}.md
       - cat AwsSolutions-violations-${UNIQUE_FILE_ID}.md
-      - aws s3 cp NIST.800.53.R5-violations-${UNIQUE_FILE_ID}.md s3://osml-cdk-nag-reports-github/
-      - aws s3 cp AwsSolutions-violations-${UNIQUE_FILE_ID}.md s3://osml-cdk-nag-reports-github/
+      - aws s3 cp NIST.800.53.R5-violations-${UNIQUE_FILE_ID}.md s3://osml-cdk-nag-reports-github-$AWS_ACCOUNT
+      - aws s3 cp AwsSolutions-violations-${UNIQUE_FILE_ID}.md s3://osml-cdk-nag-reports-github-$AWS_ACCOUNT
   post_build:
     commands:
       - echo Build completed on `date`
