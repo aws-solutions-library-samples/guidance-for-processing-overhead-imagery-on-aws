@@ -19,3 +19,6 @@
 [submodule "lib/osml-tile-server"]
 	path = lib/osml-tile-server
 	url = git@github.com:aws-solutions-library-samples/osml-tile-server.git
+[submodule "lib/osml-tile-server-test"]
+	path = lib/osml-tile-server-test
+	url = https://github.com/aws-solutions-library-samples/osml-tile-server-test.git
