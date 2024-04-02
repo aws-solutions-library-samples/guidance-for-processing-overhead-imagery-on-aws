@@ -35,7 +35,7 @@
     "@typescript-eslint/parser": "^5.62.0",
     "aws-cdk": "^2.104.0",
     "aws-cdk-lib": "^2.104.0",
-    "cdk-ecr-deployment": "^2.5.30",
+    "cdk-ecr-deployment": "^3.0.28",
     "cdk-nag": "^2.27.179",
     "constructs": "^10.3.0",
     "eslint": "^8.52.0",
