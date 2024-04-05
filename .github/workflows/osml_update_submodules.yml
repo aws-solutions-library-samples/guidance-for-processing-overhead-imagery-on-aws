@@ -25,9 +25,10 @@ jobs:
       - name: Checkout ${{ github.ref_name }} branch for each of the submodules
         run: |
           git submodule update --init --recursive --remote lib/${{ inputs.DISPATCH_REPO_NAME }}
-          git submodule set-branch --branch ${{ github.ref_name }} lib/${{ inputs.DISPATCH_REPO_NAME }}
+          git submodule set-branch --branch main lib/${{ inputs.DISPATCH_REPO_NAME }}
           cd lib/${{ inputs.DISPATCH_REPO_NAME }}
-          git checkout ${{ github.ref_name }}
+          git checkout main
+          git pull --rebase
           cd ../../
           git checkout .gitmodules
       - name: Run Git Status
