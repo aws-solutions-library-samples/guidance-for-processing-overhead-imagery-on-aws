@@ -27,8 +27,7 @@ jobs:
           git submodule update --init --recursive --remote lib/${{ inputs.DISPATCH_REPO_NAME }}
           git submodule set-branch --branch main lib/${{ inputs.DISPATCH_REPO_NAME }}
           cd lib/${{ inputs.DISPATCH_REPO_NAME }}
-          git checkout main
-          git pull --rebase
+          git checkout ${{inputs.DISPATCH_REPO_SHA}}
           cd ../../
           git checkout .gitmodules
       - name: Run Git Status
