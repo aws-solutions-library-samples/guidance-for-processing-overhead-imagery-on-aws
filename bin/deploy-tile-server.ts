@@ -5,8 +5,8 @@
 import { App, Environment } from "aws-cdk-lib";
 import { OSMLAccount } from "osml-cdk-constructs";
 
-import { TSImageryStack } from "../lib/osml-stacks/tile_server/testing/ts-imagery";
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
+import { TSImageryStack } from "../lib/osml-stacks/tile_server/testing/ts-imagery";
 import { TSTestRunnerStack } from "../lib/osml-stacks/tile_server/testing/ts-test-runner";
 import { TSContainerStack } from "../lib/osml-stacks/tile_server/ts-container";
 import { TSDataplaneStack } from "../lib/osml-stacks/tile_server/ts-dataplane";
@@ -99,5 +99,4 @@ export function deployTileServer(
     }
   );
   tileServerTestRunnerStack.addDependency(tsDataplaneStack);
-  tileServerContainerStack.addDependency(imageryStack);
 }

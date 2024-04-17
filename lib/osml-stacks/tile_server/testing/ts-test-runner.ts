@@ -3,7 +3,12 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { OSMLAccount, OSMLVpc, TSTestRunner } from "osml-cdk-constructs";
+import {
+  OSMLAccount,
+  OSMLVpc,
+  TSTestRunner,
+  TSTestRunnerContainer
+} from "osml-cdk-constructs";
 
 export interface TSTestRunnerStackProps extends StackProps {
   readonly env: Environment;
@@ -15,7 +20,8 @@ export interface TSTestRunnerStackProps extends StackProps {
 }
 
 export class TSTestRunnerStack extends Stack {
-  public resources: TSTestRunner;
+  public containerResource: TSTestRunnerContainer;
+  public runnerResource: TSTestRunner;
 
   /**
    * Constructor for the tile server test runner cdk stack
@@ -30,13 +36,32 @@ export class TSTestRunnerStack extends Stack {
       ...props
     });
 
+    // Create the tile server test runner container
+    this.containerResource = new TSTestRunnerContainer(
+      this,
+      "TSTestRunnerContainer",
+      {
+        account: props.account,
+        osmlVpc: props.osmlVpc,
+        tsEndpoint: props.tsEndpoint,
+        tsTestImageBucket: props.tsTestImageBucket,
+        buildFromSource: props.buildFromSource,
+        config: {
+          TS_TEST_CONTAINER: "awsosml/osml-tile-server-test:latest",
+          TS_TEST_BUILD_PATH: "lib/osml-tile-server-test",
+          TS_TEST_BUILD_TARGET: "osml_tile_server_test",
+          TS_TEST_REPOSITORY: "tile-server-test-container"
+        }
+      }
+    );
+
     // Create the tile server test runner
-    this.resources = new TSTestRunner(this, "TSTestRunner", {
+    this.runnerResource = new TSTestRunner(this, "TSTestRunner", {
       account: props.account,
       osmlVpc: props.osmlVpc,
-      tsEndpoint: props.tsEndpoint,
-      tsTestImageBucket: props.tsTestImageBucket,
-      buildFromSource: props.buildFromSource
+      dockerImageCode: this.containerResource.dockerImageCode
     });
+
+    this.runnerResource.node.addDependency(this.containerResource);
   }
 }
