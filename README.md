@@ -24,6 +24,8 @@
 
 ## Installation
 
+### MacOS
+
 If on a Mac without NPM/Node.js version 16 installed, run:
 
 ```bash
@@ -54,6 +56,18 @@ git clone https://github.com/aws-solutions-library-samples/guidance-for-overhead
 cd guidance-for-overhead-imagery-inference-on-aws
 git-lfs pull
 ```
+
+### Ubuntu (EC2)
+
+A bootstrap script is available in `./scripts/ec2_bootstrap.sh` to automatically install all necessary dependencies for a Ubuntu EC2 instance to deploy the OSML demo.
+
+This requires EC2 instance with internet connectivity. Insert into EC2 User Data during instance configuration or run as root once EC2 instance is running. 
+
+Known good configuration for EC2 instance:
+
+* 22.04 Ubuntu LTS (ami-08116b9957a259459)
+* Instance Type: t3.medium 
+* 50 GiB gp2 root volume
 
 ## Linting/Formatting
 
@@ -89,7 +103,7 @@ This package uses a number of tools to enforce formatting, linting, and general 
 
    ```
    export ACCOUNT_NUMBER=<target account number>
-   export AWS_DEFAULT_REGION=<target region for deployment>,
+   export AWS_DEFAULT_REGION=<target region for deployment>
    export NAME=<unique name for stacks>
    ```
 
