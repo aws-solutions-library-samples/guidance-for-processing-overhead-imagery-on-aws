@@ -6,6 +6,8 @@ import { App, Environment } from "aws-cdk-lib";
 import { OSMLAccount } from "osml-cdk-constructs";
 
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
+import { TSImageryStack } from "../lib/osml-stacks/tile_server/testing/ts-imagery";
+import { TSTestRunnerStack } from "../lib/osml-stacks/tile_server/testing/ts-test-runner";
 import { TSContainerStack } from "../lib/osml-stacks/tile_server/ts-container";
 import { TSDataplaneStack } from "../lib/osml-stacks/tile_server/ts-dataplane";
 
@@ -40,9 +42,10 @@ export function deployTileServer(
       osmlVpc: vpcStack.resources,
       buildFromSource: buildFromSource,
       description:
-        "Deployment configuration for the Tile Server container, Guidance for Overhead Imagery Inference on AWS (SO9240)"
+        "Tile Server, Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
+  tileServerContainerStack.addDependency(vpcStack);
 
   // Deploy the data plane stack for the tile server. This stack is responsible for the
   // deployment of resources necessary for the tile server's data handling capabilities,
@@ -54,7 +57,7 @@ export function deployTileServer(
       env: targetEnv,
       account: targetAccount,
       description:
-        "Deployment configuration for the Tile Server's data plane, Guidance for Overhead Imagery Inference on AWS (SO9240)",
+        "Tile Server, Guidance for Overhead Imagery Inference on AWS (SO9240)",
       osmlVpc: vpcStack.resources,
       containerImage: tileServerContainerStack.resources.containerImage
     }
@@ -63,4 +66,37 @@ export function deployTileServer(
   // Establish a deployment dependency to ensure the tile server container stack
   // is fully deployed before initiating the deployment of the data plane stack.
   tsDataplaneStack.addDependency(tileServerContainerStack);
+
+  // Testing infrastructure
+  const imageryStack = new TSImageryStack(
+    app,
+    `${targetAccount.name}-TSImagery`,
+    {
+      env: targetEnv,
+      account: targetAccount,
+      vpc: vpcStack.resources.vpc,
+      description:
+        "Tile Server, Guidance for Overhead Imagery Inference on AWS (SO9240)"
+    }
+  );
+  imageryStack.addDependency(vpcStack);
+
+  const tsEndpoint: string = `http://${tsDataplaneStack.resources.fargateService.loadBalancer.loadBalancerDnsName}/latest`;
+  const tsTestImageryBucket: string =
+    imageryStack.resources.imageBucket.bucket.bucketName;
+  const tileServerTestRunnerStack = new TSTestRunnerStack(
+    app,
+    `${targetAccount.name}-TSTestRunner`,
+    {
+      env: targetEnv,
+      account: targetAccount,
+      osmlVpc: vpcStack.resources,
+      tsEndpoint: tsEndpoint,
+      tsTestImageBucket: tsTestImageryBucket,
+      buildFromSource: buildFromSource,
+      description:
+        "Tile Server, Guidance for Overhead Imagery Inference on AWS (SO9240)"
+    }
+  );
+  tileServerTestRunnerStack.addDependency(tsDataplaneStack);
 }
