@@ -26,7 +26,12 @@ phases:
       - npm install -g aws-cdk
   build:
     commands:
-      - npm run destroy
+      - |
+        if [[ "${BASE_REF}" -eq "dev" ]]; then
+          npm run destroy:minimal
+        else
+          npm run destroy
+        fi
   post_build:
     commands:
       - echo Destroy completed on `date`

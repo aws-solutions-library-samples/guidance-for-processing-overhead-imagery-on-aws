@@ -41,28 +41,57 @@ jobs:
         run: |
           aws s3 cp s3://osml-cdk-nag-reports-github-${{ secrets[format('OSML_{0}', github.base_ref)] }}/NIST.800.53.R5-violations-${{ env.UNIQUE_FILE_ID }}.md NIST.800.53.R5-violations.md
           aws s3 cp s3://osml-cdk-nag-reports-github-${{ secrets[format('OSML_{0}', github.base_ref)] }}/AwsSolutions-violations-${{ env.UNIQUE_FILE_ID }}.md AwsSolutions-violations.md
+      - uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: 1
+          comment-author: github-actions
+          body-includes: Please review the existing CDK-Nag Violations
       - name: Comment to the PR with violation(s)
         uses: actions/github-script@v7
+        env:
+          COMMENT_ID: ${{ steps.fc.outputs.comment-id }}
+          COMMIT_ID: ${{ github.event.pull_request.head.sha || github.sha }}
         with:
           script: |
             const fs = require('fs');
+
+            console.log(JSON.stringify(process.env)["COMMIT_ID"]);
+            console.log(JSON.stringify(process.env)["COMMENT_ID"]);
+
+            const commitId = process.env.COMMIT_ID;
+            const commentId = process.env.COMMENT_ID;
+
+            // get files
             const nistFile = fs.readFileSync("NIST.800.53.R5-violations.md", "utf8");
             const awsFile = fs.readFileSync("AwsSolutions-violations.md", "utf8");
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Please review the existing CDK-Nag Violations!
-            <details close>
-            <summary>AwsSolutions Violation(s)</summary>
 
-            ${awsFile}
-            </details>
+            const content_body = `Please review the existing CDK-Nag Violations for [${commitId}](https://github.com/aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws/commit/${commitId})
+              <details close>
+              <summary>AwsSolutions Violation(s)</summary>
+              
+              ${awsFile}
+              </details>
 
-            <details close>
-            <summary>NIST.800.53.R5 Violation(s)</summary>
+              <details close>
+              <summary>NIST.800.53.R5 Violation(s)</summary>
+              
+              ${nistFile}
+              </details>
+              `;
 
-            ${nistFile}
-            </details>
-              `
-            })
+            if (commentId == 0) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: content_body
+              });
+            } else {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: commentId,
+                body: content_body
+              });
+            }
