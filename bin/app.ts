@@ -14,6 +14,7 @@ import { deployModelRuner } from "./deploy-model-runner";
 import { deployRoles } from "./deploy-roles";
 import { deployTileServer } from "./deploy-tile-server";
 import { deployVpc } from "./deploy-vpc";
+import { deployDataIntake } from "./deploy-data-intake";
 
 // Determine if the ENV instructs to globally build from source.
 const buildFromSource = process.env.BUILD_FROM_SOURCE?.toLowerCase() === "true";
@@ -54,6 +55,11 @@ if (targetAccount.deployModelRunner) {
 // Deploy the tile server application within the same VPC.
 if (targetAccount.deployTileServer) {
   deployTileServer(app, targetEnv, targetAccount, vpcStack, buildFromSource);
+}
+
+// Deploy the image intake application within the same VPC.
+if (targetAccount.deployDataIntake) {
+  deployDataIntake(app, targetEnv, targetAccount, vpcStack, buildFromSource);
 }
 
 // Comply CDK constructs with AWS Recommended Security & NIST Security
