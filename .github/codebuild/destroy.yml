@@ -5,7 +5,7 @@ phases:
       - sed -i "s/git@github.com:/https:\/\/github.com\//" .gitmodules
       - git submodule update --init --recursive
       - |
-        if [[ "${BASE_REF}" -eq "dev" ]]; then
+        if [[ "$BASE_REF" == "dev" ]]; then
           export BUILD_FROM_SOURCE=true
           cp package.json package_tmp.json;
           jq '(.devDependencies."osml-cdk-constructs") = "file:lib/osml-cdk-constructs"' package_tmp.json > package.json;
@@ -16,6 +16,8 @@ phases:
           npm run build;
           cd ../../;
           rm package_tmp.json;
+        else
+          echo "Not building from source"
         fi
       - cp lib/accounts/target_account_template.json lib/accounts/target_account.json
       - sed -i "s/1234567890123/$AWS_ACCOUNT/" lib/accounts/target_account.json
@@ -27,7 +29,7 @@ phases:
   build:
     commands:
       - |
-        if [[ "${BASE_REF}" -eq "dev" ]]; then
+        if [[ "$BASE_REF" == "dev" ]]; then
           npm run destroy:minimal
         else
           npm run destroy
