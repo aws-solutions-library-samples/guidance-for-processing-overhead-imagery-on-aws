@@ -131,3 +131,7 @@ jobs:
         with:
           project-name: CodeBuild-DestroyGithubOSML
           buildspec-override: .github/codebuild/destroy.yml
+          env-vars-for-codebuild: |
+            BASE_REF
+        env:
+          BASE_REF: ${{ github.base_ref }}
