@@ -6,6 +6,9 @@ phases:
   pre_build:
     commands:
       - sed -i "s/git@github.com:/https:\/\/github.com\//" .gitmodules
+      - echo $BASE_REF
+      - echo $GITHUB_BASE_REF
+      - echo $github.base_ref
       - git submodule update --init --recursive
       - |
         if [[ "${BASE_REF}" -eq "dev" ]]; then
