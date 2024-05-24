@@ -17,6 +17,7 @@
     "watch": "tsc -w",
     "prepare": "npm run-script build",
     "integ:aircraft": "python3 lib/osml-model-runner-test/bin/process_image.py --image tile_tif --model aircraft",
+    "integ:aircraft-roi": "python3 lib/osml-model-runner-test/bin/process_image.py --image large --model aircraft --region-of-interest 'POLYGON ((-87.89041 42.94081, -87.89041 42.94436, -87.88584 42.94436, -87.88584 42.94081, -87.89041 42.94081))'",
     "integ:centerpoint": "python3 lib/osml-model-runner-test/bin/process_image.py --image small --model centerpoint",
     "integ:flood": "python3 lib/osml-model-runner-test/bin/process_image.py --image large --model flood",
     "integ:meta": "python3 lib/osml-model-runner-test/bin/process_image.py --image meta --model centerpoint",
