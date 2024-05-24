@@ -21,7 +21,7 @@ repos:
         types: [file, python]
 
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 7.0.0
     hooks:
       - id: flake8
         args: ["--ignore=E203,W503,W605", "--max-line-length=125"]
