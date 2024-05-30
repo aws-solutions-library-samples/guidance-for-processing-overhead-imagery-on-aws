@@ -23,6 +23,7 @@ export function deployRoles(
   return new OSMLRolesStack(app, `${targetAccount.name}-OSMLRoles`, {
     env: targetEnv,
     account: targetAccount,
-    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
+    description:
+      "Roles, Guidance for Overhead Imagery Inference on AWS (SO9240)"
   });
 }

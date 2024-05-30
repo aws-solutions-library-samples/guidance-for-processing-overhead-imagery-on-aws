@@ -29,7 +29,7 @@ export function deployVpc(
   const vpcStack = new OSMLVpcStack(app, `${targetAccount.name}-OSMLVpc`, {
     env: targetEnv,
     account: targetAccount,
-    description: "Guidance for Overhead Imagery Inference on AWS (SO9240)"
+    description: "VPC, Guidance for Overhead Imagery Inference on AWS (SO9240)"
   });
   // If a role stack was provided, make it the VPC dependent on it due to
   if (osmlRolesStack) {

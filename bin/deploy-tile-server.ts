@@ -42,7 +42,7 @@ export function deployTileServer(
       osmlVpc: vpcStack.resources,
       buildFromSource: buildFromSource,
       description:
-        "Tile Server, Guidance for Overhead Imagery Inference on AWS (SO9240)"
+        "Tile Server Container, Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
   tileServerContainerStack.addDependency(vpcStack);
@@ -57,7 +57,7 @@ export function deployTileServer(
       env: targetEnv,
       account: targetAccount,
       description:
-        "Tile Server, Guidance for Overhead Imagery Inference on AWS (SO9240)",
+        "Tile Server Dataplane, Guidance for Overhead Imagery Inference on AWS (SO9240)",
       osmlVpc: vpcStack.resources,
       containerImage: tileServerContainerStack.resources.containerImage
     }
@@ -76,7 +76,7 @@ export function deployTileServer(
       account: targetAccount,
       vpc: vpcStack.resources.vpc,
       description:
-        "Tile Server, Guidance for Overhead Imagery Inference on AWS (SO9240)"
+        "Tile Server Imagery, Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
   imageryStack.addDependency(vpcStack);
@@ -95,7 +95,7 @@ export function deployTileServer(
       tsTestImageBucket: tsTestImageryBucket,
       buildFromSource: buildFromSource,
       description:
-        "Tile Server, Guidance for Overhead Imagery Inference on AWS (SO9240)"
+        "Tile Server Test, Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
   );
   tileServerTestRunnerStack.addDependency(tsDataplaneStack);

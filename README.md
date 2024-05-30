@@ -107,7 +107,7 @@ This package uses a number of tools to enforce formatting, linting, and general 
    export NAME=<unique name for stacks>
    ```
 
-5. Optional, export the following enviornment variable if you wish to build your containers from source using the submodules.
+5. Optional, export the following environment variable if you wish to build your containers from source using the submodules.
 
    ```
    export BUILD_FROM_SOURCE=true
