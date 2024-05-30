@@ -22,3 +22,6 @@
 [submodule "lib/osml-tile-server-test"]
 	path = lib/osml-tile-server-test
 	url = https://github.com/aws-solutions-library-samples/osml-tile-server-test.git
+[submodule "lib/osml-data-intake"]
+	path = lib/osml-data-intake
+	url = https://github.com/aws-solutions-library-samples/osml-data-intake

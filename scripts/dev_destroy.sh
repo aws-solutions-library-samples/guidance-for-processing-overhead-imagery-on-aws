@@ -23,7 +23,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-if [ "$1" == "full" ]; then
+if [ "$1" = "full" ]; then
     echo "Executing full destroy action..."
 
     cdk destroy --all --force
@@ -32,27 +32,23 @@ if [ "$1" == "full" ]; then
     exit 0
 fi
 
-if [ "$1" == "minimal" ]; then
+if [ "$1" = "minimal" ]; then
     echo "Executing minimal action..."
-    
-    # Run the 'cdk list' command and output to a text file
-    cdk list | sort -r > stack_list.txt
-    
-    # Check each line in the text file
-    while IFS= read -r line; do
-        if [[ "$line" == *"-TSDataplane"* || "$line" == *"-MRMonitoring"* || "$line" == *"-MRModelEndpoints"* || "$line" == *"-MRAutoscaling"* || "$line" == *"-MRDataplane"* ]]; then
-            stack_name=$(echo "$line" | cut -d' ' -f1)
-            echo "Destroying stack $stack_name..."
+    STACK_LIST="-TSDataplane|-MRMonitoring|-MRModelEndpoints|-MRAutoscaling|-MRDataplane|-DIDataplane"
+    # Run the 'cdk list' command, sort it, and filter stacks directly
+    cdk list | sort -r | grep -E "$STACK_LIST" > stack_list.txt
 
-            cdk destroy "$stack_name" --force || exit 1
-            
-            echo "Stack $stack_name destroyed."
-        fi
+    # Loop through each matching stack name
+    while IFS= read -r stack_name; do
+        echo "Destroying stack $stack_name..."
+        cdk destroy "$stack_name" --force || exit 1
+        echo "Stack $stack_name destroyed."
     done < stack_list.txt
-    
+
     echo "Minimal action completed."
     exit 0
 fi
+
 
 # If the argument is neither "full" nor "minimal"
 echo "Invalid argument. Please provide 'full' or 'minimal'."
