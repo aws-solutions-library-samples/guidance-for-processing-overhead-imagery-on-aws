@@ -10,6 +10,7 @@ import { TSImageryStack } from "../lib/osml-stacks/tile_server/testing/ts-imager
 import { TSTestRunnerStack } from "../lib/osml-stacks/tile_server/testing/ts-test-runner";
 import { TSContainerStack } from "../lib/osml-stacks/tile_server/ts-container";
 import { TSDataplaneStack } from "../lib/osml-stacks/tile_server/ts-dataplane";
+import { OSMLAuthConfig } from "../lib/osml-cdk-constructs/lib/osml/osml_authenticate";
 
 /**
  * Initializes and deploys the infrastructure required for operating a tile server.
@@ -21,6 +22,7 @@ import { TSDataplaneStack } from "../lib/osml-stacks/tile_server/ts-dataplane";
  * @param app The AWS CDK App reference where the tile server stacks will be deployed.
  * @param targetEnv The targeted deployment environment containing AWS account and region information.
  * @param targetAccount The target AWS account configuration, providing context for the deployment, such as account-specific settings.
+ * @param targetAuth The target AWS auth configuration, providing context for the deployment, such as auth-specific settings.
  * @param vpcStack An instance of `OSMLVpcStack` representing the VPC configuration to be used by the tile server for network-related settings.
  * @param buildFromSource Whether or not to build the model runner container from source
  */
@@ -28,6 +30,7 @@ export function deployTileServer(
   app: App,
   targetEnv: Environment,
   targetAccount: OSMLAccount,
+  targetAuth: OSMLAuthConfig,
   vpcStack: OSMLVpcStack,
   buildFromSource: boolean = false
 ) {
@@ -59,7 +62,8 @@ export function deployTileServer(
       description:
         "Tile Server Dataplane, Guidance for Overhead Imagery Inference on AWS (SO9240)",
       osmlVpc: vpcStack.resources,
-      containerImage: tileServerContainerStack.resources.containerImage
+      containerImage: tileServerContainerStack.resources.containerImage,
+      authConfig: targetAuth
     }
   );
 
