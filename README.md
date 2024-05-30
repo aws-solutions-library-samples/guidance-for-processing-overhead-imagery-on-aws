@@ -1,26 +1,30 @@
 [//]: # (# guidance-for-overhead-imagery-inference-on-aws)
 ### Table of Contents
 
-* [Installation](#installation)
-* [Linting/Formatting](#lintingformatting)
-* [Deployment](#deployment)
-  * [Deploying Local osml-cdk-constructs](#deploying-local-osml-cdk-constructs)
-* [Usage](#model-runner-usage)
-  * [OSML Model Runner](#osml-model-runner)
-  * [OSML Model Runner Test](#osml-model-runner-test)
-  * [OSML Cesium Globe](#osml-cesium-globe)
-  * [OSML Models](#osml-models)
-  * [OSML Tile Server](#osml-tile-server)
-* [Useful Commands](#useful-commands)
-* [Troubleshooting](#troubleshooting)
-  * [MemorySize value failed to satisfy constraint](#memorysize-value-failed-to-satisfy-constraint)
-  * [Permission Denied for submodules](#permission-denied-for-submodules)
-  * [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset)
-  * [error TS2307: Cannot find module ‘osml-cdk-constructs](#error-ts2307-cannot-find-module-osml-cdk-constructs)
-* [Support & Feedback](#support--feedback)
-  * [Supporting OSML Repositories](#supporting-osml-repositories)
-* [Security](#security)
-* [License](#license)
+- [Installation](#installation)
+   * [MacOS](#macos)
+   * [Ubuntu (EC2)](#ubuntu-ec2)
+- [Linting/Formatting](#lintingformatting)
+- [Deployment](#deployment)
+   * [Enabling Authentication](#enabling-authentication)
+   * [Deploying local osml-cdk-constructs](#deploying-local-osml-cdk-constructs)
+- [Model Runner Usage](#model-runner-usage)
+   * [OSML Model Runner](#osml-model-runner)
+   * [OSML Model Runner Test](#osml-model-runner-test)
+   * [OSML Cesium Globe](#osml-cesium-globe)
+   * [OSML Models](#osml-models)
+   * [OSML Tile Server](#osml-tile-server)
+   * [OSML Tile Server Test](#osml-tile-server-test)
+- [Useful Commands](#useful-commands)
+- [Troubleshooting](#troubleshooting)
+      + [MemorySize value failed to satisfy constraint](#memorysize-value-failed-to-satisfy-constraint)
+      + [Permission Denied for submodules](#permission-denied-for-submodules)
+      + [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset)
+      + [error TS2307: Cannot find module ‘osml-cdk-constructs’](#error-ts2307-cannot-find-module-osml-cdk-constructs)
+- [Support & Feedback](#support-feedback)
+   * [Supporting OSML Repositories](#supporting-osml-repositories)
+- [Security](#security)
+- [License](#license)
 
 ## Installation
 
@@ -154,14 +158,48 @@ This package uses a number of tools to enforce formatting, linting, and general 
     npm run destroy
     ```
 
-### Deploying Local osml-cdk-constructs
+### Enabling Authentication
 
-By default, this package uses the osml-cdk-constructs defined in
-the [official NPM repository](https://www.npmjs.com/package/osml-cdk-constructs?activeTab=readme).
-If you wish to make changes to the `lib/osml-cdk-constructs`
-submodule in this project and want to use those changes when
-deploying, then follow these steps to switch out the remote NPM
-package for the local package.
+Currently, only Tile Server service supports authentication.
+
+#### Prerequisites
+
+Before enabling authentication, you will need the following:
+- OIDC Authentication Server
+- Issuer URL (e.g., `https://<URL>/realms/<realm name>`)
+- Client Secret
+- Client ID
+- Custom Domain Name with a valid certificate ARN
+  - **Note:** Certificate for the domain (must be uploaded to ACM / IAM Server Certificate) into your account
+
+#### Setup Instructions
+1. Update authentication configuration:
+   - Navigate to `lib/accounts/target_auth.json`.
+   - Update the values for each key with your authentication details.
+
+2. To deploy the configuration:
+   - Follow the [Deployment](#deployment) instructions to deploy the updated configuration to your account.
+   - Upon successful deployment, go to your AWS Account -> Cloudformation -> find `TSDataplane` stack > `Outputs` tab, you will see an output similar to:
+     ```
+     TSDataplaneTSServiceLoadBalancerDNS<id> | <url>
+     ```
+   - Note that Application Load Balancer (ALB) DNS
+
+3. Create a CNAME Record:
+   - Log in to your AWS account and navigate to `Route 53`.
+   - Select your Hosted Zones and click `Create Record`.
+     - In the `Record name` text field, add a custom domain name that you set in the configuration file (`lib/accounts/target_auth.json`)
+     - Set the `Record Type` to `CNAME`.
+     - In the `Value` text box, enter your ALB DNS value.
+     - Click `Create records`.
+
+   - Note: It may take 1-5 minutes for the changes to propagate.
+
+After propagation, opening your domain name will redirect you to the authentication page. Once authenticated, you can start using the service.
+
+### Deploying local osml-cdk-constructs
+
+By default, this package uses the osml-cdk-constructs defined in the [official NPM repository](https://www.npmjs.com/package/osml-cdk-constructs?activeTab=readme). If you wish to make changes to the `lib/osml-cdk-constructs` submodule in this project and want to use those changes when deploying, then follow these steps to switch out the remote NPM package for the local package.
 
 1. Pull down the submodules for development
     ```bash
@@ -181,9 +219,9 @@ package for the local package.
     "osml-cdk-constructs": "file:lib/osml-cdk-constructs",
     ```
 
-3. Execute ```npm i``` to make sure everything is installed and building correctly.
-
-4. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
+3. Then cd into `lib/osml-cdk-construct` directory by executing: ```cd lib/osml-cdk-constructs``` 
+4. Execute ```npm i; npm run build``` to make sure everything is installed and building correctly.
+5. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
 
 
 ## Model Runner Usage
@@ -261,7 +299,7 @@ For more info see [osml-model-runner](https://github.com/aws-solutions-library-s
 
 ### OSML Model Runner Test
 
-This package contains the integration tests for OSML application
+This package contains the integration tests for Model Runner application
 
 For more info see [osml-model-runner-test](https://github.com/aws-solutions-library-samples/osml-model-runner-test)
 
@@ -285,6 +323,12 @@ The OversightML Tile Server is a lightweight, cloud-based tile server which allo
 bucket to get metadata, image statistics, and set of tiles in real-time.
 
 For more info on usage see [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
+
+### OSML Tile Server Test
+
+This package contains the integration and load tests for Tile Server application
+
+For more info on usage see [osml-tile-server-test](https://github.com/aws-solutions-library-samples/osml-tile-server-test)
 
 ## Useful Commands
 
@@ -360,6 +404,7 @@ If you are interested in contributing to OversightML Model Runner, see the [CONT
 * [osml-model-runner-test](https://github.com/aws-solutions-library-samples/osml-model-runner-test)
 * [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
 * [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
+* [osml-tile-server-test](https://github.com/aws-solutions-library-samples/osml-tile-server-test)
 
 ## Security
 

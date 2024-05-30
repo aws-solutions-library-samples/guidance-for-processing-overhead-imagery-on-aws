@@ -4,12 +4,11 @@
  * Copyright 2023-2024 Amazon.com, Inc. or its affiliates.
  */
 
-import "source-map-support/register";
-
 import { App, Aspects, Environment } from "aws-cdk-lib";
 import { AwsSolutionsChecks, NIST80053R5Checks } from "cdk-nag";
 
 import targetAccount from "../lib/accounts/target_account.json";
+import targetAuth from "../lib/accounts/target_auth.json";
 import { deployDataIntake } from "./deploy-data-intake";
 import { deployModelRuner } from "./deploy-model-runner";
 import { deployRoles } from "./deploy-roles";
@@ -54,7 +53,14 @@ if (targetAccount.deployModelRunner) {
 
 // Deploy the tile server application within the same VPC.
 if (targetAccount.deployTileServer) {
-  deployTileServer(app, targetEnv, targetAccount, vpcStack, buildFromSource);
+  deployTileServer(
+    app,
+    targetEnv,
+    targetAccount,
+    targetAuth,
+    vpcStack,
+    buildFromSource
+  );
 }
 
 // Deploy the image intake application within the same VPC.
