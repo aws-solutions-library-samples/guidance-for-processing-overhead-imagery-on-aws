@@ -1,28 +1,24 @@
-[//]: # (# guidance-for-overhead-imagery-inference-on-aws)
+# Guidance for Processing Overhead Imagery on AWS
+
+This Guidance demonstrates how to process remote sensing imagery using machine learning models that automatically detect and identify objects collected from satellites, unmanned aerial vehicles, and other remote sensing devices. Satellite images are often significantly larger than standard media files. This Guidance deploys highly scalable and available image processing services that support images of this size. These services collect, process, and analyze the images efficiently, giving you more time to assess and respond to what you discovered in your imagery.
+
 ### Table of Contents
 
 - [Installation](#installation)
    * [MacOS](#macos)
    * [Ubuntu (EC2)](#ubuntu-ec2)
-- [Linting/Formatting](#lintingformatting)
 - [Deployment](#deployment)
    * [Enabling Authentication](#enabling-authentication)
    * [Deploying local osml-cdk-constructs](#deploying-local-osml-cdk-constructs)
 - [Model Runner Usage](#model-runner-usage)
-   * [OSML Model Runner](#osml-model-runner)
-   * [OSML Model Runner Test](#osml-model-runner-test)
-   * [OSML Cesium Globe](#osml-cesium-globe)
-   * [OSML Models](#osml-models)
-   * [OSML Tile Server](#osml-tile-server)
-   * [OSML Tile Server Test](#osml-tile-server-test)
+- [Supporting OSML Repositories](#supporting-osml-repositories)
 - [Useful Commands](#useful-commands)
 - [Troubleshooting](#troubleshooting)
-      + [MemorySize value failed to satisfy constraint](#memorysize-value-failed-to-satisfy-constraint)
-      + [Permission Denied for submodules](#permission-denied-for-submodules)
-      + [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset)
-      + [error TS2307: Cannot find module ‘osml-cdk-constructs’](#error-ts2307-cannot-find-module-osml-cdk-constructs)
-- [Support & Feedback](#support-feedback)
-   * [Supporting OSML Repositories](#supporting-osml-repositories)
+    + [MemorySize value failed to satisfy constraint](#memorysize-value-failed-to-satisfy-constraint)
+    + [Permission Denied for submodules](#permission-denied-for-submodules)
+    + [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset)
+    + [error TS2307: Cannot find module ‘osml-cdk-constructs’](#error-ts2307-cannot-find-module-osml-cdk-constructs)
+- [Support & Feedback](#support--feedback)
 - [Security](#security)
 - [License](#license)
 
@@ -56,40 +52,27 @@ Otherwise, consult the official git-lfs [installation documentation](https://git
 Clone the repository and pull lfs files for deployment:
 
 ```bash
-git clone https://github.com/aws-solutions-library-samples/guidance-for-overhead-imagery-inference-on-aws.git
-cd guidance-for-overhead-imagery-inference-on-aws
+git clone https://github.com/aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws.git
+cd guidance-for-processing-overhead-imagery-on-aws
 git-lfs pull
 ```
 
 ### Ubuntu (EC2)
 
-A bootstrap script is available in `./scripts/ec2_bootstrap.sh` to automatically install all necessary dependencies for a Ubuntu EC2 instance to deploy the OSML demo.
+A bootstrap script is available in `./scripts/ec2_bootstrap_ubuntu.sh` to automatically install all necessary dependencies for a Ubuntu EC2 instance to deploy the OSML demo.
 
-This requires EC2 instance with internet connectivity. Insert into EC2 User Data during instance configuration or run as root once EC2 instance is running. 
+This requires EC2 instance with internet connectivity. Insert into EC2 User Data during instance configuration or run as root once EC2 instance is running.
 
 Known good configuration for EC2 instance:
 
 * 22.04 Ubuntu LTS (ami-08116b9957a259459)
-* Instance Type: t3.medium 
+* Instance Type: t3.medium
 * 50 GiB gp2 root volume
-
-## Linting/Formatting
-
-This package uses a number of tools to enforce formatting, linting, and general best practices:
-
-* [black](https://github.com/psf/black) for formatting python files with community standards
-* [isort](https://github.com/PyCQA/isort) for formatting with a max line length of 100
-* [mypy](https://github.com/pre-commit/mirrors-mypy) to enforce static type checking
-* [flake8](https://github.com/PyCQA/flake8) to check pep8 compliance and logical errors in code
-* [autopep](https://github.com/pre-commit/mirrors-autopep8) to check pep8 compliance and logical errors in code
-* [eslint](https://github.com/pre-commit/mirrors-eslint) to check pep8 compliance and logical errors in code
-* [prettier](https://github.com/pre-commit/mirrors-prettier) to check pep8 compliance and logical errors in code
-* [pre-commit](https://github.com/pre-commit/pre-commit-hooks) to install and control linters in githooks
 
 ## Deployment
 
 1. Create an AWS account
-2. Create `target_account.json` under `guidance-for-overhead-imagery-inference-on-aws/lib/accounts/`
+2. Create `target_account.json` under `guidance-for-processing-overhead-imagery-on-aws/lib/accounts/`
 3. Copy the below template into `target_account.json` and update your account number, alias, and region:
 
    ```text
@@ -99,11 +82,14 @@ This package uses a number of tools to enforce formatting, linting, and general 
        "region": <target region for deployment>,
        "prodLike": <false || true marks resource retention>
        "deployModelRunner": <false || true deploy model runner>,
-       "deployTileServer": <false || true deploy tile server>
+       "deployTileServer": <false || true deploy tile server>,
+       "deployDataIntake": <false || true deploy data intake>
    }
    ```
 
-4. Export your dev account number and deployment username:
+4. Create `target_auth.json` under `guidance-for-processing-overhead-imagery-on-aws/lib/accounts/` and leave it blank unless you are planning to enable Authenication. If so, head over to [Enabling Authentication](#enabling-authentication) in this README.
+
+5. Export your dev account number and deployment username:
 
    ```
    export ACCOUNT_NUMBER=<target account number>
@@ -111,21 +97,21 @@ This package uses a number of tools to enforce formatting, linting, and general 
    export NAME=<unique name for stacks>
    ```
 
-5. Optional, export the following environment variable if you wish to build your containers from source using the submodules.
+6. Optional, export the following environment variable if you wish to build your containers from source using the submodules.
 
    ```
    export BUILD_FROM_SOURCE=true
    ```
 
-6. Pull your latest credentials into `~/.aws/credentials`
+7. Pull your latest credentials into `~/.aws/credentials`
 
-7. Go into `guidance-for-overhead-imagery-inference-on-aws` directory and execute the following commands to install npm packages:
+8. Go into `guidance-for-processing-overhead-imagery-on-aws` directory and execute the following commands to install npm packages:
 
    ```
    npm i
    ```
 
-8. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
+9. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
 
    ```
    npm install -g aws-cdk
@@ -133,26 +119,26 @@ This package uses a number of tools to enforce formatting, linting, and general 
    cdk bootstrap
    ```
 
-9. Make sure Docker is running on your machine:
+10. Make sure Docker is running on your machine:
 
    ```
    dockerd
    ```
 
-10. Then deploy the stacks to your commercial account:
+11. Then deploy the stacks to your commercial account:
 
     ```
     npm run deploy
     ```
 
-11. If you want to validate the deployment with integration tests:
+12. If you want to validate the deployment with integration tests:
 
     ```
     npm run setup
     npm run integ
     ```
 
-12. When you are done, you can clean up the deployment:
+13. When you are done, you can clean up the deployment:
 
     ```
     npm run destroy
@@ -174,7 +160,7 @@ Before enabling authentication, you will need the following:
 
 #### Setup Instructions
 1. Update authentication configuration:
-   - Navigate to `lib/accounts/target_auth.json`.
+   - Navigate to `lib/accounts/README.md` and follow the `TARGET AUTHENTICATION` section
    - Update the values for each key with your authentication details.
 
 2. To deploy the configuration:
@@ -219,7 +205,7 @@ By default, this package uses the osml-cdk-constructs defined in the [official N
     "osml-cdk-constructs": "file:lib/osml-cdk-constructs",
     ```
 
-3. Then cd into `lib/osml-cdk-construct` directory by executing: ```cd lib/osml-cdk-constructs``` 
+3. Then cd into `lib/osml-cdk-construct` directory by executing: ```cd lib/osml-cdk-constructs```
 4. Execute ```npm i; npm run build``` to make sure everything is installed and building correctly.
 5. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
 
@@ -285,50 +271,19 @@ Here is an example of a complete image request:
 }
 ```
 
+## Supporting OSML Repositories
+
 Here is some useful information about each of the OSML components:
 
-### OSML Model Runner
-
-This package contains an application used to orchestrate the execution of ML models on large satellite images. The
-application monitors an input queue for processing requests, decomposes the image into a set of smaller regions and
-tiles, invokes an ML model endpoint with each tile, and finally aggregates all the results into a single output. The
-application itself has been containerized and is designed to run on a distributed cluster of machines collaborating
-across instances to process images as quickly as possible.
-
-For more info see [osml-model-runner](https://github.com/aws-solutions-library-samples/osml-model-runner)
-
-### OSML Model Runner Test
-
-This package contains the integration tests for Model Runner application
-
-For more info see [osml-model-runner-test](https://github.com/aws-solutions-library-samples/osml-model-runner-test)
-
-### OSML Cesium Globe
-
-Build a way to visualize and display results from our image processing workflow.
-
-For more info see [osml-cesium-globe](https://github.com/aws-solutions-library-samples/osml-cesium-globe)
-
-### OSML Models
-
-This package contains sample models that can be used to test OversightML installations without incurring high compute
-costs typically associated with complex Computer Vision models. These models implement an interface compatible with
-SageMaker and are suitable for deployment as endpoints with CPU instances.
-
-For more info see [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
-
-### OSML Tile Server
-
-The OversightML Tile Server is a lightweight, cloud-based tile server which allows you to quickly pass an image from S3
-bucket to get metadata, image statistics, and set of tiles in real-time.
-
-For more info on usage see [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
-
-### OSML Tile Server Test
-
-This package contains the integration and load tests for Tile Server application
-
-For more info on usage see [osml-tile-server-test](https://github.com/aws-solutions-library-samples/osml-tile-server-test)
+* [osml-cdk-constructs](https://github.com/aws-solutions-library-samples/osml-cdk-constructs)
+* [osml-cesium-globe](https://github.com/aws-solutions-library-samples/osml-cesium-globe)
+* [osml-imagery-toolkit](https://github.com/aws-solutions-library-samples/osml-imagery-toolkit)
+* [osml-model-runner](https://github.com/aws-solutions-library-samples/osml-model-runner)
+* [osml-model-runner-test](https://github.com/aws-solutions-library-samples/osml-model-runner-test)
+* [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
+* [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
+* [osml-tile-server-test](https://github.com/aws-solutions-library-samples/osml-tile-server-test)
+* [osml-data-intake](https://github.com/aws-solutions-library-samples/osml-data-intake)
 
 ## Useful Commands
 
@@ -391,20 +346,9 @@ Please execute the following command and try again:
 
 ## Support & Feedback
 
-To post feedback, submit feature ideas, or report bugs, please use the [Issues](https://github.com/aws-solutions-library-samples/guidance-for-overhead-imagery-inference-on-aws/issues) section of this GitHub repo.
+To post feedback, submit feature ideas, or report bugs, please use the [Issues](https://github.com/aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws/issues) section of this GitHub repo.
 
 If you are interested in contributing to OversightML Model Runner, see the [CONTRIBUTING](CONTRIBUTING.md) guide.
-
-### Supporting OSML Repositories
-
-* [osml-cdk-constructs](https://github.com/aws-solutions-library-samples/osml-cdk-constructs)
-* [osml-cesium-globe](https://github.com/aws-solutions-library-samples/osml-cesium-globe)
-* [osml-imagery-toolkit](https://github.com/aws-solutions-library-samples/osml-imagery-toolkit)
-* [osml-model-runner](https://github.com/aws-solutions-library-samples/osml-model-runner)
-* [osml-model-runner-test](https://github.com/aws-solutions-library-samples/osml-model-runner-test)
-* [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
-* [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
-* [osml-tile-server-test](https://github.com/aws-solutions-library-samples/osml-tile-server-test)
 
 ## Security
 
