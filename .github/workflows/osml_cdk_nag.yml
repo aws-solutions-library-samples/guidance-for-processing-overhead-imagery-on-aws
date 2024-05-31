@@ -69,13 +69,13 @@ jobs:
             const content_body = `Please review the existing CDK-Nag Violations for [${commitId}](https://github.com/aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws/commit/${commitId})
               <details close>
               <summary>AwsSolutions Violation(s)</summary>
-              
+
               ${awsFile}
               </details>
 
               <details close>
               <summary>NIST.800.53.R5 Violation(s)</summary>
-              
+
               ${nistFile}
               </details>
               `;
