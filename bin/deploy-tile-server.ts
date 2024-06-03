@@ -3,14 +3,13 @@
  */
 
 import { App, Environment } from "aws-cdk-lib";
-import { OSMLAccount } from "osml-cdk-constructs";
+import { OSMLAccount, OSMLAuthConfig } from "osml-cdk-constructs";
 
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
 import { TSImageryStack } from "../lib/osml-stacks/tile_server/testing/ts-imagery";
 import { TSTestRunnerStack } from "../lib/osml-stacks/tile_server/testing/ts-test-runner";
 import { TSContainerStack } from "../lib/osml-stacks/tile_server/ts-container";
 import { TSDataplaneStack } from "../lib/osml-stacks/tile_server/ts-dataplane";
-import { OSMLAuthConfig } from "../lib/osml-cdk-constructs/lib/osml/osml_authenticate";
 
 /**
  * Initializes and deploys the infrastructure required for operating a tile server.
