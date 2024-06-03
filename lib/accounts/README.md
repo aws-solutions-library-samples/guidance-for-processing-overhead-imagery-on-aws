@@ -11,8 +11,9 @@ in place rebuild your project to generate stack targets for your account.
   name: "INSERT YOUR ALIAS", // alias to tag your stacks with
   region: "INSERT YOUR REGION", // region you want to deploy into
   prodLike: false, // if you want to retain resources and enable stack termination protections set to true
-  deployModelRuner: false, // enable deploying model runner
-  deployTileServer: false // enable deploying tile server
+  deployModelRuner: true, // enable deploying model runner
+  deployTileServer: true, // enable deploying tile server
+  deployDataIntake: true // enable deploying data intake
 }
 ```
 
