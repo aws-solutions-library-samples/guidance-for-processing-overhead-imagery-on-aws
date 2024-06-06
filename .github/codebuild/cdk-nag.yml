@@ -12,7 +12,6 @@ phases:
           export BUILD_FROM_SOURCE=true
         fi
       - cp lib/accounts/target_account_template.json lib/accounts/target_account.json
-      - cp lib/accounts/target_auth_template.json lib/accounts/target_auth.json
       - sed -i "s/1234567890123/$AWS_ACCOUNT/" lib/accounts/target_account.json
       - sed -i "s/fake-alias/$NAME/" lib/accounts/target_account.json
       - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json
