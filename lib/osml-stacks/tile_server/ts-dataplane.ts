@@ -5,12 +5,7 @@
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
 import { ContainerImage } from "aws-cdk-lib/aws-ecs";
 import { IRole } from "aws-cdk-lib/aws-iam";
-import {
-  OSMLAccount,
-  OSMLAuthConfig,
-  OSMLVpc,
-  TSDataplane
-} from "osml-cdk-constructs";
+import { OSMLAccount, OSMLVpc, TSDataplane } from "osml-cdk-constructs";
 
 export interface TSDataplaneStackProps extends StackProps {
   readonly env: Environment;
@@ -18,7 +13,6 @@ export interface TSDataplaneStackProps extends StackProps {
   readonly osmlVpc: OSMLVpc;
   readonly containerImage: ContainerImage;
   readonly taskRole?: IRole;
-  readonly authConfig: OSMLAuthConfig;
 }
 
 export class TSDataplaneStack extends Stack {
@@ -42,8 +36,7 @@ export class TSDataplaneStack extends Stack {
       account: props.account,
       taskRole: props.taskRole,
       osmlVpc: props.osmlVpc,
-      containerImage: props.containerImage,
-      authConfig: props.authConfig
+      containerImage: props.containerImage
     });
   }
 }

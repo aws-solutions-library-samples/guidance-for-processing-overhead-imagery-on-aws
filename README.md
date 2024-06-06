@@ -86,16 +86,16 @@ Known good configuration for EC2 instance:
        "deployDataIntake": <false || true deploy data intake>
    }
    ```
-
-4. Create `target_auth.json` under `guidance-for-processing-overhead-imagery-on-aws/lib/accounts/` and leave it blank unless you are planning to enable Authenication. If so, head over to [Enabling Authentication](#enabling-authentication) in this README.
-
-5. Export your dev account number and deployment username:
+   
+4. Export your dev account number and deployment username:
 
    ```
    export ACCOUNT_NUMBER=<target account number>
    export AWS_DEFAULT_REGION=<target region for deployment>
    export NAME=<unique name for stacks>
    ```
+
+5. Optional: If you want to enable Authentication, please head over to Enabling Authentication in this README.
 
 6. Optional, export the following environment variable if you wish to build your containers from source using the submodules.
 
@@ -121,9 +121,9 @@ Known good configuration for EC2 instance:
 
 10. Make sure Docker is running on your machine:
 
-   ```
-   dockerd
-   ```
+    ```
+    dockerd
+    ```
 
 11. Then deploy the stacks to your commercial account:
 
@@ -160,8 +160,16 @@ Before enabling authentication, you will need the following:
 
 #### Setup Instructions
 1. Update authentication configuration:
-   - Navigate to `lib/accounts/README.md` and follow the `TARGET AUTHENTICATION` section
-   - Update the values for each key with your authentication details.
+   - Copy this object template into the ``auth`` property of your target_account.js file and update it accordingly.
+    ```
+        {
+            "clientId": "<your client id IdP>",
+            "clientSecret": "<your client IdP secret>",
+            "authority": "<your issuer IdP url>",
+            "certificateArn": "<your certificate arn>",
+            "domainName": "<your domain name>",
+        }
+    ```
 
 2. To deploy the configuration:
    - Follow the [Deployment](#deployment) instructions to deploy the updated configuration to your account.

@@ -1,7 +1,0 @@
-{
-    "clientId": "<your client id IdP>",
-    "clientSecret": "<your client IdP secret>",
-    "authority": "<your issuer IdP url>",
-    "certificateArn": "<your certificate arn>",
-    "domainName": "<your domain name>"
-}
