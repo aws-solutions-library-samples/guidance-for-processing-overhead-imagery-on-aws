@@ -64,17 +64,20 @@ jobs:
 
             // get files
             const nistFile = fs.readFileSync("NIST.800.53.R5-violations.md", "utf8");
+            const totalNistViolations = nistFile.split('\n').length - 2; // minus 2 due to the headers
+
             const awsFile = fs.readFileSync("AwsSolutions-violations.md", "utf8");
+            const totalAwsViolations = awsFile.split('\n').length - 2; // minus 2 due to the headers
 
             const content_body = `Please review the existing CDK-Nag Violations for [${commitId}](https://github.com/aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws/commit/${commitId})
               <details close>
-              <summary>AwsSolutions Violation(s)</summary>
+              <summary>There are ${totalAwsViolations} AwsSolutions Violation(s)</summary>
 
               ${awsFile}
               </details>
 
               <details close>
-              <summary>NIST.800.53.R5 Violation(s)</summary>
+              <summary>There are ${totalNistViolations} NIST.800.53.R5 Violation(s)</summary>
 
               ${nistFile}
               </details>

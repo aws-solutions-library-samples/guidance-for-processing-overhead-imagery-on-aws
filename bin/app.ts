@@ -12,6 +12,7 @@ import { deployDataIntake } from "./deploy-data-intake";
 import { deployModelRuner } from "./deploy-model-runner";
 import { deployRoles } from "./deploy-roles";
 import { deployTileServer } from "./deploy-tile-server";
+import { deployDataCatalog } from "./deploy-data-catalog";
 import { deployVpc } from "./deploy-vpc";
 
 // Determine if the ENV instructs to globally build from source.
@@ -58,6 +59,11 @@ if (targetAccount.deployTileServer) {
 // Deploy the image intake application within the same VPC.
 if (targetAccount.deployDataIntake) {
   deployDataIntake(app, targetEnv, targetAccount, vpcStack, buildFromSource);
+}
+
+// Deploy Stac Catalog within the same VPC
+if (targetAccount.deployDataCatalog) {
+  deployDataCatalog(app, targetEnv, targetAccount, vpcStack);
 }
 
 // Comply CDK constructs with AWS Recommended Security & NIST Security

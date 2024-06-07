@@ -83,7 +83,8 @@ Known good configuration for EC2 instance:
        "prodLike": <false || true marks resource retention>
        "deployModelRunner": <false || true deploy model runner>,
        "deployTileServer": <false || true deploy tile server>,
-       "deployDataIntake": <false || true deploy data intake>
+       "deployDataIntake": <false || true deploy data intake>,
+       "deployDataCatalog": <false || true deploy data catalog>
    }
    ```
    
@@ -95,7 +96,7 @@ Known good configuration for EC2 instance:
    export NAME=<unique name for stacks>
    ```
 
-5. Optional: If you want to enable Authentication, please head over to Enabling Authentication in this README.
+5. Optional: If you want to enable Authentication, please head over to [Enabling Authentication](#enabling-authentication) in this README.
 
 6. Optional, export the following environment variable if you wish to build your containers from source using the submodules.
 
