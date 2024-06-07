@@ -36,7 +36,7 @@ if [ "$1" = "minimal" ]; then
     echo "Executing minimal action..."
     STACK_LIST="-TSDataplane|-MRMonitoring|-MRModelEndpoints|-MRAutoscaling|-MRDataplane|-DIDataplane"
     # Run the 'cdk list' command, sort it, and filter stacks directly
-    cdk list | sort -r | grep -E "$STACK_LIST" > stack_list.txt
+    cdk list | sort -r | grep -E -- "$STACK_LIST" > stack_list.txt
 
     # Loop through each matching stack name
     while IFS= read -r stack_name; do
