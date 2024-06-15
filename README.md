@@ -147,50 +147,38 @@ Known good configuration for EC2 instance:
 
 ### Enabling Authentication
 
-Currently, only Tile Server service supports authentication.
+Currently, there are two services that supports authentication
+- Tile Sever
+- Data Catalog
 
 #### Prerequisites
 
 Before enabling authentication, you will need the following:
 - OIDC Authentication Server
-- Issuer URL (e.g., `https://<URL>/realms/<realm name>`)
-- Client Secret
+- Issuer URL (e.g., `https://<URL>/realms/<realm name>`) which is also known as authority
 - Client ID
-- Custom Domain Name with a valid certificate ARN
-  - **Note:** Certificate for the domain (must be uploaded to ACM / IAM Server Certificate) into your account
 
 #### Setup Instructions
 1. Update authentication configuration:
-   - Copy this object template into the ``auth`` property of your target_account.js file and update it accordingly.
+   - Copy this object template into the `auth` property of your `target_account.json` file and update it accordingly.
     ```
-        {
-            "clientId": "<your client id IdP>",
-            "clientSecret": "<your client IdP secret>",
-            "authority": "<your issuer IdP url>",
-            "certificateArn": "<your certificate arn>",
-            "domainName": "<your domain name>",
-        }
+      auth: {
+         "clientId": "<your client id IdP>",
+         "authority": "<your issuer IdP url>"
+      }
     ```
 
 2. To deploy the configuration:
    - Follow the [Deployment](#deployment) instructions to deploy the updated configuration to your account.
-   - Upon successful deployment, go to your AWS Account -> Cloudformation -> find `TSDataplane` stack > `Outputs` tab, you will see an output similar to:
+   - Upon successful deployment, go to your AWS Account -> API-GW -> find `<service>Dataplane` (ie: `TSDataplane`) stack > `Outputs` tab, you will see an output similar to:
      ```
-     TSDataplaneTSServiceLoadBalancerDNS<id> | <url>
+     TSDataplaneTileServerRestApiRestApiTileServerRestApiEndpoint<id> | <url>
      ```
-   - Note that Application Load Balancer (ALB) DNS
+   - Then you can invoke the URL using the authentication token! Ensure that sure you passing `"Authorization: Bearer $TOKEN"` as a header for any curl request you make. For example:
 
-3. Create a CNAME Record:
-   - Log in to your AWS account and navigate to `Route 53`.
-   - Select your Hosted Zones and click `Create Record`.
-     - In the `Record name` text field, add a custom domain name that you set in the configuration file (`lib/accounts/target_auth.json`)
-     - Set the `Record Type` to `CNAME`.
-     - In the `Value` text box, enter your ALB DNS value.
-     - Click `Create records`.
-
-   - Note: It may take 1-5 minutes for the changes to propagate.
-
-After propagation, opening your domain name will redirect you to the authentication page. Once authenticated, you can start using the service.
+      ```
+      curl -X "GET" "<api endpoint>" -H "Authorization: Bearer $TOKEN"
+      ```
 
 ### Deploying local osml-cdk-constructs
 
