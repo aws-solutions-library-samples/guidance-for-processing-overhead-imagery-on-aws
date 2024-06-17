@@ -70,6 +70,9 @@ Known good configuration for EC2 instance:
 * 50 GiB gp2 root volume
 
 ## Deployment
+The following steps provide general instructions supporting the most common deployments.
+See [Deployment Frequently Asked Questions](DEPLOYMENT_FAQ.md) for alternate examples used by some teams 
+with different operational requirements.
 
 1. Create an AWS account
 2. Create `target_account.json` under `guidance-for-processing-overhead-imagery-on-aws/lib/accounts/`
@@ -82,6 +85,7 @@ Known good configuration for EC2 instance:
        "region": <target region for deployment>,
        "prodLike": <false || true marks resource retention>
        "deployModelRunner": <false || true deploy model runner>,
+       "deployModelRunnerExamples": <false || true deploy example models>,
        "deployTileServer": <false || true deploy tile server>,
        "deployDataIntake": <false || true deploy data intake>,
        "deployDataCatalog": <false || true deploy data catalog>
@@ -102,6 +106,7 @@ Known good configuration for EC2 instance:
 
    ```
    export BUILD_FROM_SOURCE=true
+   export BUILD_FROM_SOURCE_PATH=lib
    ```
 
 7. Pull your latest credentials into `~/.aws/credentials`

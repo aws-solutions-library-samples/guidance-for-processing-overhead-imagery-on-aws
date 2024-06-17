@@ -3,7 +3,7 @@
  */
 
 import { App, Environment } from "aws-cdk-lib";
-import { OSMLAccount } from "osml-cdk-constructs";
+import { OSMLAccount, DCContainerConfig } from "osml-cdk-constructs";
 
 import { DCContainerStack } from "../lib/osml-stacks/data-catalog/dc-container";
 import { DCDataplaneStack } from "../lib/osml-stacks/data-catalog/dc-dataplane";
@@ -19,14 +19,15 @@ import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
  * @param targetAccount Provides additional details of the target AWS account specific to the OversightML setup.
  * to have a dependency on it, ensuring the necessary roles and permissions are in place before setting up the VPC.
  * @param vpcStack Provides the VPC OSML is deployed into.
- * @param buildFromSource Whether to build the container from source.
+ * @param containerConfig Provides configuration options for the application container.
  * @returns An instance of OSMLVpcStack, representing the deployed VPC and networking infrastructure within the AWS CDK application.
  */
 export function deployDataCatalog(
   app: App,
   targetEnv: Environment,
   targetAccount: OSMLAccount,
-  vpcStack: OSMLVpcStack
+  vpcStack: OSMLVpcStack,
+  containerConfig: DCContainerConfig
 ) {
   // Deploy the ECR container mirror for the Lambda Docker image
   const containerStack = new DCContainerStack(
@@ -36,6 +37,7 @@ export function deployDataCatalog(
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
+      config: containerConfig,
       description:
         "Data Catalog Container, Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }

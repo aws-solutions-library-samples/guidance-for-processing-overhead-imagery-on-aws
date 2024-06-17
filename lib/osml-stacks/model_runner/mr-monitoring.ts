@@ -9,7 +9,6 @@ export interface MRMonitoringStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly mrDataplane: MRDataplane;
-  readonly targetModel: string;
 }
 
 export class MRMonitoringStack extends Stack {
@@ -35,8 +34,7 @@ export class MRMonitoringStack extends Stack {
       imageRequestDlQueue: props.mrDataplane.imageRequestQueue.dlQueue,
       regionRequestDlQueue: props.mrDataplane.regionRequestQueue.dlQueue,
       service: props.mrDataplane.fargateService,
-      mrDataplaneConfig: props.mrDataplane.mrDataplaneConfig,
-      model: props.targetModel
+      mrDataplaneConfig: props.mrDataplane.mrDataplaneConfig
     });
   }
 }

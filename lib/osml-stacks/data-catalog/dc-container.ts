@@ -3,12 +3,13 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { OSMLAccount, OSMLVpc, DCContainer } from "osml-cdk-constructs";
+import { OSMLAccount, OSMLVpc, DCContainer, DCContainerConfig } from "osml-cdk-constructs";
 
 export interface DCContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
+  readonly config?: DCContainerConfig;
 }
 
 export class DCContainerStack extends Stack {
@@ -30,7 +31,8 @@ export class DCContainerStack extends Stack {
     // Create the STAC catalog ECR container image
     this.resources = new DCContainer(this, "DCContainer", {
       account: props.account,
-      osmlVpc: props.osmlVpc
+      osmlVpc: props.osmlVpc,
+      config: props.config
     });
   }
 }
