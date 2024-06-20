@@ -3,12 +3,14 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
+import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { MRContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
 
 export interface MRAppContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
+  readonly lambdaRuntime: Runtime;
   readonly buildFromSource?: boolean;
 }
 
@@ -32,6 +34,7 @@ export class MRContainerStack extends Stack {
     this.resources = new MRContainer(this, "MRContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc,
+      lambdaRuntime: props.lambdaRuntime,
       buildFromSource: props.buildFromSource
     });
   }
