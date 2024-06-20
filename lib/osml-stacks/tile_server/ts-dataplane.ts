@@ -13,6 +13,7 @@ export interface TSDataplaneStackProps extends StackProps {
   readonly osmlVpc: OSMLVpc;
   readonly containerImage: ContainerImage;
   readonly taskRole?: IRole;
+  readonly sourcePathDLQLambda?: string;
 }
 
 export class TSDataplaneStack extends Stack {
@@ -36,7 +37,8 @@ export class TSDataplaneStack extends Stack {
       account: props.account,
       taskRole: props.taskRole,
       osmlVpc: props.osmlVpc,
-      containerImage: props.containerImage
+      containerImage: props.containerImage,
+      sourcePathDLQLambda: props.sourcePathDLQLambda
     });
   }
 }

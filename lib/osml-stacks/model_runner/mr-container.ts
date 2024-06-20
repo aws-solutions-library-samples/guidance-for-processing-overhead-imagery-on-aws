@@ -3,13 +3,14 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MRContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
+import { MRContainer, MRContainerConfig, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
 
 export interface MRAppContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
   readonly buildFromSource?: boolean;
+  readonly config?: MRContainerConfig;
 }
 
 export class MRContainerStack extends Stack {
@@ -32,7 +33,8 @@ export class MRContainerStack extends Stack {
     this.resources = new MRContainer(this, "MRContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc,
-      buildFromSource: props.buildFromSource
+      buildFromSource: props.buildFromSource,
+      mrAppContainerConfig: props.config
     });
   }
 }

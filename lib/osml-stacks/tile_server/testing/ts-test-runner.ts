@@ -7,7 +7,8 @@ import {
   OSMLAccount,
   OSMLVpc,
   TSTestRunner,
-  TSTestRunnerContainer
+  TSTestRunnerContainer,
+  TSTestRunnerContainerConfig
 } from "osml-cdk-constructs";
 
 export interface TSTestRunnerStackProps extends StackProps {
@@ -17,6 +18,7 @@ export interface TSTestRunnerStackProps extends StackProps {
   readonly buildFromSource: boolean;
   readonly tsEndpoint: string;
   readonly tsTestImageBucket: string;
+  readonly containerConfig?: TSTestRunnerContainerConfig;
 }
 
 export class TSTestRunnerStack extends Stack {
@@ -46,12 +48,7 @@ export class TSTestRunnerStack extends Stack {
         tsEndpoint: props.tsEndpoint,
         tsTestImageBucket: props.tsTestImageBucket,
         buildFromSource: props.buildFromSource,
-        config: {
-          TS_TEST_CONTAINER: "awsosml/osml-tile-server-test:latest",
-          TS_TEST_BUILD_PATH: "lib/osml-tile-server-test",
-          TS_TEST_BUILD_TARGET: "osml_tile_server_test",
-          TS_TEST_REPOSITORY: "tile-server-test-container"
-        }
+        config: props.containerConfig
       }
     );
 

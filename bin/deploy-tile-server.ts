@@ -3,7 +3,7 @@
  */
 
 import { App, Environment } from "aws-cdk-lib";
-import { OSMLAccount } from "osml-cdk-constructs";
+import { OSMLAccount, TSContainerConfig, TSTestRunnerContainerConfig } from "osml-cdk-constructs";
 
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
 import { TSImageryStack } from "../lib/osml-stacks/tile_server/testing/ts-imagery";
@@ -22,6 +22,9 @@ import { TSDataplaneStack } from "../lib/osml-stacks/tile_server/ts-dataplane";
  * @param targetEnv The targeted deployment environment containing AWS account and region information.
  * @param targetAccount The target AWS account configuration, providing context for the deployment, such as account-specific settings.
  * @param vpcStack An instance of `OSMLVpcStack` representing the VPC configuration to be used by the tile server for network-related settings.
+ * @param containerConfig Provides configuration options for the application container.
+ * @param testContainerConfig Provides configuration options for the test container.
+ * @param sourcePathDLQLambda Provide the location of the handler for messages that end up on the DLQ.
  * @param buildFromSource Whether or not to build the model runner container from source
  */
 export function deployTileServer(
@@ -29,6 +32,9 @@ export function deployTileServer(
   targetEnv: Environment,
   targetAccount: OSMLAccount,
   vpcStack: OSMLVpcStack,
+  containerConfig: TSContainerConfig,
+  testContainerConfig: TSTestRunnerContainerConfig,
+  sourcePathDLQLambda: string | undefined = undefined,
   buildFromSource: boolean = false
 ) {
   // Deploy the container stack for the tile server, which includes the Docker container
@@ -41,6 +47,7 @@ export function deployTileServer(
       account: targetAccount,
       osmlVpc: vpcStack.resources,
       buildFromSource: buildFromSource,
+      config: containerConfig,
       description:
         "Tile Server Container, Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }
@@ -59,7 +66,8 @@ export function deployTileServer(
       description:
         "Tile Server Dataplane, Guidance for Overhead Imagery Inference on AWS (SO9240)",
       osmlVpc: vpcStack.resources,
-      containerImage: tileServerContainerStack.resources.containerImage
+      containerImage: tileServerContainerStack.resources.containerImage,
+      sourcePathDLQLambda: sourcePathDLQLambda,
     }
   );
 
@@ -94,6 +102,7 @@ export function deployTileServer(
       tsEndpoint: tsEndpoint,
       tsTestImageBucket: tsTestImageryBucket,
       buildFromSource: buildFromSource,
+      containerConfig: testContainerConfig,
       description:
         "Tile Server Test, Guidance for Overhead Imagery Inference on AWS (SO9240)"
     }

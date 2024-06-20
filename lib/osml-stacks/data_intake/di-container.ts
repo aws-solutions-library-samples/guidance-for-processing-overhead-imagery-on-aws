@@ -3,13 +3,14 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { DIContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
+import { DIContainer, DIContainerConfig, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
 
 export interface DIContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
   readonly buildFromSource: boolean;
+  readonly config?: DIContainerConfig;
 }
 
 export class DIContainerStack extends Stack {
@@ -29,7 +30,8 @@ export class DIContainerStack extends Stack {
     this.resources = new DIContainer(this, "DIContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc,
-      buildFromSource: props.buildFromSource
+      buildFromSource: props.buildFromSource,
+      config: props.config
     });
   }
 }

@@ -4,6 +4,7 @@
   "region": "us-west-2",
   "prodLike": false,
   "deployModelRunner": true,
+  "deployModelRunnerExamples": true,
   "deployTileServer": true,
   "deployDataIntake": true,
   "deployDataCatalog": true
