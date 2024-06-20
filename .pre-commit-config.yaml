@@ -40,7 +40,7 @@ repos:
         types: [file, python]
 
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.35.0
+    rev: v8.56.0
     hooks:
       - id: eslint
         files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx

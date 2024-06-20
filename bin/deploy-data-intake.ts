@@ -3,6 +3,7 @@
  */
 
 import { App, Environment } from "aws-cdk-lib";
+import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { OSMLAccount } from "osml-cdk-constructs";
 
 import { DIContainerStack } from "../lib/osml-stacks/data_intake/di-container";
@@ -20,6 +21,7 @@ import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
  * @param targetAccount Provides additional details of the target AWS account specific to the OversightML setup.
  * to have a dependency on it, ensuring the necessary roles and permissions are in place before setting up the VPC.
  * @param vpcStack Provides the VPC OSML is deployed into.
+ * @param lambdaRuntime The lambda runtime environment for copying Docker images to ECR.
  * @param buildFromSource Whether to build the container from source.
  * @returns An instance of OSMLVpcStack, representing the deployed VPC and networking infrastructure within the AWS CDK application.
  */
@@ -28,6 +30,7 @@ export function deployDataIntake(
   targetEnv: Environment,
   targetAccount: OSMLAccount,
   vpcStack: OSMLVpcStack,
+  lambdaRuntime: Runtime,
   buildFromSource: boolean = true
 ) {
   // Deploy the ECR container mirror for the Lambda Docker image
@@ -38,6 +41,7 @@ export function deployDataIntake(
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
+      lambdaRuntime: lambdaRuntime,
       buildFromSource: buildFromSource,
       description:
         "Data Intake Container, Guidance for Overhead Imagery Inference on AWS (SO9240)"
