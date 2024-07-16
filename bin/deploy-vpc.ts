@@ -23,7 +23,7 @@ export function deployVpc(
   app: App,
   targetEnv: Environment,
   targetAccount: OSMLAccount,
-  osmlRolesStack: OSMLRolesStack | undefined
+  osmlRolesStack: OSMLRolesStack | undefined = undefined
 ): OSMLVpcStack {
   // Deploy the Virtual Private Cloud (VPC) resources for OversightML
   const vpcStack = new OSMLVpcStack(app, `${targetAccount.name}-OSMLVpc`, {

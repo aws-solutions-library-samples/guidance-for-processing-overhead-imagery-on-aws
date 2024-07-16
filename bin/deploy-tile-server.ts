@@ -3,7 +3,6 @@
  */
 
 import { App, Environment } from "aws-cdk-lib";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { OSMLAccount } from "osml-cdk-constructs";
 
 import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
@@ -23,7 +22,6 @@ import { TSDataplaneStack } from "../lib/osml-stacks/tile_server/ts-dataplane";
  * @param targetEnv The targeted deployment environment containing AWS account and region information.
  * @param targetAccount The target AWS account configuration, providing context for the deployment, such as account-specific settings.
  * @param vpcStack An instance of `OSMLVpcStack` representing the VPC configuration to be used by the tile server for network-related settings.
- * @param lambdaRuntime The lambda runtime environment for copying Docker images to ECR.
  * @param buildFromSource Whether or not to build the model runner container from source
  */
 export function deployTileServer(
@@ -31,8 +29,7 @@ export function deployTileServer(
   targetEnv: Environment,
   targetAccount: OSMLAccount,
   vpcStack: OSMLVpcStack,
-  lambdaRuntime: Runtime,
-  buildFromSource: boolean = false
+  buildFromSource: boolean | undefined = undefined
 ) {
   // Deploy the container stack for the tile server, which includes the Docker container
   // configuration and other related settings required for the tile server's operation.
@@ -43,7 +40,6 @@ export function deployTileServer(
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
-      lambdaRuntime: lambdaRuntime,
       buildFromSource: buildFromSource,
       description:
         "Tile Server Container, Guidance for Overhead Imagery Inference on AWS (SO9240)"
@@ -95,7 +91,6 @@ export function deployTileServer(
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
-      lambdaRuntime: lambdaRuntime,
       tsEndpoint: tsEndpoint,
       tsTestImageBucket: tsTestImageryBucket,
       buildFromSource: buildFromSource,

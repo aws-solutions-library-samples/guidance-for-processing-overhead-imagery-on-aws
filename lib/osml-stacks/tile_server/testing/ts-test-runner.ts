@@ -3,7 +3,6 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
 import {
   OSMLAccount,
   OSMLVpc,
@@ -15,10 +14,9 @@ export interface TSTestRunnerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
-  readonly lambdaRuntime: Runtime;
-  readonly buildFromSource: boolean;
   readonly tsEndpoint: string;
   readonly tsTestImageBucket: string;
+  readonly buildFromSource?: boolean;
 }
 
 export class TSTestRunnerStack extends Stack {
@@ -45,7 +43,6 @@ export class TSTestRunnerStack extends Stack {
       {
         account: props.account,
         osmlVpc: props.osmlVpc,
-        lambdaRuntime: props.lambdaRuntime,
         tsEndpoint: props.tsEndpoint,
         tsTestImageBucket: props.tsTestImageBucket,
         buildFromSource: props.buildFromSource,

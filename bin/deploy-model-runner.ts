@@ -3,7 +3,6 @@
  */
 
 import { App, Environment } from "aws-cdk-lib";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { OSMLAccount } from "osml-cdk-constructs";
 
 import { MRAutoScalingStack } from "../lib/osml-stacks/model_runner/mr-autoscaling";
@@ -26,18 +25,16 @@ import { OSMLVpcStack } from "../lib/osml-stacks/osml-vpc";
  * @param targetEnv The target deployment environment, including account and region.
  * @param targetAccount Details of the target AWS account where the stacks are deployed, including configurations for autoscaling and testing.
  * @param vpcStack An instance of `OSMLVpcStack` to be used by other stacks for network configurations.
- * @param lambdaRuntime The lambda runtime environment for copying Docker images to ECR.
  * @param osmlRolesStack An instance of `OSMLRolesStack` to be used by other stacks for roles configurations.
  * @param buildFromSource Whether or not to build the model runner container from source
  */
-export function deployModelRuner(
+export function deployModelRunner(
   app: App,
   targetEnv: Environment,
   targetAccount: OSMLAccount,
   vpcStack: OSMLVpcStack,
-  lambdaRuntime: Runtime,
-  osmlRolesStack: OSMLRolesStack | undefined,
-  buildFromSource: boolean = false
+  osmlRolesStack: OSMLRolesStack | undefined = undefined,
+  buildFromSource: boolean | undefined = undefined
 ) {
   // Deploy container stack for the model runner application.
   const mrContainerStack = new MRContainerStack(
@@ -47,7 +44,6 @@ export function deployModelRuner(
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
-      lambdaRuntime: lambdaRuntime,
       buildFromSource: buildFromSource,
       description:
         "Model Runner Container, Guidance for Overhead Imagery Inference on AWS (SO9240)"
@@ -96,7 +92,6 @@ export function deployModelRuner(
       env: targetEnv,
       account: targetAccount,
       osmlVpc: vpcStack.resources,
-      lambdaRuntime: lambdaRuntime,
       buildFromSource: buildFromSource,
       description:
         "Model Container, Guidance for Overhead Imagery Inference on AWS (SO9240)"

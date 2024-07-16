@@ -3,14 +3,17 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { OSMLAccount, OSMLVpc, DCDataplane } from "osml-cdk-constructs";
 import { DockerImageCode } from "aws-cdk-lib/aws-lambda";
+import { ITopic } from "aws-cdk-lib/aws-sns";
+import { DCDataplane, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
 
 export interface DCDataplaneStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
-  readonly dockerImageCode: DockerImageCode;
+  readonly stacCode: DockerImageCode;
+  readonly ingestCode: DockerImageCode;
+  readonly ingestTopic: ITopic | undefined;
 }
 
 export class DCDataplaneStack extends Stack {
@@ -33,7 +36,9 @@ export class DCDataplaneStack extends Stack {
     this.resources = new DCDataplane(this, "DCDataplane", {
       account: props.account,
       osmlVpc: props.osmlVpc,
-      dockerImageCode: props.dockerImageCode
+      stacCode: props.stacCode,
+      ingestCode: props.ingestCode,
+      ingestTopic: props.ingestTopic
     });
   }
 }

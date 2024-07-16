@@ -3,34 +3,36 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { OSMLAccount, OSMLVpc, DCContainer } from "osml-cdk-constructs";
+import { DCStacContainer, OSMLAccount, OSMLVpc } from "osml-cdk-constructs";
 
-export interface DCContainerStackProps extends StackProps {
+export interface DCStacContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
+  readonly buildFromSource: boolean | undefined;
 }
 
-export class DCContainerStack extends Stack {
-  public resources: DCContainer;
+export class DCStacContainerStack extends Stack {
+  public resources: DCStacContainer;
 
   /**
    * Constructor for the data catalog container cdk stack
    * @param parent the parent cdk app object
    * @param name the name of the stack to be created in the parent app object.
    * @param props the properties required to create the stack.
-   * @returns the created DCContainerStack object
+   * @returns the created DCIngestContainer object
    */
-  constructor(parent: App, name: string, props: DCContainerStackProps) {
+  constructor(parent: App, name: string, props: DCStacContainerStackProps) {
     super(parent, name, {
       terminationProtection: props.account.prodLike,
       ...props
     });
 
     // Create the STAC catalog ECR container image
-    this.resources = new DCContainer(this, "DCContainer", {
+    this.resources = new DCStacContainer(this, "DCStacContainer", {
       account: props.account,
-      osmlVpc: props.osmlVpc
+      osmlVpc: props.osmlVpc,
+      buildFromSource: props.buildFromSource
     });
   }
 }
