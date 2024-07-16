@@ -8,7 +8,7 @@
 #
 # Installs all necessary dependencies on a fresh EC2 instance to deploy the OSML demo.
 # Known good configuration:
-#     - OS: Ubuntu 22.04 LTS (AMI ID: ami-08116b9957a259459)
+#     - OS: Amazon Linux 2023 AMI 2023.5.20240708.0 x86_64 HVM kernel-6.1 (AMI ID: ami-078701cc0905d44e4)
 #     - Instance Type: t3.medium
 #     - Root Volume: 50 GiB gp2
 #
@@ -40,32 +40,27 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-# Define constants
+## Variable definition
 LOG_FILE="/var/log/user-data.log"
 
-# Redirect stdout and stderr to log file
-exec > >(tee -a $LOG_FILE) 2>&1
+## Enable logging for startup script
+exec > >(tee -a $LOG_FILE)
+exec 2>&1
 
-# Update system
-apt update -y
-
-# Install necessary packages
-apt install -y git-lfs python3-pip ca-certificates curl unzip nodejs
-
-# Setup Node.js repository and install Node.js
-curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-apt install -y npm
-
-# Install AWS CLI
+## Install the AWS CLI
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip -o awscliv2.zip
-./aws/install
+unzip awscliv2.zip
+sudo ./aws/install
 
-# Install AWS CDK
-npm install -g aws-cdk
+## Install dependencies (root level)
+yum install -y git-lfs python3-pip aws-cli npm docker
 
-# Setup Docker repository and install Docker components
-snap install docker
+## Start and enable Docker service
+systemctl start docker
+systemctl enable docker
+
+## Install CDK
+npm install aws-cdk
 
 # Clone primary AWS repo
 OSML_REPO=guidance-for-processing-overhead-imagery-on-aws
