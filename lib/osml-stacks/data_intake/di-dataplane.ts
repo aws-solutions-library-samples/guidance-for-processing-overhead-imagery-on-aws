@@ -10,7 +10,7 @@ export interface DIDataplaneStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
-  readonly dockerImageCode: DockerImageCode;
+  readonly intakeCode: DockerImageCode;
 }
 
 export class DIDataplaneStack extends Stack {
@@ -30,7 +30,7 @@ export class DIDataplaneStack extends Stack {
     this.resources = new DIDataplane(this, "DIDataplane", {
       account: props.account,
       osmlVpc: props.osmlVpc,
-      dockerImageCode: props.dockerImageCode
+      intakeCode: props.intakeCode
     });
   }
 }

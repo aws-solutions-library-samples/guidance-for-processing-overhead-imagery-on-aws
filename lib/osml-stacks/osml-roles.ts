@@ -3,9 +3,12 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { MESMRole, MRTaskRole, OSMLAccount } from "osml-cdk-constructs";
-
-import { MEHTTPRole } from "../osml-cdk-constructs/lib/osml/model_endpoint/roles/me_http_role";
+import {
+  MEHTTPRole,
+  MESMRole,
+  MRTaskRole,
+  OSMLAccount
+} from "osml-cdk-constructs";
 
 export interface OSMLStackProps extends StackProps {
   readonly env: Environment;

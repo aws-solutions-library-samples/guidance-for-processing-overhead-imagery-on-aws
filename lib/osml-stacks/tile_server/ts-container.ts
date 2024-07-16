@@ -10,8 +10,7 @@ export interface MRAppContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
-  readonly lambdaRuntime: Runtime;
-  readonly buildFromSource: boolean;
+  readonly buildFromSource: boolean | undefined;
 }
 
 export class TSContainerStack extends Stack {
@@ -34,7 +33,6 @@ export class TSContainerStack extends Stack {
     this.resources = new TSContainer(this, "TSContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc,
-      lambdaRuntime: props.lambdaRuntime,
       buildFromSource: props.buildFromSource
     });
   }

@@ -10,7 +10,6 @@ export interface DIContainerStackProps extends StackProps {
   readonly env: Environment;
   readonly account: OSMLAccount;
   readonly osmlVpc: OSMLVpc;
-  readonly lambdaRuntime: Runtime;
   readonly buildFromSource: boolean;
 }
 
@@ -31,7 +30,6 @@ export class DIContainerStack extends Stack {
     this.resources = new DIContainer(this, "DIContainer", {
       account: props.account,
       osmlVpc: props.osmlVpc,
-      lambdaRuntime: props.lambdaRuntime,
       buildFromSource: props.buildFromSource
     });
   }
