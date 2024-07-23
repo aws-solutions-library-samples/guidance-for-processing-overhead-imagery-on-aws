@@ -1,24 +1,21 @@
 [submodule "lib/osml-model-runner"]
 	path = lib/osml-model-runner
-	url = git@github.com:aws-solutions-library-samples/osml-model-runner.git
+	url = https://github.com/aws-solutions-library-samples/osml-model-runner.git
 [submodule "lib/osml-models"]
 	path = lib/osml-models
-	url = git@github.com:aws-solutions-library-samples/osml-models.git
+	url = https://github.com/aws-solutions-library-samples/osml-models.git
 [submodule "lib/osml-model-runner-test"]
 	path = lib/osml-model-runner-test
-	url = git@github.com:aws-solutions-library-samples/osml-model-runner-test.git
+	url = https://github.com/aws-solutions-library-samples/osml-model-runner-test.git
 [submodule "lib/osml-cdk-constructs"]
 	path = lib/osml-cdk-constructs
-	url = git@github.com:aws-solutions-library-samples/osml-cdk-constructs.git
-[submodule "lib/guidance-for-overhead-imagery-inference-on-aws"]
-	path = lib/guidance-for-overhead-imagery-inference-on-aws
-	url = git@github.com:aws-solutions-library-samples/guidance-for-overhead-imagery-inference-on-aws.git
+	url = https://github.com/aws-solutions-library-samples/osml-cdk-constructs.git
 [submodule "lib/osml-cesium-globe"]
 	path = lib/osml-cesium-globe
-	url = git@github.com:aws-solutions-library-samples/osml-cesium-globe.git
+	url = https://github.com/aws-solutions-library-samples/osml-cesium-globe.git
 [submodule "lib/osml-tile-server"]
 	path = lib/osml-tile-server
-	url = git@github.com:aws-solutions-library-samples/osml-tile-server.git
+	url = https://github.com/aws-solutions-library-samples/osml-tile-server.git
 [submodule "lib/osml-tile-server-test"]
 	path = lib/osml-tile-server-test
 	url = https://github.com/aws-solutions-library-samples/osml-tile-server-test.git

@@ -27,7 +27,7 @@ The branches developers should create directly off of `dev` (our trunk) as part 
 #### Step 1: Clone the Repository
 Clone the repository to your local machine.
 ```bash
-git clone git@github.com:aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws.git
+git clone https://github.com/aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws.git
 ```
 
 #### Step 2: Create a New Branch

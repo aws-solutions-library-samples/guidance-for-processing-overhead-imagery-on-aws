@@ -79,7 +79,6 @@ chmod -R 777 $OSML_REPO
 
 # Clone submodules from HTTPS instead of SSH (since git ssh keys are not available yet)
 cd $OSML_REPO \
-    && sed -i 's/git@github.com:/https:\/\/github.com\//g' .gitmodules \
     && git submodule update --init --recursive
 
 echo "--------------------- EC2 Bootstrap complete ---------------------"
