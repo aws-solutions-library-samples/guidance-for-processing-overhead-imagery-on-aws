@@ -42,81 +42,39 @@ jobs:
             BASE_REF
         env:
           BASE_REF: ${{ github.base_ref }}
-  RunSmallTifCenterpointTest:
+  RunModelRunnerTest:
+    runs-on: ubuntu-latest
     needs: BuildOSML
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run small.tif using Centerpoint Model"
-      TEST_IMAGE: "small"
-      TEST_MODEL: "centerpoint"
-    secrets: inherit
-  RunMetaNtfCenterpointTest:
-    needs: RunSmallTifCenterpointTest
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run meta.ntf using Centerpoint Model"
-      TEST_IMAGE: "meta"
-      TEST_MODEL: "centerpoint"
-    secrets: inherit
-  RunLargeTifFloodTest:
-    needs: RunMetaNtfCenterpointTest
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run large.tif using Flood Model"
-      TEST_IMAGE: "large"
-      TEST_MODEL: "flood"
-    secrets: inherit
-  RunTileNtfAircraftTest:
-    needs: RunLargeTifFloodTest
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run tile.ntf using Aircraft Model"
-      TEST_IMAGE: "tile_ntf"
-      TEST_MODEL: "aircraft"
-    secrets: inherit
-  RunTileTifAircraftTest:
-    needs: RunTileNtfAircraftTest
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run tile.tif using Aircraft Model"
-      TEST_IMAGE: "tile_tif"
-      TEST_MODEL: "aircraft"
-    secrets: inherit
-  RunSICDCapellaChipNtfTest:
-    needs: RunTileTifAircraftTest
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run sicd-capella-chip.ntf using Centerpoint Model"
-      TEST_IMAGE: "sicd_capella_chip_ntf"
-      TEST_MODEL: "centerpoint"
-    secrets: inherit
-  RunSICDUmbraChipNtfTest:
-    needs: RunSICDCapellaChipNtfTest
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run sicd-umbra-chip.ntf using Centerpoint Model"
-      TEST_IMAGE: "sicd_umbra_chip_ntf"
-      TEST_MODEL: "centerpoint"
-    secrets: inherit
-  RunSICDInterferometricHhNtfTest:
-    needs: RunSICDUmbraChipNtfTest
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run sicd-interferometric-hh.nitf using Centerpoint Model"
-      TEST_IMAGE: "sicd_interferometric_hh_ntf"
-      TEST_MODEL: "centerpoint"
-    secrets: inherit
-  RunWBIDTest:
-    needs: RunSICDInterferometricHhNtfTest
-    uses: ./.github/workflows/osml_reusable_test.yml
-    with:
-      TEST_DESCRIPTION: "Run wbid.nitf using Centerpoint Model"
-      TEST_IMAGE: "wbid"
-      TEST_MODEL: "centerpoint"
-    secrets: inherit
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+      - name: Model Runner Integration Tests
+        uses: aws-actions/aws-codebuild-run-build@v1
+        with:
+          project-name: CodeBuild-TestGithubOSML
+          buildspec-override: .github/codebuild/model_runner_test.yml
+  RunTileServerTest:
+    runs-on: ubuntu-latest
+    needs: BuildOSML
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+      - name: Tile Server Integration Tests
+        uses: aws-actions/aws-codebuild-run-build@v1
+        with:
+          project-name: CodeBuild-TestGithubOSML
+          buildspec-override: .github/codebuild/tile_server_test.yml
   DestroyOSML:
     if: ${{ always() && ( needs.CheckPendingWorkflow.result == 'success' )}}
-    needs: [ CheckPendingWorkflow, BuildOSML, RunSmallTifCenterpointTest, RunMetaNtfCenterpointTest, RunLargeTifFloodTest, RunTileNtfAircraftTest, RunTileTifAircraftTest, RunSICDCapellaChipNtfTest, RunSICDUmbraChipNtfTest, RunSICDInterferometricHhNtfTest, RunWBIDTest ]
+    needs: [ CheckPendingWorkflow, BuildOSML, RunTileServerTest, RunModelRunnerTest ]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials

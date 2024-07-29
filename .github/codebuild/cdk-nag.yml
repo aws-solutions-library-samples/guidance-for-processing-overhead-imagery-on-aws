@@ -1,46 +1,52 @@
 version: 0.2
+
 phases:
   install:
     runtime-versions:
-      nodejs: 18
+      nodejs: 16
+    commands:
+      - npm install -g aws-cdk
+
   pre_build:
     commands:
+      - yum install -y git-lfs
+      - cp .github/cdk.context.github.json cdk.context.json
       - git submodule update --init --recursive
       - |
-        if [[ "${BASE_REF}" -eq "dev" ]]; then
-          export BUILD_FROM_SOURCE=true
+        if [[ "$BASE_REF" == "dev" ]]; then
+          echo "Building from source for dev branch"
+          sed -i 's/"BUILD_FROM_SOURCE": false/"BUILD_FROM_SOURCE": true/' cdk.context.json
+        else
+          echo "Not building from source for main branch"
         fi
-      - cp lib/accounts/target_account_template.json lib/accounts/target_account.json
-      - sed -i "s/1234567890123/$AWS_ACCOUNT/" lib/accounts/target_account.json
-      - sed -i "s/fake-alias/$NAME/" lib/accounts/target_account.json
-      - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json
-      - sed -i "s/false/true/" lib/accounts/target_account.json
-      - cat lib/accounts/target_account.json
-      - yum install -y git-lfs
-      - git-lfs pull
-      - npm i
-      - npm install -g aws-cdk
+      - sed -i "s/1234567890123/$AWS_ACCOUNT/" cdk.context.json
+      - cat cdk.context.json
+      - git lfs pull
+      - git submodule foreach git lfs pull
+      - npm install
+
   build:
     commands:
       - export RUN_CDK_NAG=true
       - echo ${UNIQUE_FILE_ID}
-      - npm i
-      - cdk synth; EXITCODE=$?
-      - mkdir cdk_nag_report
+      - npm install
+      - cdk synth; EXITCODE=$
+      - mkdir -p cdk_nag_report
       - cp -r cdk.out/*-NagReport.csv cdk_nag_report/
       - cd cdk_nag_report
-      - pip install csvkit
+      - pip install --quiet csvkit csv2md
       - csvstack NIST.800.53.R5-*.csv > NIST.800.53.R5-cdk-nag.csv
       - csvstack AwsSolutions-*.csv > AwsSolutions-cdk-nag.csv
       - csvcut -c "Rule ID","Resource ID","Compliance","Exception Reason","Rule Level","Rule Info" NIST.800.53.R5-cdk-nag.csv | csvgrep -c Compliance -m Non-Compliant > NIST.800.53.R5-violations.csv
       - csvcut -c "Rule ID","Resource ID","Compliance","Exception Reason","Rule Level","Rule Info" AwsSolutions-cdk-nag.csv | csvgrep -c Compliance -m Non-Compliant > AwsSolutions-violations.csv
-      - pip install csv2md
       - csv2md NIST.800.53.R5-violations.csv > NIST.800.53.R5-violations-${UNIQUE_FILE_ID}.md
       - csv2md AwsSolutions-violations.csv > AwsSolutions-violations-${UNIQUE_FILE_ID}.md
       - cat NIST.800.53.R5-violations-${UNIQUE_FILE_ID}.md
       - cat AwsSolutions-violations-${UNIQUE_FILE_ID}.md
-      - aws s3 cp NIST.800.53.R5-violations-${UNIQUE_FILE_ID}.md s3://osml-cdk-nag-reports-github-$AWS_ACCOUNT
-      - aws s3 cp AwsSolutions-violations-${UNIQUE_FILE_ID}.md s3://osml-cdk-nag-reports-github-$AWS_ACCOUNT
+      - aws s3 cp NIST.800.53.R5-violations-${UNIQUE_FILE_ID}.md s3://osml-cdk-nag-reports-github-$AWS_ACCOUNT/
+      - aws s3 cp AwsSolutions-violations-${UNIQUE_FILE_ID}.md s3://osml-cdk-nag-reports-github-$AWS_ACCOUNT/
+
   post_build:
     commands:
-      - echo Build completed on `date`
+      - echo "Build completed on $(date)"
+

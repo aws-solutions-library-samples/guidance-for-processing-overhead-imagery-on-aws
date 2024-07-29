@@ -26,11 +26,11 @@ This Guidance demonstrates how to process remote sensing imagery using machine l
 
 ### MacOS
 
-If on a Mac without NPM/Node.js version 16 installed, run:
+If on a Mac without NPM/Node.js version 18 installed, run:
 
 ```bash
 brew install npm
-brew install node@16
+brew install node@18
 ```
 
 Alternatively, NPM/Node.js can be installed through the NVM:
@@ -38,7 +38,7 @@ Alternatively, NPM/Node.js can be installed through the NVM:
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
 source ~/.bash_profile
-nvm install 16
+nvm install 18
 ```
 
 If on a Mac without git-lfs installed, run:
@@ -59,9 +59,11 @@ git-lfs pull
 
 ### Ubuntu (EC2)
 
-A bootstrap script is available in `./scripts/ec2_bootstrap_ubuntu.sh` to automatically install all necessary dependencies for a Ubuntu EC2 instance to deploy the OSML demo.
+A bootstrap script is available in `./scripts/ec2_bootstrap_ubuntu.sh` to automatically install all necessary
+dependencies for an Ubuntu EC2 instance to deploy the OSML demo.
 
-This requires EC2 instance with internet connectivity. Insert into EC2 User Data during instance configuration or run as root once EC2 instance is running.
+This requires EC2 instance with internet connectivity. Insert into EC2 User Data during instance configuration
+or run as root once EC2 instance is running.
 
 Known good configuration for EC2 instance:
 
@@ -71,48 +73,21 @@ Known good configuration for EC2 instance:
 
 ## Deployment
 
-1. Create an AWS account
-2. Create `target_account.json` under `guidance-for-processing-overhead-imagery-on-aws/lib/accounts/`
-3. Copy the below template into `target_account.json` and update your account number, alias, and region:
+1. Create an AWS account.
 
-   ```text
-   {
-       "id": <target account id for deployment>,
-       "name": <unique name for stacks>,
-       "region": <target region for deployment>,
-       "prodLike": <false || true marks resource retention>
-       "deployModelRunner": <false || true deploy model runner>,
-       "deployTileServer": <false || true deploy tile server>,
-       "deployDataIntake": <false || true deploy data intake>,
-       "deployDataCatalog": <false || true deploy data catalog>
-   }
-   ```
-   
-4. Export your dev account number and deployment username:
+1. Pull your latest credentials into `~/.aws/credentials` and run `aws configure` - follow the prompts to set your default region.
 
-   ```
-   export ACCOUNT_NUMBER=<target account number>
-   export AWS_DEFAULT_REGION=<target region for deployment>
-   export NAME=<unique name for stacks>
-   ```
+1. Update the deployment configuration you want per the [deployment guidance](documentation/deployment/README.md).
 
-5. Optional: If you want to enable Authentication, please head over to [Enabling Authentication](#enabling-authentication) in this README.
+1. Optional: If you want to enable Authentication, please head over to [Enabling Authentication](#enabling-authentication) in this README.
 
-6. Optional, export the following environment variable if you wish to build your containers from source using the submodules.
-
-   ```
-   export BUILD_FROM_SOURCE=true
-   ```
-
-7. Pull your latest credentials into `~/.aws/credentials`
-
-8. Go into `guidance-for-processing-overhead-imagery-on-aws` directory and execute the following commands to install npm packages:
+1. Go into `guidance-for-processing-overhead-imagery-on-aws` directory and execute the following commands to install npm packages:
 
    ```
    npm i
    ```
 
-9. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
+1. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
 
    ```
    npm install -g aws-cdk
@@ -120,65 +95,30 @@ Known good configuration for EC2 instance:
    cdk bootstrap
    ```
 
-10. Make sure Docker is running on your machine:
+1. Make sure Docker is running on your machine:
 
-    ```
-    dockerd
-    ```
+   ```
+   dockerd
+   ```
 
-11. Then deploy the stacks to your commercial account:
+1. Then deploy the stacks to your commercial account:
 
     ```
     npm run deploy
     ```
 
-12. If you want to validate the deployment with integration tests:
+1. If you want to validate the deployment with integration tests:
 
     ```
     npm run setup
     npm run integ
     ```
 
-13. When you are done, you can clean up the deployment:
+1. When you are done, you can clean up the deployment:
 
     ```
     npm run destroy
     ```
-
-### Enabling Authentication
-
-Currently, there are two services that supports authentication
-- Tile Sever
-- Data Catalog
-
-#### Prerequisites
-
-Before enabling authentication, you will need the following:
-- OIDC Authentication Server
-- Issuer URL (e.g., `https://<URL>/realms/<realm name>`) which is also known as authority
-- Client ID
-
-#### Setup Instructions
-1. Update authentication configuration:
-   - Copy this object template into the `auth` property of your `target_account.json` file and update it accordingly.
-    ```
-      auth: {
-         "clientId": "<your client id IdP>",
-         "authority": "<your issuer IdP url>"
-      }
-    ```
-
-2. To deploy the configuration:
-   - Follow the [Deployment](#deployment) instructions to deploy the updated configuration to your account.
-   - Upon successful deployment, go to your AWS Account -> API-GW -> find `<service>Dataplane` (ie: `TSDataplane`) stack > `Outputs` tab, you will see an output similar to:
-     ```
-     TSDataplaneTileServerRestApiRestApiTileServerRestApiEndpoint<id> | <url>
-     ```
-   - Then you can invoke the URL using the authentication token! Ensure that sure you passing `"Authorization: Bearer $TOKEN"` as a header for any curl request you make. For example:
-
-      ```
-      curl -X "GET" "<api endpoint>" -H "Authorization: Bearer $TOKEN"
-      ```
 
 ### Deploying local osml-cdk-constructs
 
@@ -196,15 +136,15 @@ By default, this package uses the osml-cdk-constructs defined in the [official N
     git submodule update --init --recursive
     ```
 
-2. In `package.json`, locate `osml-cdk-constructs` under `devDependencies`. By default, it points to the latest NPM package version, but swaps out the version number with `"file:lib/osml-cdk-constructs"`. This will tell package.json to use the local package instead. The dependency will now look like this:
+1. In `package.json`, locate `osml-cdk-constructs` under `devDependencies`. By default, it points to the latest NPM package version, but swaps out the version number with `"file:lib/osml-cdk-constructs"`. This will tell package.json to use the local package instead. The dependency will now look like this:
 
     ```bash
     "osml-cdk-constructs": "file:lib/osml-cdk-constructs",
     ```
 
-3. Then cd into `lib/osml-cdk-construct` directory by executing: ```cd lib/osml-cdk-constructs```
-4. Execute ```npm i; npm run build``` to make sure everything is installed and building correctly.
-5. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
+1. Then cd into `lib/osml-cdk-construct` directory by executing: ```cd lib/osml-cdk-constructs```
+1. Execute ```npm i; npm run build``` to make sure everything is installed and building correctly.
+1. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
 
 
 ## Model Runner Usage
@@ -302,13 +242,13 @@ If you encounter an issue where the deployment is reporting this error:
 
 The restriction stems from the limitations of your AWS account. To address this issue, you'll need to access your AWS Account
 1. Go to Service Quotas
-2. Select `AWS Services` on left sidebar
-3. Find and select `AWS Lambda`
+1. Select `AWS Services` on left sidebar
+1. Find and select `AWS Lambda`
    - Select `Concurrent executions`
    - Click `Request increase at account-level` on top right corner
    - Find `Increase quota value` section and increase it to `1000`
    - Then submit it.
-4. This process may require up to 24 hours to complete.
+1. This process may require up to 24 hours to complete.
 
 To access further details regarding this matter, please visit: [AWS Lambda Memory Quotas](https://docs.aws.amazon.com/lambda/latest/dg/troubleshooting-deployment.html#troubleshooting-deployment-quotas) and [AWS Service Quotas](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html).
 
@@ -323,10 +263,10 @@ it indicates that Docker is running out of memory and requires additional ram to
 You can increase memory by completing the following steps:
 
 1. Open Docker UI
-2. Click `Settings` gear icon on top-right
-3. Click `Resources` on the left sidebar menu
-4. Click `Advanced` on the left sidebar menu
-5. Find `Memory` and adjust it to 12 GB
+1. Click `Settings` gear icon on top-right
+1. Click `Resources` on the left sidebar menu
+1. Click `Advanced` on the left sidebar menu
+1. Find `Memory` and adjust it to 12 GB
 
 #### error TS2307: Cannot find module ‘osml-cdk-constructs’
 
@@ -337,6 +277,26 @@ If you encounter an error while running `npm i` that leads to an error:
 Please execute the following command and try again:
 
 > npm install osml-cdk-constructs
+
+#### OSML-DCDataplane Stack Creation Failure
+
+If you encounter the following error during the deployment of the OSML-DCDataplane stack:
+
+```
+OSML-DCDataplane failed: Error: The stack named OSML-DCDataplane failed creation, it may need to be manually deleted
+from the AWS console: ROLLBACK_COMPLETE: Resource handler returned message: "Invalid request provided: Before you can
+proceed, you must enable a service-linked role to give Amazon OpenSearch Service permissions to access your VPC.
+(Service: OpenSearch, Status Code: 400, Request ID: 11ab9b5f-b59b-418a-9f89-98b1700bd248)"
+```
+
+This error indicates that the deployment could not proceed because the required service-linked role for Amazon
+OpenSearch Service to access your VPC is not enabled. This is actually an issue with dependency on the custom
+cloud formation resources used to provision the role; see [link](https://github.com/aws/aws-cdk/issues/27203)
+
+**Resolution:**
+
+1. **Re-run the Deployment:**
+    - Simply re-running your deployment should resolve the issue as the service-linked role will be automatically enabled during the subsequent deployment attempt.
 
 ## Support & Feedback
 

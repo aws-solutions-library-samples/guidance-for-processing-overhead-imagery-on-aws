@@ -25,9 +25,6 @@ rm -rf dist
 echo "Removing cdk.out folder..."
 rm -rf cdk.out
 
-echo "Removing cdk.context.json..."
-rm -rf cdk.context.json
-
 echo "Removing aws_lambda.bundle*..."
 rm -rf aws_lambda.bundle*
 

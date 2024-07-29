@@ -6,4 +6,4 @@ phases:
       - python3 -m pip install lib/osml-model-runner-test/
   build:
     commands:
-      - python3 ./lib/osml-model-runner-test/bin/process_image.py --image ${TEST_IMAGE} --model ${TEST_MODEL}
+      - bash scripts/model_runner_integ.sh
