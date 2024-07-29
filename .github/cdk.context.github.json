@@ -1,0 +1,45 @@
+{
+  "projectName": "OSML",
+  "account": {
+    "id": "1234567890123",
+    "region": "us-west-2",
+    "prodLike": false
+  },
+  "modelRunner": {
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": false
+    }
+  },
+  "tileServer": {
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": false,
+      "DEPLOY_TEST_COMPONENTS": true
+    }
+  },
+  "dataIntake": {
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": false
+    }
+  },
+  "dataCatalog": {
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": false
+    }
+  },
+  "testModelEndpoints": {
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": false
+    }
+  },
+  "testImagery": {
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": false
+    }
+  }
+}

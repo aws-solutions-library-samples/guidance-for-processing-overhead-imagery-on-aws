@@ -3,53 +3,71 @@
 # Copyright 2024 Amazon.com, Inc. or its affiliates.
 #
 
-echo "________                           .__       .__     __     _____  .____      ";
-echo "\_____  \___  __ ___________  _____|__| ____ |  |___/  |_  /     \ |    |     ";
-echo " /   |   \  \/ // __ \_  __ \/  ___/  |/ ___\|  |  \   __\/  \ /  \|    |     ";
-echo "/    |    \   /\  ___/|  | \/\___ \|  / /_/  >   Y  \  | /    Y    \    |___  ";
-echo "\_______  /\_/  \___  >__|  /____  >__\___  /|___|  /__| \____|__  /_______ \ ";
-echo "        \/          \/           \/  /_____/      \/             \/        \/ ";
+print_banner() {
+    echo "==============================="
+    echo "   Destroying OSML Stacks       "
+    echo "==============================="
+}
 
-echo "________                   __                          _________ __                 __            ";
-echo "\______ \   ____   _______/  |________  ____ ___.__.  /   _____//  |______    ____ |  | __  ______";
-echo " |    |  \_/ __ \ /  ___/\   __\_  __ \/  _ <   |  |  \_____  \\   __\__  \ _/ ___\|  |/ / /  ___/";
-echo " |    /   \  ___/ \___ \  |  |  |  | \(  <_> )___  |  /        \|  |  / __ \\  \___|    <  \___ \ ";
-echo "/_______  /\___  >____  > |__|  |__|   \____// ____| /_______  /|__| (____  /\___  >__|_ \/____  >";
-echo "        \/     \/     \/                     \/              \/           \/     \/     \/     \/ ";
+
+print_completion_message() {
+    echo "==============================="
+    echo "  CDK Stack Destroy Completed   "
+    echo "==============================="
+    echo "          All done!             "
+    echo "==============================="
+}
+
+# Function to display usage information
+usage() {
+    echo "Usage: $0 <full|minimal>"
+    exit 1
+}
+
+# Function to list all stacks
+list_all_stacks() {
+    cdk list | sort -r > stack_list.txt
+}
+
+# Function to list and destroy minimal stacks
+destroy_minimal_stacks() {
+    echo "Executing minimal action..."
+
+    local STACK_LIST=".*TileServer.*|.*Test-ModelEndpoints.*|.*ModelRunner.*|.*DataIntake.*|.*DataCatalog.*"
+    cdk list | sort -r | grep -E "$STACK_LIST" > stack_list.txt
+
+    for stack_name in $(cat stack_list.txt); do
+        echo "Destroying stack $stack_name..."
+        cdk destroy "$stack_name" --force
+    done
+
+    print_completion_message
+    exit 0
+}
+
+
+# Function to destroy all stacks in sequence
+destroy_all_stacks() {
+    echo "Executing full destroy action..."
+    cdk destroy --all --force
+    print_completion_message
+    exit 0
+}
+
+# Main script logic
 
 # Check if the user provided an argument
 if [ -z "$1" ]; then
-    echo "Usage: $0 <full|minimal>"
-    exit 1
+    usage
 fi
 
+# Determine the action based on the user input
 if [ "$1" = "full" ]; then
-    echo "Executing full destroy action..."
-
-    cdk destroy --all --force
-
-    echo "Full action completed."
-    exit 0
+    destroy_all_stacks
+elif [ "$1" = "minimal" ]; then
+    destroy_minimal_stacks
+else
+    usage
 fi
 
-if [ "$1" = "minimal" ]; then
-    echo "Executing minimal action..."
-    STACK_LIST="-TSDataplane|-MRMonitoring|-MRModelEndpoints|-MRAutoscaling|-MRDataplane|-DIDataplane|-DCDataplane"
-    # Run the 'cdk list' command, sort it, and filter stacks directly
-    cdk list | sort -r | grep -E -- "$STACK_LIST" > stack_list.txt
-
-    # Loop through each matching stack name
-    while IFS= read -r stack_name; do
-        echo "Destroying stack $stack_name..."
-        cdk destroy "$stack_name" --force || exit 1
-        echo "Stack $stack_name destroyed."
-    done < stack_list.txt
-
-    echo "Minimal action completed."
-    exit 0
-fi
-
-
-# If the argument is neither "full" nor "minimal"
-echo "Invalid argument. Please provide 'full' or 'minimal'."
 exit 1

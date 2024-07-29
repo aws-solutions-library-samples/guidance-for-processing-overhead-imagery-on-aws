@@ -1,32 +1,36 @@
 version: 0.2
+
 phases:
   install:
     runtime-versions:
       nodejs: 16
+    commands:
+      - npm install -g aws-cdk
+
   pre_build:
     commands:
+      - yum install -y git-lfs
+      - cp .github/cdk.context.github.json cdk.context.json
       - git submodule update --init --recursive
       - |
         if [[ "$BASE_REF" == "dev" ]]; then
-          echo "Building from source"
-          export BUILD_FROM_SOURCE=true
+          echo "Building from source for dev branch"
+          sed -i 's/"BUILD_FROM_SOURCE": false/"BUILD_FROM_SOURCE": true/' cdk.context.json
         else
-          echo "Not building from source"
+          echo "Not building from source for main branch"
         fi
-      - cp lib/accounts/target_account_template.json lib/accounts/target_account.json
-      - sed -i "s/1234567890123/$AWS_ACCOUNT/" lib/accounts/target_account.json
-      - sed -i "s/fake-alias/$NAME/" lib/accounts/target_account.json
-      - sed -i "s/us-west-1/$AWS_DEFAULT_REGION/" lib/accounts/target_account.json
-      - cat lib/accounts/target_account.json
-      - yum install -y git-lfs
+      - sed -i "s/1234567890123/$AWS_ACCOUNT/" cdk.context.json
+      - cat cdk.context.json
       - git lfs pull
       - git submodule foreach git lfs pull
-      - npm i
-      - npm install -g aws-cdk
+      - npm install
+
   build:
     commands:
       - cdk bootstrap --force
       - npm run deploy
+
   post_build:
     commands:
-      - echo Build completed on `date`
+      - echo "Build completed on $(date)"
+
