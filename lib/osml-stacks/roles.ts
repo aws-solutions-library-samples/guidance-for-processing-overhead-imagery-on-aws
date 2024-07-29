@@ -3,16 +3,12 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import {
-  MEHTTPRole,
-  MESMRole,
-  MRTaskRole,
-  OSMLAccount
-} from "osml-cdk-constructs";
+import { MEHTTPRole, MESMRole, MRTaskRole } from "osml-cdk-constructs";
+
+import { appConfig } from "../../bin/app_config";
 
 export interface OSMLStackProps extends StackProps {
   readonly env: Environment;
-  readonly account: OSMLAccount;
 }
 
 /**
@@ -32,26 +28,42 @@ export class OSMLRolesStack extends Stack {
    */
   constructor(parent: App, name: string, props: OSMLStackProps) {
     super(parent, name, {
-      terminationProtection: props.account.prodLike,
+      terminationProtection: appConfig.account.prodLike,
       ...props
     });
 
     // Create the model runner Fargate task role
     this.mrTaskRole = new MRTaskRole(this, "MRTaskRole", {
-      account: props.account,
-      roleName: "OSMLMRTaskRole"
+      account: appConfig.account,
+      roleName: `${appConfig.projectName}MRTaskRole`
     });
 
     // Create a SageMaker role for model hosted endpoints
     this.meSMRole = new MESMRole(this, "MESMRole", {
-      account: props.account,
-      roleName: "OSMLSageMakerEndpointRole"
+      account: appConfig.account,
+      roleName: `${appConfig.projectName}SageMakerEndpointRole`
     });
 
     // Create a new role for the HTTP endpoint
     this.httpEndpointRole = new MEHTTPRole(this, "HTTPEndpointTaskRole", {
-      account: props.account,
-      roleName: "OSMLHTTPEndpointTaskRole"
+      account: appConfig.account,
+      roleName: `${appConfig.projectName}HTTPEndpointTaskRole`
     });
   }
+}
+
+/**
+ * Deploys the roles stack for the OversightML environment within the specified AWS CDK application.
+ *
+ * @returns An instance of OSMLRolesStack, representing the deployed roles stack within the AWS CDK application.
+ */
+export function deployRoles(): OSMLRolesStack {
+  return new OSMLRolesStack(appConfig.app, `${appConfig.projectName}-Roles`, {
+    env: {
+      account: appConfig.account.id,
+      region: appConfig.account.region
+    },
+    description:
+      "Roles, Guidance for Overhead Imagery Inference on AWS (SO9240)"
+  });
 }

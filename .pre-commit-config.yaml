@@ -86,4 +86,5 @@ repos:
             package.json|
             package-lock.json|
             tsconfig.json|
+            cdk.context.json|
           )$

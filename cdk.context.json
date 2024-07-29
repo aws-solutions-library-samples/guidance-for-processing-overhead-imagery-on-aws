@@ -1,0 +1,26 @@
+{
+  "projectName": "OSML",
+  "account": {
+    "id": "1234567889123",
+    "region": "us-west-2",
+    "prodLike": false
+  },
+  "modelRunner": {
+    "deploy": true
+  },
+  "tileServer": {
+    "deploy": true
+  },
+  "dataIntake": {
+    "deploy": true
+  },
+  "dataCatalog": {
+    "deploy": true
+  },
+  "testModelEndpoints": {
+    "deploy": true
+  },
+  "testImagery": {
+    "deploy": true
+  }
+}
