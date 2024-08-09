@@ -217,7 +217,6 @@ To start a job, place an `ImageRequest` on the `ImageRequestQueue` by going into
 {
    "jobId": "<job_id>",
    "jobName": "<job_name>",
-   "jobArn": "arn:aws:oversightml:<YOUR REGION>:<YOUR ACCOUNT #>:ipj/<job_name>",
    "imageUrls": ["<image_url>"],
    "outputs": [
       {"type": "S3", "bucket": "<result_bucket_name>", "prefix": "<job_name>/"},
@@ -237,7 +236,6 @@ Below are additional details about each key-value pair in the image request:
 |-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | jobId                         | `<job_id>`                                                                                                                                                           | string               | Unique id for a job, ex: `testId1`                                                                                                                                                                                                                                                           |
 | jobName                       | `<job_name>`                                                                                                                                                         | string               | Name of the job, ex: `jobtest-testId1`                                                                                                                                                                                                                                                       |
-| jobArn                        | `arn:aws:oversightml:<YOUR REGION>:<YOUR ACCOUNT #>:ipj/<job_name>`                                                                                                  | string               | Arn which is responsible for communicating with OSML service. Insert your region, account #, and job_name. ex: `arn:aws:oversightml:us-west-2:0123456789:ipj/jobtest-testid1`                                                                                                                |
 | imageUrls                     | `["<image_url>"]`                                                                                                                                                    | list[string]         | List of S3 image path, which can be found by going to your S3 bucket, ex: `s3://test-images-0123456789/tile.tif`                                                                                                                                                                             |
 | outputs                       | ```{"type": "S3", "bucket": "<result_bucket_name>", "prefix": "<job_name>/"},```</br> ```{"type": "Kinesis", "stream": "<result_stream_name>", "batchSize": 1000}``` | dict[string, string] | Once the OSML has processed an image request, it will output its GeoJson files into two services, Kinesis and S3. The Kinesis and S3 are defined in `osml-cdk-constructs` package which can be found there. ex: `"bucket":"test-results-0123456789"` and `"stream":"test-stream-0123456789"` |
 | imageProcessor                | ```{"name": "<sagemaker_endpoint_name>", "type": "SM_ENDPOINT"}```                                                                                                   | dict[string, string] | Select a model that you want to run your image request against, you can find the list of models by going to AWS Console > SageMaker Console > Click `Inference` (left sidebar) > Click `Endpoints` > Copy the name of any model. ex: `aircraft`                                              |
@@ -254,7 +252,6 @@ Here is an example of a complete image request:
 {
    "jobId": "testid1",
    "jobName": "jobtest-testid1",
-   "jobArn": "arn:aws:oversightml:us-west-2:0123456789:ipj/test-testid1",
    "imageUrls": [ "s3://test-images-0123456789/tile.tif" ],
    "outputs": [
       { "type": "S3", "bucket": "test-results-0123456789", "prefix": "jobtest-testid1/" },
