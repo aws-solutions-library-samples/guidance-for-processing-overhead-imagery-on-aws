@@ -44,7 +44,7 @@ export class OSMLTestImageryStack extends Stack {
 /**
  * Deploys all necessary stacks for the OversightML Model Runner application within the specified AWS CDK application.
  * This includes roles, container stacks, data planes, auto-scaling configurations, model endpoints,
- * synchronization mechanisms, and monitoring dashboards tailored to the target environment.
+ * output sinks, and monitoring dashboards tailored to the target environment.
  *
  * @param vpcStack An instance of `OSMLVpcStack` representing the VPC configuration to be used by model runner.
  */
