@@ -18,20 +18,26 @@ import { deployTileServer } from "../lib/osml-stacks/tile_server";
 import { deployVpc } from "../lib/osml-stacks/vpc";
 import { appConfig } from "./app_config";
 
-let osmlRolesStack = undefined;
+// These are optional stacks required to be defined for upstream dependency injection.
 let diDataplaneStack = undefined;
+let rolesStack = undefined;
 
-// Deploy an optional role stack
-if (appConfig.modelRunner?.deploy) {
-  osmlRolesStack = deployRoles();
+// If we are deploying the SMEndpoints then we require this stack to correctly clean up the deployment.
+// Once the ticket bellow is resolved this can be removed when SM cleans up ENI's correctly.
+// https://github.com/aws-cloudformation/cloudformation-coverage-roadmap/issues/1327
+if (appConfig.testModelEndpoints?.deploy) {
+  rolesStack = deployRoles();
 }
 
 // Deploy required OSML networking infrastructure.
-const vpcStack = deployVpc(osmlRolesStack);
+const vpcStack = deployVpc();
+if (rolesStack) {
+  vpcStack.addDependency(rolesStack);
+}
 
 // Deploy the model runner component
 if (appConfig.modelRunner?.deploy) {
-  deployModelRunner(vpcStack, osmlRolesStack);
+  deployModelRunner(vpcStack);
 }
 
 // Deploy the tile server component
@@ -51,7 +57,13 @@ if (appConfig.dataCatalog?.deploy) {
 
 // Deploy test model endpoints
 if (appConfig.testModelEndpoints?.deploy) {
-  deployTestModelEndpoints(vpcStack, osmlRolesStack);
+  const testModelEndpointsStack = deployTestModelEndpoints(
+    vpcStack,
+    rolesStack?.smRole.role
+  );
+  if (rolesStack) {
+    testModelEndpointsStack.addDependency(rolesStack);
+  }
 }
 
 // Deploy test imagery

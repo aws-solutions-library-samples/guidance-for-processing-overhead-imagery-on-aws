@@ -6,10 +6,10 @@
     "prodLike": false
   },
   "modelRunner": {
-    "deploy": true,
+    "deploy": true
   },
   "tileServer": {
-    "deploy": true,
+    "deploy": true
   },
   "dataIntake": {
     "deploy": true

@@ -9,8 +9,8 @@ of configuration parameters available for various OSML constructs please refer t
 ## Define Configurations in `cdk.context.json`
 
 The `cdk.context.json` file allows you to specify configuration parameters for various components of your application.
-Below is an example configuration where we demonstrate renaming the model runner cluster, specifying a VPC
-to import, and which subnets to target for deploying into:
+Below is an example configuration where we demonstrate renaming the model runner cluster, specifying a custom role to 
+import for the model runner ECS task role, specifying a VPC to import, and which subnets to target for deploying into:
 
 ```json
 {
@@ -23,7 +23,8 @@ to import, and which subnets to target for deploying into:
   "modelRunner": {
     "deploy": true,
     "config": {
-      "MR_CLUSTER_NAME": "TEST",
+      "ECS_TASK_ROLE_NAME": "CUSTOM_TASK_ROLE_NAME",
+      "MR_CLUSTER_NAME": "TEST_CLUSTER_NAME",
       "BUILD_FROM_SOURCE": true
     }
   },

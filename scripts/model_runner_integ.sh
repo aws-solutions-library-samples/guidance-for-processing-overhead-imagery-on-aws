@@ -32,7 +32,7 @@ run_test() {
     local model=$3
     local temp_output="temp_output.log"
 
-    echo "$description"
+    echo "$description..."
     python3 lib/osml-model-runner-test/bin/process_image.py --image "$image" --model "$model" > "$temp_output" 2>&1
 
     if [ $? -ne 0 ]; then
@@ -45,6 +45,7 @@ run_test() {
 
     # Clean up temporary output file if test succeeds
     rm -f "$temp_output"
+    echo "...success!"
 }
 
 # Run all desired model runner tests sequentially

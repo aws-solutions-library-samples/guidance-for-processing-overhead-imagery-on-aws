@@ -3,23 +3,20 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
+import { IRole } from "aws-cdk-lib/aws-iam";
 import {
-  MEHTTPRole,
-  MESMRole,
   METestEndpoints,
   METestEndpointsConfig,
   OSMLVpc
 } from "osml-cdk-constructs";
 
 import { appConfig } from "../../bin/app_config";
-import { OSMLRolesStack } from "./roles";
 import { OSMLVpcStack } from "./vpc";
 
 export interface TestModelEndpointsStackProps extends StackProps {
   readonly env: Environment;
   readonly osmlVpc: OSMLVpc;
-  readonly meSMRole?: MESMRole;
-  readonly meHTTPRole?: MEHTTPRole;
+  readonly smRole?: IRole;
 }
 
 export class TestModelEndpointsStack extends Stack {
@@ -42,8 +39,7 @@ export class TestModelEndpointsStack extends Stack {
     this.resources = new METestEndpoints(this, "MREndpoints", {
       account: appConfig.account,
       osmlVpc: props.osmlVpc,
-      smRole: props.meSMRole?.role,
-      httpEndpointRole: props.meHTTPRole?.role,
+      smRole: props.smRole,
       config: appConfig.testModelEndpoints?.config
         ? new METestEndpointsConfig(appConfig.testModelEndpoints.config)
         : undefined
@@ -56,12 +52,12 @@ export class TestModelEndpointsStack extends Stack {
  * This includes roles, container stacks, data planes, auto-scaling configurations, and test model endpoints.
  *
  * @param vpcStack An instance of `OSMLVpcStack` representing the VPC configuration to be used by the test model endpoints.
- * @param osmlRolesStack An instance of `OSMLRolesStack` to be used by other stacks for role configurations.
+ * @param smRole A role to use for provisioning the SMTestEndpoints.
  */
 export function deployTestModelEndpoints(
   vpcStack: OSMLVpcStack,
-  osmlRolesStack: OSMLRolesStack | undefined = undefined
-) {
+  smRole: IRole | undefined = undefined
+): TestModelEndpointsStack {
   // Deploy test model endpoints to host the model container.
   const modelEndpointsStack = new TestModelEndpointsStack(
     appConfig.app,
@@ -71,16 +67,13 @@ export function deployTestModelEndpoints(
         account: appConfig.account.id,
         region: appConfig.account.region
       },
+      smRole: smRole,
       osmlVpc: vpcStack.resources,
-      meSMRole: osmlRolesStack?.meSMRole,
-      meHTTPRole: osmlRolesStack?.httpEndpointRole,
       description:
         "OSML Test Model Endpoints, Guidance for Processing Overhead Imagery on AWS (SO9240)"
     }
   );
   modelEndpointsStack.addDependency(vpcStack);
 
-  if (osmlRolesStack) {
-    modelEndpointsStack.addDependency(osmlRolesStack);
-  }
+  return modelEndpointsStack;
 }
