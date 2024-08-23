@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright 2024 Amazon.com, Inc. or its affiliates.
+#
 
 set -e  # Exit immediately if a command exits with a non-zero status
 set -o pipefail  # Exit if any part of a pipeline fails
@@ -37,26 +40,42 @@ trap 'handle_error' ERR
 # Grab the account id for the loaded AWS credentials
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
-# Check if the account ID was successfully retrieved
+# Check if the account ID was successfully retrieved.
+# If not, prompt the user for the account ID.
 if [ -z "$ACCOUNT_ID" ]; then
-    echo "ERROR: Failed to retrieve AWS Account ID."
-    exit 1
+    read -p "Please enter your AWS Account ID: " account_id
+    if [ -z "$account_id" ]; then
+        echo "ERROR: AWS Account ID is required."
+        exit 1
+    else
+        ACCOUNT_ID=$account_id
+    fi
 fi
 
-# Check if the account ID was successfully retrieved
+# Check AWS_REGION, aws configure, then AWS_DEFAULT_REGION to determine the region.
+# If none are set, prompt the user for the AWS_REGION.
 if [ -z "$AWS_REGION" ]; then
     {
         AWS_REGION=$(aws configure get region)
     } || {
-        echo "ERROR: Failed to get AWS_REGION ENV variable."
-        exit 1
+        if [ -n "$AWS_DEFAULT_REGION" ]; then
+            AWS_REGION=$AWS_DEFAULT_REGION
+        else
+            read -p "Could not find region. Enter the AWS region (ex. us-west-2): " user_region
+            if [ -n "$user_region" ]; then
+                AWS_REGION=$user_region
+            else
+                echo "ERROR: AWS region is required."
+                exit 1
+            fi
+        fi
     }
 fi
 
 # Print the starting banner
 print_banner
 
-# Creat the lambda test payload
+# Create the lambda test payload
 echo "{\"image_uri\": \"s3://osml-test-images-$ACCOUNT_ID/small.tif\"}" > tmp_payload.json
 
 echo "Invoking the Lambda function 'TSTestRunner' with payload from 'payload.json' in the region '$AWS_REGION'..."
