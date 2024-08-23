@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright 2024 Amazon.com, Inc. or its affiliates.
+#
 
 set -e  # Exit immediately if a command exits with a non-zero status
 set -o pipefail  # Exit if any part of a pipeline fails
