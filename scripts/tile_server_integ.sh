@@ -43,20 +43,35 @@ if [ -z "$ACCOUNT_ID" ]; then
     exit 1
 fi
 
+# Check if the account ID was successfully retrieved
+if [ -z "$AWS_REGION" ]; then
+    {
+        AWS_REGION=$(aws configure get region)
+    } || {
+        echo "ERROR: Failed to get AWS_REGION ENV variable."
+        exit 1
+    }
+fi
+
 # Print the starting banner
 print_banner
 
-# Creat the lambda test paylod
-echo "{\"image_uri\": \"s3://osml-test-images-$ACCOUNT_ID/small.tif\"}" > /tmp/payload.json
+# Creat the lambda test payload
+echo "{\"image_uri\": \"s3://osml-test-images-$ACCOUNT_ID/small.tif\"}" > tmp_payload.json
+
+echo "Invoking the Lambda function 'TSTestRunner' with payload from 'payload.json' in the region '$AWS_REGION'..."
 
 # Invoke the Lambda function with the payload
-log_result=$(aws lambda invoke --region "$AWS_DEFAULT_REGION" \
+log_result=$(aws lambda invoke --region "$AWS_REGION" \
                                --function-name "TSTestRunner" \
-                               --payload fileb:///tmp/payload.json \
+                               --payload fileb://tmp_payload.json \
                                --log-type Tail /dev/null \
                                --cli-read-timeout 0 \
                                --query 'LogResult' \
                                --output text | base64 --decode)
+
+# Clean up the temporary payload file
+rm tmp_payload.json
 
 # Decode the log result and check for success
 if echo "$log_result" | grep -q "Success: 100.00%"; then

@@ -3,7 +3,6 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { IRole } from "aws-cdk-lib/aws-iam";
 import { OSMLVpc, TSDataplane, TSDataplaneConfig } from "osml-cdk-constructs";
 
 import { appConfig } from "../../bin/app_config";
@@ -12,7 +11,6 @@ import { OSMLVpcStack } from "./vpc";
 export interface TileServerStackProps extends StackProps {
   readonly env: Environment;
   readonly osmlVpc: OSMLVpc;
-  readonly taskRole?: IRole;
 }
 
 export class TileServerStack extends Stack {
@@ -34,7 +32,6 @@ export class TileServerStack extends Stack {
     // Create the tile server application dataplane
     this.resources = new TSDataplane(this, "TSDataplane", {
       account: appConfig.account,
-      taskRole: props.taskRole,
       osmlVpc: props.osmlVpc,
       config: appConfig.tileServer?.config
         ? new TSDataplaneConfig(appConfig.tileServer.config)
@@ -53,9 +50,7 @@ export class TileServerStack extends Stack {
  *
  * @param vpcStack An instance of `OSMLVpcStack` representing the VPC configuration to be used by tile server.
  */
-export function deployTileServer(
-  vpcStack: OSMLVpcStack
-): TileServerStack {
+export function deployTileServer(vpcStack: OSMLVpcStack): TileServerStack {
   return new TileServerStack(
     appConfig.app,
     `${appConfig.projectName}-TileServer`,

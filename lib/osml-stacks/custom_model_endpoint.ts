@@ -21,8 +21,7 @@ import { OSMLVpcStack } from "./vpc";
 export interface CustomModelEndpointStackProps extends StackProps {
   readonly env: Environment;
   readonly osmlVpc: OSMLVpc;
-  readonly meSMRole?: MESMRole;
-  readonly meHTTPRole?: MEHTTPRole;
+  readonly smRole?: MESMRole;
 }
 
 export class CustomModelEndpointStack extends Stack {
@@ -93,8 +92,7 @@ export function deployCustomModelEndpoint(
         region: appConfig.account.region
       },
       osmlVpc: vpcStack.resources,
-      meSMRole: osmlRolesStack?.meSMRole,
-      meHTTPRole: osmlRolesStack?.httpEndpointRole,
+      smRole: osmlRolesStack?.smRole,
       description:
         "OSML Custom Model Endpoint, Guidance for Processing Overhead Imagery on AWS (SO9240)"
     }

@@ -3,7 +3,6 @@
  */
 
 import { App, Environment, Stack, StackProps } from "aws-cdk-lib";
-import { IRole } from "aws-cdk-lib/aws-iam";
 import { MRDataplane, MRDataplaneConfig, OSMLVpc } from "osml-cdk-constructs";
 
 import { appConfig } from "../../bin/app_config";
@@ -13,7 +12,6 @@ import { OSMLVpcStack } from "./vpc";
 export interface ModelRunnerStackProps extends StackProps {
   readonly env: Environment;
   readonly osmlVpc: OSMLVpc;
-  readonly taskRole: IRole | undefined;
 }
 
 export class ModelRunnerStack extends Stack {
@@ -35,7 +33,6 @@ export class ModelRunnerStack extends Stack {
     // Create the model runner application dataplane
     this.resources = new MRDataplane(this, "MRDataplane", {
       account: appConfig.account,
-      taskRole: props.taskRole,
       osmlVpc: props.osmlVpc,
       config: appConfig.modelRunner?.config
         ? new MRDataplaneConfig(appConfig.modelRunner.config)
@@ -65,7 +62,6 @@ export function deployModelRunner(
         account: appConfig.account.id,
         region: appConfig.account.region
       },
-      taskRole: osmlRolesStack?.mrTaskRole.role,
       osmlVpc: vpcStack.resources,
       description:
         "OSML Model Runner, Guidance for Processing Overhead Imagery on AWS (SO9240)"
