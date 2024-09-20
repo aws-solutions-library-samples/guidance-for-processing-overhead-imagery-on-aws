@@ -33,44 +33,49 @@ run_test() {
     local description=$1
     local image=$2
     local model=$3
-    local temp_output="temp_output.log"
+    local region=$4
 
     echo "$description..."
-    python3 lib/osml-model-runner-test/bin/process_image.py --image "$image" --model "$model" > "$temp_output" 2>&1
+    python3 lib/osml-model-runner-test/bin/process_image.py --image "$image" --model "$model" --region "$region"
 
     if [ $? -ne 0 ]; then
         print_test_failed
         echo "Error: $description failed."
         echo "Output:"
-        cat "$temp_output"
         exit 1
     fi
 
     # Clean up temporary output file if test succeeds
-    rm -f "$temp_output"
     echo "...success!"
 }
+
+if [ -z "$AWS_DEFAULT_REGION" ]; then
+    AWS_DEFAULT_REGION=$(aws configure get region) || {
+        echo "ERROR: AWS region is required."
+        exit 1
+    }
+fi
 
 # Run all desired model runner tests sequentially
 print_banner
 
-run_test "Run small.tif against centerpoint model" "small" "centerpoint"
+run_test "Run small.tif against centerpoint model" "small" "centerpoint" $AWS_DEFAULT_REGION
 
-run_test "Run meta.ntf against centerpoint model" "meta" "centerpoint"
+run_test "Run meta.ntf against centerpoint model" "meta" "centerpoint" $AWS_DEFAULT_REGION
 
-run_test "Run large.tif against flood model" "large" "flood"
+run_test "Run large.tif against flood model" "large" "flood" $AWS_DEFAULT_REGION
 
-run_test "Run tile.ntf against aircraft model" "tile_ntf" "aircraft"
+run_test "Run tile.ntf against aircraft model" "tile_ntf" "aircraft" $AWS_DEFAULT_REGION
 
-run_test "Run tile.tif against aircraft model" "tile_tif" "aircraft"
+run_test "Run tile.tif against aircraft model" "tile_tif" "aircraft" $AWS_DEFAULT_REGION
 
-run_test "Run sicd-capella-chip.ntf against centerpoint model" "sicd_capella_chip_ntf" "centerpoint"
+run_test "Run sicd-capella-chip.ntf against centerpoint model" "sicd_capella_chip_ntf" "centerpoint" $AWS_DEFAULT_REGION
 
-run_test "Run sicd-umbra-chip.ntf against centerpoint model" "sicd_umbra_chip_ntf" "centerpoint"
+run_test "Run sicd-umbra-chip.ntf against centerpoint model" "sicd_umbra_chip_ntf" "centerpoint" $AWS_DEFAULT_REGION
 
-run_test "Run sicd-interferometric-hh.nitf against centerpoint model" "sicd_interferometric_hh_ntf" "centerpoint"
+run_test "Run sicd-interferometric-hh.nitf against centerpoint model" "sicd_interferometric_hh_ntf" "centerpoint" $AWS_DEFAULT_REGION
 
-run_test "Run wbid.nitf against centerpoint model" "wbid" "centerpoint"
+run_test "Run wbid.nitf against centerpoint model" "wbid" "centerpoint" $AWS_DEFAULT_REGION
 
 print_test_passed
 
