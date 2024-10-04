@@ -92,15 +92,13 @@ log_result=$(aws lambda invoke --region "$AWS_REGION" \
 # Clean up the temporary payload file
 rm tmp_payload.json
 
-# Print out the logs
-echo "$log_result"
-
 # Decode the log result and check for success
 if echo "$log_result" | grep -q "Success: 100.00%"; then
+    echo "$log_result" | sed -n '/^Test Summary/,/Success: [0-9]\+\.[0-9]\+%/p'
     print_test_passed
     exit 0
 else
+    echo "$log_result" | sed -n '/^{.*"message":/p' | jq -r '.message' | sed 's/\\n/\n/g'
     print_test_failed
-    echo "$log_result"
     exit 1
 fi
