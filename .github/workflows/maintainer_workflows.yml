@@ -1,0 +1,39 @@
+# Workflows managed by aws-solutions-library-samples maintainers
+name: Maintainer Workflows
+
+on:
+  # Trigger workflows on push or pull request events for the "main" branch
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+    types:
+      - opened
+      - reopened
+      - edited
+
+jobs:
+  CheckSolutionId:
+    name: Validate Solution ID
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Validate Solution ID using the script
+      - name: Validate Solution ID
+        run: |
+          # Ensure the script is executable
+          chmod +x ./.github/solutionid_validator.sh
+          # Run the solution ID validator script with the provided solution ID
+          ./.github/solutionid_validator.sh "${{ vars.SOLUTIONID }}"
+
+      # Optional Step: Handle failures explicitly
+      - name: Handle Failure (optional)
+        if: failure()
+        run: |
+          echo "Solution ID validation failed. Please ensure the SOLUTIONID is correct."
