@@ -18,6 +18,7 @@ This Guidance demonstrates how to process remote sensing imagery using machine l
     + [Permission Denied for submodules](#permission-denied-for-submodules)
     + [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset)
     + [error TS2307: Cannot find module ‘osml-cdk-constructs’](#error-ts2307-cannot-find-module-osml-cdk-constructs)
+    + [OSML-DCDataplane Stack Creation Failure](#osml-dcdataplane-stack-creation-failure)
 - [Support & Feedback](#support--feedback)
 - [Security](#security)
 - [License](#license)
@@ -110,7 +111,6 @@ Known good configuration for EC2 instance:
 1. If you want to validate the deployment with integration tests:
 
     ```
-    npm run setup
     npm run integ
     ```
 
@@ -293,10 +293,7 @@ This error indicates that the deployment could not proceed because the required 
 OpenSearch Service to access your VPC is not enabled. This is actually an issue with dependency on the custom
 cloud formation resources used to provision the role; see [link](https://github.com/aws/aws-cdk/issues/27203)
 
-**Resolution:**
-
-1. **Re-run the Deployment:**
-    - Simply re-running your deployment should resolve the issue as the service-linked role will be automatically enabled during the subsequent deployment attempt.
+**Resolution:** Simply re-running your deployment should resolve the issue as the service-linked role will be automatically enabled during the subsequent deployment attempt.
 
 ## Support & Feedback
 
