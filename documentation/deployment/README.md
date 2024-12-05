@@ -47,6 +47,7 @@ import for the model runner ECS task role, specifying a VPC to import, and which
     - `id`: The target AWS account ID.
     - `region`: The target AWS region.
     - `prodLike`: Whether the environment is production-like - this will effect things like resource retention.
+    - `isADC`: Whether the environment is in a special region or not
 - `modelRunner`,`tileServer`, `dataIntake`, `dataCatalog`, `vpc`: Component level specifications.
     - `deploy`: Whether to deploy the component.
     - `buildFromSource`: Whether to build the component from source.
@@ -156,7 +157,6 @@ containers from source for more specialized needs. Below is an example of how to
     "modelName": "your-model-name",
     "instance_type": "ml.m5.large",
     "containerConfig": {
-      "CONTAINER_TAG": "your-container-tag",
       "CONTAINER_URI": "your-container-uri",
       "CONTAINER_BUILD_PATH": "your-build-path",
       "CONTAINER_BUILD_TARGET": "your-build-target",
@@ -190,28 +190,27 @@ Before enabling authentication, you will need the following:
 
 ### Setup Instructions
 1. Update authentication configuration:
-  - Copy this object template into the `auth` property of your `cdk.context.json` such as:
-    ```
-      auth: {
-         "audience": "<your Oauth2/OpenID Connect>",
-         "authority": "<your issuer IdP url>"
-      }
-    ```
+   - Copy this object template into the `auth` property of your `cdk.context.json` such as:
+      ```
+        auth: {
+          "audience": "<your Oauth2/OpenID Connect>",
+          "authority": "<your issuer IdP url>"
+        }
+      ```
 
 1. To validate:
-  - Upon successful deployment, go to your AWS Account -> API-GW -> find `<service>Dataplane` (ie: `TSDataplane`) stack > `Outputs` tab, you will see an output similar to:
-    ```
-    TSDataplaneTileServerRestApiRestApiTileServerRestApiEndpoint<id> | <url>
-    ```
-  - Then you can invoke the URL using the authentication token! Ensure that sure you are passing `"Authorization: Bearer $TOKEN"` as a header for any curl request you make. For example:
+    - Upon successful deployment, go to your AWS Account -> API-GW -> find `<service>Dataplane` (ie: `TSDataplane`) stack > `Outputs` tab, you will see an output similar to:
+      ```
+      TSDataplaneTileServerRestApiRestApiTileServerRestApiEndpoint<id> | <url>
+      ```
+    - Then you can invoke the URL using the authentication token! Ensure that sure you are passing `"Authorization: Bearer $TOKEN"` as a header for any curl request you make. For example:
 
-     ```
-     curl -X "GET" "<api endpoint>" -H "Authorization: Bearer $TOKEN"
-     ```
+      ```
+      curl -X "GET" "<api endpoint>" -H "Authorization: Bearer $TOKEN"
+      ```
 
 ## Summary
 
-By following this guide, you can easily configure various components of your application using the `cdk.context.json` file.
-This approach centralizes your configuration, making it easier to manage and update settings for your application.
+By following this guide, you can easily configure various components of your application using the `cdk.context.json` file. This approach centralizes your configuration, making it easier to manage and update settings for your application.
 
 For more details on the available configurations and options, refer to the documentation provided by the `osml-cdk-constructs` package.
