@@ -36,6 +36,16 @@ destroy_minimal_stacks() {
     local STACK_LIST=".*TileServer.*|.*Test-ModelEndpoints.*|.*ModelRunner.*|.*DataIntake.*|.*DataCatalog.*"
     cdk list | sort -r | grep -E "$STACK_LIST" > stack_list.txt
 
+    # This is to speed up the AWS CloudFormation delete-stack
+    # so we can start deleting all stacks at once
+    echo "Performing AWS CloudFormation delete-stack for matching stacks..."
+    for stack_name in $(cat stack_list.txt); do
+        if [[ "$stack_name" =~ $STACK_LIST ]]; then
+            echo "Deleting CloudFormation stack $stack_name..."
+            aws cloudformation delete-stack --stack-name "$stack_name"
+        fi
+    done
+
     for stack_name in $(cat stack_list.txt); do
         echo "Destroying stack $stack_name..."
         cdk destroy "$stack_name" --force
