@@ -37,9 +37,6 @@
     }
   },
   "testImagery": {
-    "deploy": true,
-    "config": {
-      "BUILD_FROM_SOURCE": false
-    }
+    "deploy": true
   }
 }
