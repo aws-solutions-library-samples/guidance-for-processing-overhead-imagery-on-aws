@@ -27,12 +27,7 @@ phases:
 
   build:
     commands:
-      - |
-        if [[ "$BASE_REF" == "dev" ]]; then
-          npm run destroy:minimal
-        else
-          npm run destroy
-        fi
+      - npm run destroy
 
   post_build:
     commands:

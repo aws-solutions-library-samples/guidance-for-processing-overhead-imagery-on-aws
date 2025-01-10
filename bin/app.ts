@@ -47,12 +47,12 @@ if (appConfig.tileServer?.deploy) {
 
 // Deploy the data intake component.
 if (appConfig.dataIntake?.deploy) {
-  diDataplaneStack = deployDataIntake(vpcStack);
+  deployDataIntake(vpcStack);
 }
 
 // Deploy the STAC component
 if (appConfig.dataCatalog?.deploy) {
-  deployDataCatalog(vpcStack, diDataplaneStack?.resources.stacTopic);
+  deployDataCatalog(vpcStack);
 }
 
 // Deploy test model endpoints
