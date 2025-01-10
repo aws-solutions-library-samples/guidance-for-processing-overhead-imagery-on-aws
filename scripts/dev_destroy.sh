@@ -1,83 +1,72 @@
-#!/bin/sh
-#
+#!/bin/bash
+
 # Copyright 2024 Amazon.com, Inc. or its affiliates.
-#
+
+# Script to destroy specific OSML CDK stacks.
 
 print_banner() {
     echo "==============================="
-    echo "   Destroying OSML Stacks       "
+    echo "   Destroying OSML Stacks      "
     echo "==============================="
 }
-
 
 print_completion_message() {
     echo "==============================="
-    echo "  CDK Stack Destroy Completed   "
+    echo "  CDK Stack Destroy Completed  "
+    echo "          All done!            "
     echo "==============================="
-    echo "          All done!             "
-    echo "==============================="
 }
 
-# Function to display usage information
-usage() {
-    echo "Usage: $0 <full|minimal>"
-    exit 1
+# List and filter stacks for destruction
+list_and_filter_stacks() {
+    local stack_pattern=".*Test-Imagery.*|.*TileServer.*|.*Test-ModelEndpoints.*|.*ModelRunner.*|.*DataIntake.*|.*DataCatalog.*"
+    cdk list | sort -r | grep -E "$stack_pattern" > stack_list.txt
 }
 
-# Function to list all stacks
-list_all_stacks() {
-    cdk list | sort -r > stack_list.txt
+# Perform AWS CloudFormation deletion for all matching stacks
+delete_cloudformation_stacks() {
+    echo "Initiating AWS CloudFormation delete-stack in parallel for OSML component stacks..."
+    while IFS= read -r stack_name; do
+        (
+            echo "Deleting CloudFormation stack: $stack_name"
+            if aws cloudformation delete-stack --stack-name "$stack_name"; then
+                echo "Completed deletion of stack: $stack_name"
+            else
+                echo "Failed to delete stack: $stack_name"
+            fi
+        ) &
+    done < stack_list.txt
+
+    # Wait for all background jobs to complete
+    echo "Waiting for delete-stack commands to completed..."
+    wait
+    echo "All CloudFormation delete-stack commands completed."
 }
 
-# Function to list and destroy minimal stacks
-destroy_minimal_stacks() {
-    echo "Executing minimal action..."
-
-    local STACK_LIST=".*TileServer.*|.*Test-ModelEndpoints.*|.*ModelRunner.*|.*DataIntake.*|.*DataCatalog.*"
-    cdk list | sort -r | grep -E "$STACK_LIST" > stack_list.txt
-
-    # This is to speed up the AWS CloudFormation delete-stack
-    # so we can start deleting all stacks at once
-    echo "Performing AWS CloudFormation delete-stack for matching stacks..."
-    for stack_name in $(cat stack_list.txt); do
-        if [[ "$stack_name" =~ $STACK_LIST ]]; then
-            echo "Deleting CloudFormation stack $stack_name..."
-            aws cloudformation delete-stack --stack-name "$stack_name"
-        fi
-    done
-
-    for stack_name in $(cat stack_list.txt); do
-        echo "Destroying stack $stack_name..."
-        cdk destroy "$stack_name" --force
-    done
-
-    print_completion_message
-    exit 0
-}
-
-
-# Function to destroy all stacks in sequence
-destroy_all_stacks() {
-    echo "Executing full destroy action..."
+# Destroy CDK stacks
+cdk_destroy() {
+    echo "Starting CDK stack destruction to clean up remaining stacks..."
     cdk destroy --all --force
-    print_completion_message
-    exit 0
 }
 
 # Main script logic
+main() {
+    print_banner
 
-# Check if the user provided an argument
-if [ -z "$1" ]; then
-    usage
-fi
+    echo "Listing and filtering stacks for destruction..."
+    list_and_filter_stacks
 
-# Determine the action based on the user input
-if [ "$1" = "full" ]; then
-    destroy_all_stacks
-elif [ "$1" = "minimal" ]; then
-    destroy_minimal_stacks
-else
-    usage
-fi
+    if [[ -s stack_list.txt ]]; then
+        delete_cloudformation_stacks
+        cdk_destroy
+        print_completion_message
+    else
+        echo "No stacks found matching the criteria."
+    fi
 
-exit 1
+    # Cleanup
+    rm -f stack_list.txt
+}
+
+# Execute the script
+main
