@@ -1,0 +1,27 @@
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python=3.10.15
+- boto3=1.28.57
+- s3fs=2024.10.0
+- pandas=1.5.3
+- geopandas=1.0.1
+- pyogrio=0.10.0
+- rasterio
+- matplotlib=3.9.2
+- yaml=0.2.5
+- numpy=1.26.4
+- fiona=1.10.1
+- shapely=2.0.6
+- jsonschema=4.23.0
+- requests=2.32.3
+- sagemaker=2.232.3
+- pytest=7.3.1
+- pip=24.3.1
+- nodejs=20.17.0
+- git=2.40.1
+- pip:
+  - earthpy=0.9.4
+  - awscli==1.36.13
+name: osml
