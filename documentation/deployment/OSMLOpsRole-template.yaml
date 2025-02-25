@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "IAM role for OSML deployment and operation via SageMaker."
+
+Resources:
+  OSMLOpsRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Description: "Role for OSML workflows on SageMaker."
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/IAMFullAccess"
+        - "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+      Policies:
+        - PolicyName: "AdditionalPermissions"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "sqs:*"
+                  - "sns:*"
+                  - "iam:Get*"
+                  - "iam:List*"
+                  - "iam:PassRole"
+                  - "iam:SimulatePrincipalPolicy"
+                  - "kms:*"
+                  - "ssm:GetParameter"
+                  - "ssm:DescribeParameters"
+                  - "elasticloadbalancing:*"
+                  - "autoscaling:*"
+                  - "cloudformation:*"
+                  - "route53:*"
+                Resource: "*"
+
+Outputs:
+  RoleArn:
+    Description: "ARN of the provisioned IAM role for OSML workflows."
+    Value: !GetAtt OSMLOpsRole.Arn

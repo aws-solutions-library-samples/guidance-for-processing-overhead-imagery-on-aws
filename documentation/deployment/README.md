@@ -1,12 +1,149 @@
-# Guide to Configuring Your Deployment
+# Guide to Deploying OSML
 
+This guide provides step-by-step instructions to:
+1. Provision the required IAM role using the provided CloudFormation template.
+2. Provision a SageMaker Notebook Instance with the created Role. 
+3. Bootstrap the notebook instance with required dependencies.
+4. Configure and deploy OSML into your account.
+
+---
+
+## 1: Provision the SageMaker Role
+
+### Option 1: Using the AWS Management Console
+1. **Upload the CloudFormation Template**:
+    - Navigate to the AWS Management Console.
+    - Go to **CloudFormation** (Search for "CloudFormation" in the AWS Services search bar).
+
+2. **Create a New Stack**:
+    - Click **Create stack** and select **Upload a template file**.
+    - Upload the `OSMLOpsRole-template.yaml` file.
+    - Click **Next**.
+
+3. **Configure Stack Details**:
+    - **Stack Name**: Enter a unique name for the stack (e.g., `OSMLOpsRoleStack`).
+    - **Parameters**: No additional parameters are required for this template.
+
+4. **Review and Create**:
+    - Review the stack configuration.
+    - Acknowledge the capabilities to create IAM resources.
+    - Click **Create stack**.
+
+5. **Wait for the Stack to Complete**:
+    - Wait for the stack status to change to `CREATE_COMPLETE`.
+    - Note the **RoleArn** from the stack’s outputs. This will be the ARN of the provisioned role.
+
+---
+
+### Option 2: Using the AWS CLI
+
+1. **Ensure AWS CLI is Installed and Configured**:
+    - Install the AWS CLI if it's not already installed ([Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)).
+    - Verify your credentials and default region are configured:
+      ```bash
+      aws configure
+      ```
+
+2. **Validate the CloudFormation Template**:
+    - Before creating the stack, validate the template to ensure there are no syntax errors:
+      ```bash
+      aws cloudformation validate-template --template-body file://OSMLOpsRole-template.yaml
+      ```
+
+3. **Create the CloudFormation Stack**:
+    - Run the following command to create the stack:
+      ```bash
+      aws cloudformation create-stack \
+        --stack-name OSMLOpsRoleStack \
+        --template-body file://OSMLOpsRole-template.yaml \
+        --capabilities CAPABILITY_NAMED_IAM
+      ```
+
+4. **Monitor the Stack Creation**:
+    - Use the following command to track the stack's status:
+      ```bash
+      aws cloudformation describe-stacks --stack-name OSMLOpsRoleStack
+      ```
+
+5. **Retrieve the Role ARN**:
+    - Once the stack status is `CREATE_COMPLETE`, retrieve the role ARN with:
+      ```bash
+      aws cloudformation describe-stacks \
+        --stack-name OSMLOpsRoleStack \
+        --query "Stacks[0].Outputs[?OutputKey=='RoleArn'].OutputValue" \
+        --output text
+      ```
+
+---
+
+### Notes
+- Both methods achieve the same outcome. Use the AWS CLI for automation or scripting and the AWS Management Console for a more guided experience.
+- Ensure you have sufficient IAM permissions to create resources via CloudFormation (e.g., `iam:CreateRole`, `cloudformation:CreateStack`).
+- For additional details on AWS CLI commands, refer to the [AWS CLI Command Reference](https://docs.aws.amazon.com/cli/latest/reference/).
+
+---
+
+## 2: Provision the SageMaker Notebook Instance
+
+### Steps
+
+1. **Log in to the AWS Management Console**:
+    - Navigate to [AWS SageMaker](https://console.aws.amazon.com/sagemaker/).
+
+2. **Open the Notebook Instances Page**:
+    - From the SageMaker dashboard, select **Notebook instances** in the left-hand menu.
+
+3. **Create a New Notebook Instance**:
+    - Click the **Create notebook instance** button at the top of the page.
+
+4. **Configure the Notebook Instance**:
+    - **Notebook instance name**: Enter a unique name (e.g., `osml-notebook`).
+    - **Instance type**: Choose an instance type based on your workload (e.g., `ml.t3.medium` for lightweight tasks or `ml.p3.2xlarge` for GPU-based tasks).
+    - **IAM role**:
+        - Select the role provisioned using the CloudFormation stack (e.g., `OSMLOpsRole`).
+    - **Volume size**: Set the storage size (default: 5 GB or more, based on your requirements).
+
+5. **Review and Create**:
+    - Click **Create notebook instance**.
+    - Wait for the instance status to transition to **InService**.
+
+---
+
+## 3: Bootstrap the Notebook Instance
+
+### Steps
+
+1. **Clone the Repository**:
+    - Open a terminal in the SageMaker Notebook instance and clone the repository containing the bootstrap script:
+      ```bash
+      git clone https://github.com/your-org/guidance-for-processing-overhead-imagery-on-aws.git
+      cd guidance-for-processing-overhead-imagery-on-aws
+      ```
+
+2. **Run the Bootstrap Script**:
+    - Execute the `sm_bootstrap_conda.sh` script to set up the environment:
+      ```bash
+      npm run sm:boostrap
+      ```
+
+3. **Verify the Setup**:
+    - After the script finishes, verify the environment setup:
+      ```bash
+      conda list
+      git lfs --version
+      cdk --version
+      ```
+
+---
+
+## 4. Configuring and Deploying OSML
 This guide will help you configure various components of your AWS CDK application using the `cdk.context.json` file.
 By following these steps, you can customize the settings for your deployment without making any code updates.
 We will use the VPC as a use case example and also demonstrate the Model Runner Dataplane deployment. For a full list
 of configuration parameters available for various OSML constructs please refer to the published documentation such as the 
 [MRDataplaneConfig](https://aws-solutions-library-samples.github.io/osml-cdk-constructs/classes/MRDataplaneConfig.html).
 
-## Define Configurations in `cdk.context.json`
+### Define Configurations in `cdk.context.json`
 
 The `cdk.context.json` file allows you to specify configuration parameters for various components of your application.
 Below is an example configuration where we demonstrate renaming the model runner cluster, specifying a custom role to 
@@ -40,7 +177,7 @@ import for the model runner ECS task role, specifying a VPC to import, and which
 }
 ```
 
-### Configuration Parameters
+#### Configuration Parameters
 
 - `projectName`: The name of the project - this will be used to tag stack names.
 - `account`: AWS account configuration.
@@ -53,14 +190,14 @@ import for the model runner ECS task role, specifying a VPC to import, and which
     - `buildFromSource`: Whether to build the component from source.
     - `config`: Each component has a configuration class that be used to customize its CDK resources.
 
-## Understanding the Configuration Parser
+### Understanding the Configuration Parser
 
 The `ConfigParser` class reads the configuration from the `cdk.context.json` file and makes it available for use in 
 your CDK stacks. Ensure your `config-parser.ts` includes the necessary structure to read these configurations.
 You do not need to implement this as a customer but a breakdown of how it works is provided her for your understanding;
 incase further customization is required.
 
-### Example `config-parser.ts`
+#### Example `config-parser.ts`
 
 ```typescript
 import { App } from "aws-cdk-lib";
@@ -100,11 +237,11 @@ export class AppConfig {
 export const appConfig = new AppConfig(new App());
 ```
 
-## Using the Configuration in Your CDK Stacks
+### Using the Configuration in Your CDK Stacks
 
 You can now use the `ConfigParser` to configure your VPC and other components based on the settings provided in the `cdk.context.json` file. Here is an example of how to use it in a CDK stack.
 
-### Example VPC Stack
+#### Example VPC Stack
 
 ```typescript
 import { App, Stack, StackProps } from 'aws-cdk-lib';
@@ -127,11 +264,11 @@ export class MyVpcStack extends Stack {
 }
 ```
 
-## Custom Model Deployment Configuration Instructions
+### Custom Model Deployment Configuration Instructions
 
 Follow the steps below to configure and deploy your custom model using the provided configuration classes and AWS CDK constructs.
 
-### Update the `cdk.context.json` File
+#### Update the `cdk.context.json` File
 
 Your `cdk.context.json` file contains the configuration details required for deploying your custom model. 
 You need to update this file with your specific configuration values. When configuring your custom model deployment, 
@@ -175,13 +312,13 @@ containers from source for more specialized needs. Below is an example of how to
 ```
 
 
-## Enabling Authentication
+### Enabling Authentication
 
 Currently, there are two services that supports authentication
 - Tile Sever
 - Data Catalog
 
-### Prerequisites
+#### Prerequisites
 
 Before enabling authentication, you will need the following:
 - OIDC Authentication Server
@@ -198,7 +335,7 @@ Before enabling authentication, you will need the following:
         }
       ```
 
-1. To validate:
+2. To validate:
     - Upon successful deployment, go to your AWS Account -> API-GW -> find `<service>Dataplane` (ie: `TSDataplane`) stack > `Outputs` tab, you will see an output similar to:
       ```
       TSDataplaneTileServerRestApiRestApiTileServerRestApiEndpoint<id> | <url>
@@ -208,9 +345,20 @@ Before enabling authentication, you will need the following:
       ```
       curl -X "GET" "<api endpoint>" -H "Authorization: Bearer $TOKEN"
       ```
+---
 
 ## Summary
 
-By following this guide, you can easily configure various components of your application using the `cdk.context.json` file. This approach centralizes your configuration, making it easier to manage and update settings for your application.
+By following this guide, you can easily configure various components of your application using the `cdk.context.json` file. 
+This approach centralizes your configuration, making it easier to manage and update settings for your application.
 
 For more details on the available configurations and options, refer to the documentation provided by the `osml-cdk-constructs` package.
+
+## Notes
+- Remember to stop or delete the notebook instance when not in use to avoid unnecessary charges.
+
+## Additional Resources
+
+- [AWS CloudFormation Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html)
+- [AWS SageMaker Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-setup-working-env.html)
+- [Conda Documentation](https://docs.conda.io/projects/conda/en/latest/)
