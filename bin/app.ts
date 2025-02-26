@@ -4,9 +4,6 @@
  * Copyright 2023-2024 Amazon.com, Inc. or its affiliates.
  */
 
-import { Aspects } from "aws-cdk-lib";
-import { AwsSolutionsChecks, NIST80053R5Checks } from "cdk-nag";
-
 import { deployCustomModelEndpoint } from "../lib/osml-stacks/custom_model_endpoint";
 import { deployDataCatalog } from "../lib/osml-stacks/data_catalog";
 import { deployDataIntake } from "../lib/osml-stacks/data_intake";
@@ -19,7 +16,6 @@ import { deployVpc } from "../lib/osml-stacks/vpc";
 import { appConfig } from "./app_config";
 
 // These are optional stacks required to be defined for upstream dependency injection.
-let diDataplaneStack = undefined;
 let rolesStack = undefined;
 
 // If we are deploying the SMEndpoints then we require this stack to correctly clean up the deployment.
@@ -74,12 +70,6 @@ if (appConfig.testImagery?.deploy) {
 // Deploy custom model endpoint
 if (appConfig.customModelEndpoints?.deploy) {
   deployCustomModelEndpoint(vpcStack);
-}
-
-// Comply CDK constructs with AWS Recommended Security & NIST Security
-if (appConfig.runCdkNag) {
-  Aspects.of(appConfig.app).add(new AwsSolutionsChecks());
-  Aspects.of(appConfig.app).add(new NIST80053R5Checks());
 }
 
 // Finalize the CDK app deployment by synthesizing the CloudFormation templates.

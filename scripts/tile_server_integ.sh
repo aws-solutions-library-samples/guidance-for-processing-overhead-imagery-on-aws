@@ -100,5 +100,7 @@ if echo "$log_result" | grep -q "Success: 100.00%"; then
     exit 0
 else
     print_test_failed
+    echo "Output:"
+    echo "$log_result"
     exit 1
 fi
