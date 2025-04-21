@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Amazon.com, Inc. or its affiliates.
+ * Copyright 2023-2025 Amazon.com, Inc. or its affiliates.
  */
 
 import { App } from "aws-cdk-lib";
@@ -84,6 +84,21 @@ export class AppConfig {
   dataCatalog: ComponentConfig;
 
   /**
+   * Configuration for the web app component.
+   */
+  webApp: ComponentConfig;
+
+  /**
+   * Configuration for the S3 API.
+   */
+  s3Api: ComponentConfig;
+
+  /**
+   * Configuration for the ModelRunner API.
+   */
+  modelRunnerApi: ComponentConfig;
+
+  /**
    * Configuration for the custom model endpoints component.
    */
   customModelEndpoints: CustomEndpointConfig;
@@ -122,6 +137,9 @@ export class AppConfig {
     this.tileServer = this.getContextValue("tileServer", true);
     this.dataIntake = this.getContextValue("dataIntake", true);
     this.dataCatalog = this.getContextValue("dataCatalog", true);
+    this.webApp = this.getContextValue("webApp", true);
+    this.s3Api = this.getContextValue("s3Api", true);
+    this.modelRunnerApi = this.getContextValue("modelRunnerApi", true);
     this.customModelEndpoints = this.getContextValue(
       "customModelEndpoints",
       true

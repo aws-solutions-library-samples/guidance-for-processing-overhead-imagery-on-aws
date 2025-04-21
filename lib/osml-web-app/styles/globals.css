@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* OpenLayers styles */
+.ol-control {
+    @apply bg-opacity-40 bg-white rounded p-1;
+}
+
+.ol-zoom {
+    @apply top-2 left-2;
+}
+
+.ol-zoom-in,
+.ol-zoom-out {
+    @apply bg-white hover:bg-gray-100 text-gray-700 w-8 h-8 flex items-center justify-center rounded;
+}
+
+.ol-zoom-in {
+    @apply mb-1;
+}
+
+/* Map container styles */
+.ol-viewport {
+    @apply outline-none;
+}
+
+.ol-attribution {
+    @apply text-sm;
+}
+
+.ol-popup {
+    position: absolute;
+    background-color: white;
+    filter: drop-shadow(0 0 1px rgba(0,0,0,0.2));
+    padding: 0;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0,0,0,0.2);
+    bottom: 12px;
+    left: -50px;
+    min-width: 200px;
+}
+
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+
+.ol-popup:before {
+    border-top-color: rgba(0,0,0,0.2);
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+
+.dark .ol-popup {
+    background-color: rgb(31, 41, 55);
+    color: white;
+}
+
+.dark .ol-popup:after {
+    border-top-color: rgb(31, 41, 55);
+}
+
+/* Adding dark mode ol support */
+@media (prefers-color-scheme: dark) {
+    .ol-control {
+        @apply bg-gray-800 bg-opacity-40;
+    }
+
+    .ol-zoom-in,
+    .ol-zoom-out {
+        @apply bg-gray-800 hover:bg-gray-700 text-gray-200;
+    }
+}
+
+/* Glove container styles */
+.cesium-widget-credits {
+    display: none !important;
+}
+
+
+/* custom components style */
+.opacity-slider-fill {
+    background: linear-gradient(to right, rgb(var(--background-color)), var(--slider-color));
+}
+
+:root {
+    --background-color: 255, 255, 255;
+    --slider-color: #ffff00;
+}
+
+.dark {
+    --background-color: 24, 24, 27;
+}
+

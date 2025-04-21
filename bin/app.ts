@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2023-2024 Amazon.com, Inc. or its affiliates.
+ * Copyright 2023-2025 Amazon.com, Inc. or its affiliates.
  */
 
 import { Aspects } from "aws-cdk-lib";
@@ -16,7 +16,10 @@ import { deployTestImagery } from "../lib/osml-stacks/test_imagery";
 import { deployTestModelEndpoints } from "../lib/osml-stacks/test_model_endpoints";
 import { deployTileServer } from "../lib/osml-stacks/tile_server";
 import { deployVpc } from "../lib/osml-stacks/vpc";
+import { deployWebApp } from "../lib/osml-stacks/web_ui";
 import { appConfig } from "./app_config";
+import { deployS3Api } from "../lib/osml-stacks/s3_api";
+import { deployModelRunnerApi } from "../lib/osml-stacks/model_runner_api";
 
 // These are optional stacks required to be defined for upstream dependency injection.
 let diDataplaneStack = undefined;
@@ -29,7 +32,7 @@ if (appConfig.testModelEndpoints?.deploy) {
   rolesStack = deployRoles();
 }
 
-// Deploy required OSML networking infrastructure.
+// Deploy required OSML networking infrastructure
 const vpcStack = deployVpc();
 if (rolesStack) {
   vpcStack.addDependency(rolesStack);
@@ -45,7 +48,7 @@ if (appConfig.tileServer?.deploy) {
   deployTileServer(vpcStack);
 }
 
-// Deploy the data intake component.
+// Deploy the data intake component
 if (appConfig.dataIntake?.deploy) {
   deployDataIntake(vpcStack);
 }
@@ -53,6 +56,21 @@ if (appConfig.dataIntake?.deploy) {
 // Deploy the STAC component
 if (appConfig.dataCatalog?.deploy) {
   deployDataCatalog(vpcStack);
+}
+
+// Deploy the web app component
+if (appConfig.webApp?.deploy) {
+  deployWebApp(vpcStack);
+}
+
+// Deploy the S3 API
+if (appConfig.s3Api?.deploy) {
+  deployS3Api(vpcStack);
+}
+
+// Deploy the MR API
+if (appConfig.modelRunnerApi?.deploy) {
+  deployModelRunnerApi(vpcStack);
 }
 
 // Deploy test model endpoints

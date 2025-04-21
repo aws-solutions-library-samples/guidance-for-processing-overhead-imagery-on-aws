@@ -1,26 +1,59 @@
 {
   "projectName": "OSML",
   "account": {
-    "id": "123456789123",
+    "id": "008372964747",
     "region": "us-west-2",
     "prodLike": false
   },
+  "auth": {
+    "audience": "account",
+    "authority": "https://keycloak.jtblack.people.aws.dev/realms/osml"
+  },
   "modelRunner": {
-    "deploy": true
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": true
+    }
   },
   "tileServer": {
-    "deploy": true
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": true,
+      "DEPLOY_TEST_COMPONENTS": true
+    }
   },
   "dataIntake": {
-    "deploy": true
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": true
+    }
   },
   "dataCatalog": {
-    "deploy": true
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": true
+    }
+  },
+  "webApp": {
+    "deploy": false,
+    "config": {
+      "BUILD_FROM_SOURCE": true,
+      "WEB_APP_DOMAIN_NAME": "https://osml.jtblack.people.aws.dev"
+    }
   },
   "testModelEndpoints": {
-    "deploy": true
+    "deploy": true,
+    "config": {
+      "BUILD_FROM_SOURCE": false
+    }
   },
   "testImagery": {
     "deploy": true
-  }
+  },
+  "availability-zones:account=008372964747:region=us-west-2": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+  ]
 }

@@ -3,13 +3,13 @@
 This guide will help you configure various components of your AWS CDK application using the `cdk.context.json` file.
 By following these steps, you can customize the settings for your deployment without making any code updates.
 We will use the VPC as a use case example and also demonstrate the Model Runner Dataplane deployment. For a full list
-of configuration parameters available for various OSML constructs please refer to the published documentation such as the 
+of configuration parameters available for various OSML constructs please refer to the published documentation such as the
 [MRDataplaneConfig](https://aws-solutions-library-samples.github.io/osml-cdk-constructs/classes/MRDataplaneConfig.html).
 
 ## Define Configurations in `cdk.context.json`
 
 The `cdk.context.json` file allows you to specify configuration parameters for various components of your application.
-Below is an example configuration where we demonstrate renaming the model runner cluster, specifying a custom role to 
+Below is an example configuration where we demonstrate renaming the model runner cluster, specifying a custom role to
 import for the model runner ECS task role, specifying a VPC to import, and which subnets to target for deploying into:
 
 ```json
@@ -55,7 +55,7 @@ import for the model runner ECS task role, specifying a VPC to import, and which
 
 ## Understanding the Configuration Parser
 
-The `ConfigParser` class reads the configuration from the `cdk.context.json` file and makes it available for use in 
+The `ConfigParser` class reads the configuration from the `cdk.context.json` file and makes it available for use in
 your CDK stacks. Ensure your `config-parser.ts` includes the necessary structure to read these configurations.
 You do not need to implement this as a customer but a breakdown of how it works is provided her for your understanding;
 incase further customization is required.
@@ -133,15 +133,15 @@ Follow the steps below to configure and deploy your custom model using the provi
 
 ### Update the `cdk.context.json` File
 
-Your `cdk.context.json` file contains the configuration details required for deploying your custom model. 
-You need to update this file with your specific configuration values. When configuring your custom model deployment, 
-you have the flexibility to either provide a URI for an existing container image or specify a build path to construct 
+Your `cdk.context.json` file contains the configuration details required for deploying your custom model.
+You need to update this file with your specific configuration values. When configuring your custom model deployment,
+you have the flexibility to either provide a URI for an existing container image or specify a build path to construct
 the container from source. If you choose to supply a CONTAINER_URI, the deployment process will import the container
-directly from the specified URI, streamlining the setup by utilizing a pre-built image. Alternatively, if you opt to 
-build the container from source, you need to specify the CONTAINER_BUILD_PATH and optionally the CONTAINER_BUILD_TARGET. 
-This approach allows you to define a custom build process using a Dockerfile located at the build path, giving you the 
-ability to customize the container environment precisely to your requirements before deployment. This dual-option 
-configuration ensures that you can either leverage existing container images for rapid deployment or construct tailored 
+directly from the specified URI, streamlining the setup by utilizing a pre-built image. Alternatively, if you opt to
+build the container from source, you need to specify the CONTAINER_BUILD_PATH and optionally the CONTAINER_BUILD_TARGET.
+This approach allows you to define a custom build process using a Dockerfile located at the build path, giving you the
+ability to customize the container environment precisely to your requirements before deployment. This dual-option
+configuration ensures that you can either leverage existing container images for rapid deployment or construct tailored
 containers from source for more specialized needs. Below is an example of how to structure your `cdk.context.json` file:
 
 ```json

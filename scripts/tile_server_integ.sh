@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2024 Amazon.com, Inc. or its affiliates.
+# Copyright 2024-2025 Amazon.com, Inc. or its affiliates.
 #
 
 set -e  # Exit immediately if a command exits with a non-zero status
@@ -100,5 +100,6 @@ if echo "$log_result" | grep -q "Success: 100.00%"; then
     exit 0
 else
     print_test_failed
+    echo $log_result
     exit 1
 fi
