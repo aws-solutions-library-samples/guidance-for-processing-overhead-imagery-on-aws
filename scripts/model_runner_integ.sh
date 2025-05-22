@@ -49,33 +49,48 @@ run_test() {
     echo "...success!"
 }
 
-if [ -z "$AWS_DEFAULT_REGION" ]; then
-    AWS_DEFAULT_REGION=$(aws configure get region) || {
-        echo "ERROR: AWS region is required."
-        exit 1
+# Check AWS_REGION, aws configure, then AWS_DEFAULT_REGION to determine the region.
+# If none are set, prompt the user for the AWS_REGION.
+if [ -z "$AWS_REGION" ]; then
+    {
+        AWS_REGION=$(aws configure get region)
+    } || {
+        if [ -n "$AWS_DEFAULT_REGION" ]; then
+            AWS_REGION=$AWS_DEFAULT_REGION
+        else
+            read -p "Could not find region. Enter the AWS region (ex. us-west-2): " user_region
+            if [ -n "$user_region" ]; then
+                AWS_REGION=$user_region
+            else
+                echo "ERROR: AWS region is required."
+                exit 1
+            fi
+        fi
     }
 fi
 
 # Run all desired model runner tests sequentially
 print_banner
 
-run_test "Run small.tif against centerpoint model" "small" "centerpoint" $AWS_DEFAULT_REGION
+run_test "Run small.tif against centerpoint model" "small" "centerpoint" $AWS_REGION
 
-run_test "Run meta.ntf against centerpoint model" "meta" "centerpoint" $AWS_DEFAULT_REGION
+run_test "Run meta.ntf against centerpoint model" "meta" "centerpoint" $AWS_REGION
 
-run_test "Run large.tif against flood model" "large" "flood" $AWS_DEFAULT_REGION
+run_test "Run large.tif against flood model" "large" "flood" $AWS_REGION
 
-run_test "Run tile.ntf against aircraft model" "tile_ntf" "aircraft" $AWS_DEFAULT_REGION
+run_test "Run tile.ntf against aircraft model" "tile_ntf" "aircraft" $AWS_REGION
 
-run_test "Run tile.tif against aircraft model" "tile_tif" "aircraft" $AWS_DEFAULT_REGION
+run_test "Run tile.tif against aircraft model" "tile_tif" "aircraft" $AWS_REGION
 
-run_test "Run sicd-capella-chip.ntf against centerpoint model" "sicd_capella_chip_ntf" "centerpoint" $AWS_DEFAULT_REGION
+run_test "Run sicd-capella-chip.ntf against centerpoint model" "sicd_capella_chip_ntf" "centerpoint" $AWS_REGION
 
-run_test "Run sicd-umbra-chip.ntf against centerpoint model" "sicd_umbra_chip_ntf" "centerpoint" $AWS_DEFAULT_REGION
+run_test "Run sicd-umbra-chip.ntf against centerpoint model" "sicd_umbra_chip_ntf" "centerpoint" $AWS_REGION
 
-run_test "Run sicd-interferometric-hh.nitf against centerpoint model" "sicd_interferometric_hh_ntf" "centerpoint" $AWS_DEFAULT_REGION
+run_test "Run sicd-interferometric-hh.nitf against centerpoint model" "sicd_interferometric_hh_ntf" "centerpoint" $AWS_REGION
 
-run_test "Run wbid.nitf against centerpoint model" "wbid" "centerpoint" $AWS_DEFAULT_REGION
+run_test "Run wbid.nitf against centerpoint model" "wbid" "centerpoint" $AWS_REGION
+
+run_test "Run small.tif against multi-container endpoint" "small" "multi-container" $AWS_REGION
 
 print_test_passed
 
