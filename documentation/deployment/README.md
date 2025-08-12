@@ -4,7 +4,7 @@ This guide will help you configure various components of your AWS CDK applicatio
 By following these steps, you can customize the settings for your deployment without making any code updates.
 We will use the VPC as a use case example and also demonstrate the Model Runner Dataplane deployment. For a full list
 of configuration parameters available for various OSML constructs please refer to the published documentation such as the 
-[MRDataplaneConfig](https://aws-solutions-library-samples.github.io/osml-cdk-constructs/classes/MRDataplaneConfig.html).
+[MRDataplaneConfig](https://awslabs.github.io/osml-cdk-constructs/classes/MRDataplaneConfig.html).
 
 ## Define Configurations in `cdk.context.json`
 
