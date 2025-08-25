@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2024 Amazon.com, Inc. or its affiliates.
+# Copyright 2024-2025 Amazon.com, Inc. or its affiliates.
 #
 
 set -e  # Exit immediately if a command exits with a non-zero status
@@ -75,30 +75,46 @@ fi
 # Print the starting banner
 print_banner
 
-# Create the lambda test payload
-echo "{\"image_uri\": \"s3://osml-test-images-$ACCOUNT_ID/small.tif\"}" > tmp_payload.json
+# Create the lambda test payload with full path
+TEMP_PAYLOAD=$(mktemp)
+echo "{\"image_uri\": \"s3://osml-test-images-$ACCOUNT_ID/small.tif\"}" > "$TEMP_PAYLOAD"
 
-echo "Invoking the Lambda function 'TSTestRunner' with payload from 'payload.json' in the region '$AWS_REGION'..."
+echo "Invoking the Lambda function 'TSTestRunner' with payload:"
+echo "Payload: {\"image_uri\": \"s3://osml-test-images-$ACCOUNT_ID/small.tif\"}"
+echo "Region: $AWS_REGION"
+echo ""
 
 # Invoke the Lambda function with the payload
-log_result=$(aws lambda invoke --region "$AWS_REGION" \
-                               --function-name "TSTestRunner" \
-                               --payload fileb://tmp_payload.json \
-                               --log-type Tail /dev/null \
-                               --cli-read-timeout 0 \
-                               --query 'LogResult' \
-                               --output text | base64 --decode)
+if ! log_result=$(aws lambda invoke --region "$AWS_REGION" \
+                                    --function-name "TSTestRunner" \
+                                    --payload fileb://"$TEMP_PAYLOAD" \
+                                    --log-type Tail /dev/null \
+                                    --cli-read-timeout 0 \
+                                    --query 'LogResult' \
+                                    --output text 2>&1); then
+    echo "ERROR: Failed to invoke Lambda function: $log_result"
+    rm -f "$TEMP_PAYLOAD"
+    exit 1
+fi
 
-echo "$log_result" | sed -n '/^Test Summary/,/Success: [0-9]\+\.[0-9]\+%/p'
+# Decode the log result
+decoded_log=$(echo "$log_result" | base64 --decode)
+
+# Extract and display only the test summary section using awk for more precise control
+test_summary=$(echo "$decoded_log" | awk '/^Test Summary/{p=1; print; next} /^Tests: [0-9]+, Passed: [0-9]+, Failed: [0-9]+, Success: [0-9]+\.[0-9]+%$/{p=0; print; exit} p{print}')
+echo "$test_summary"
 
 # Clean up the temporary payload file
-rm tmp_payload.json
+rm -f "$TEMP_PAYLOAD"
 
-# Decode the log result and check for success
-if echo "$log_result" | grep -q "Success: 100.00%"; then
+# Check for success in the decoded log
+if echo "$decoded_log" | grep -q "Success: 100.00%"; then
     print_test_passed
     exit 0
 else
+    # If failed print logs
     print_test_failed
+    echo "Full logs for debugging:"
+    echo "$decoded_log"
     exit 1
 fi
