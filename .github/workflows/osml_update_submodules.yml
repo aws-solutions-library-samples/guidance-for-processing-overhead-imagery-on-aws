@@ -12,6 +12,10 @@ on:
         description: repo SHA to dispatch
         type: string
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update_submodules:
     if: ${{ github.ref == 'refs/heads/dev' }}
