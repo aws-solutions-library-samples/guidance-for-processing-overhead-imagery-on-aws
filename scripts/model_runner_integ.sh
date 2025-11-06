@@ -40,6 +40,8 @@ run_test() {
     local model=$3
     local region=$4
     local timeout_minutes=${5:-$DEFAULT_TIMEOUT_MINUTES}
+    local tileSize="${5:-512}"
+    local tileOverlap="${6:-128}"
 
     echo "=========================================="
     echo "Running: $description"
@@ -47,12 +49,14 @@ run_test() {
     echo "Model: $model"
     echo "Region: $region"
     echo "Timeout: ${timeout_minutes} minutes"
+    echo "Tile Size: ${tileSize}"
+    echo "Tile Overlap: ${tileOverlap}"
     echo "=========================================="
 
     # Set timeout environment variable for the Python script
     export TEST_TIMEOUT_MINUTES=$timeout_minutes
 
-    if python lib/osml-model-runner-test/bin/process_image.py --image "$image" --model "$model" --region "$region"; then
+    if python lib/osml-model-runner-test/bin/process_image.py --image "$image" --model "$model" --region "$region" --tile_size "$tileSize" --tile_overlap "$tileOverlap"; then
         echo "=========================================="
         echo "✓ $description: SUCCESS"
         echo "=========================================="
@@ -98,6 +102,8 @@ run_test "Run sicd-umbra-chip.ntf against centerpoint model" "sicd_umbra_chip_nt
 run_test "Run sicd-interferometric-hh.nitf against centerpoint model" "sicd_interferometric_hh_ntf" "centerpoint" $AWS_REGION
 run_test "Run wbid.nitf against centerpoint model" "wbid" "centerpoint" $AWS_REGION
 run_test "Run small.tif against multi-container endpoint" "small" "multi-container" $AWS_REGION
+
+run_test "Run failure_model_checker_tile.tif against failure model" "failure_model_checker_tile" "failure" $AWS_DEFAULT_REGION "512" "0"
 
 print_test_passed
 
