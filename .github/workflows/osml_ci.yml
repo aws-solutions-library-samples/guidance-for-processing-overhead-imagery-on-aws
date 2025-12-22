@@ -1,0 +1,78 @@
+name: 'OSML CI'
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Target branch for pre-commit diff comparison'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - main
+  pull_request:
+    branches:
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Install npm dependencies
+        run: |
+          npm ci
+          cd lib/osml-vpc/cdk && npm ci
+          cd ../../../lib/osml-apis/cdk && npm ci
+
+      - name: Run pre-commit on changed files
+        run: pre-commit run --from-ref origin/${{ github.base_ref || inputs.target_branch }} --to-ref HEAD
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd lib/osml-vpc/cdk && npm ci
+          cd ../../../lib/osml-apis/cdk && npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test

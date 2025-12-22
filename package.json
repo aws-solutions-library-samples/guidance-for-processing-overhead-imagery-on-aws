@@ -1,53 +1,41 @@
 {
-  "name": "osml-demo",
+  "name": "osml-guidance",
   "version": "1.0.0",
-  "license": "UNLICENSED",
-  "bin": {
-    "osml": "bin/app.ts"
-  },
+  "license": "MIT No Attribution",
   "scripts": {
     "build": "tsc",
-    "synth": "cdk synth",
-    "deploy": "cdk deploy --all --require-approval never --concurrency 10 || exit 1",
-    "destroy": "bash scripts/dev_destroy.sh || exit 1",
+    "test": "jest",
+    "deploy": "bash scripts/deploy.sh",
+    "destroy": "bash scripts/destroy.sh",
     "clean": "bash scripts/dev_clean.sh",
     "lint": "pre-commit run --all-files",
     "watch": "tsc -w",
-    "prepare": "npm run-script build",
-    "integ:model-runner": "bash scripts/model_runner_integ.sh",
-    "integ:tile-server": "bash scripts/tile_server_integ.sh"
-  },
-  "dependencies": {
-    "ts-node": "^10.9.1"
+    "integ:model-runner": "cd lib/osml-model-runner && python bin/run-integration-tests.py --suite test/integ/suites/default.json",
+    "integ:tile-server": "bash lib/osml-tile-server/scripts/tile_server_integ.sh",
+    "integ:data-intake": "cd lib/osml-data-intake && pytest -m integration test/integ/test_integration.py -s",
+    "integ:geo-agents": "bash lib/osml-geo-agents/scripts/geo_agents_integ.sh"
   },
   "devDependencies": {
-    "@aws-sdk/client-iam": "^3.529.0",
-    "@cdklabs/cdk-enterprise-iac": "^0.0.490",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^22.0.0",
-    "@types/source-map-support": "^0.5.10",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "aws-cdk": "^2.1016.1",
-    "aws-cdk-lib": "^2.197.0",
-    "cdk-nag": "^2.28.168",
-    "constructs": "^10.3.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-import-resolver-typescript": "^3.6.1",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-jest": "^28.6.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-promise": "^7.0.0",
+    "@eslint/js": "^9.39.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jest": "^29.1.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "jest": "^29.7.0",
+    "fast-check": "^4.4.0",
+    "globals": "^15.14.0",
+    "jest": "^30.2.0",
     "lint-staged": "^15.2.7",
-    "osml-cdk-constructs": "^2.1.0",
-    "prettier": "^3.3.3",
-    "ts-jest": "^29.2.3",
-    "typescript": "^5.5.4"
-  },
-  "browser": {
-    "child_process": false
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

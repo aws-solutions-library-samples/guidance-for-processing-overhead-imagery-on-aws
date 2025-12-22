@@ -4,42 +4,82 @@ This Guidance demonstrates how to process remote sensing imagery using machine l
 
 ### Table of Contents
 
+- [Architecture Overview](#architecture-overview)
 - [Installation](#installation)
    * [MacOS](#macos)
-   * [Ubuntu (EC2)](#ubuntu-ec2)
+   * [EC2 Instance](#ec2-instance)
+- [Configuration](#configuration)
 - [Deployment](#deployment)
-   * [Enabling Authentication](#enabling-authentication)
-   * [Deploying local osml-cdk-constructs](#deploying-local-osml-cdk-constructs)
-- [Model Runner Usage](#model-runner-usage)
 - [Supporting OSML Repositories](#supporting-osml-repositories)
 - [Useful Commands](#useful-commands)
 - [Troubleshooting](#troubleshooting)
     + [MemorySize value failed to satisfy constraint](#memorysize-value-failed-to-satisfy-constraint)
-    + [Permission Denied for submodules](#permission-denied-for-submodules)
     + [Exit code: 137; Deployment failed: Error: Failed to build asset](#exit-code-137-deployment-failed-error-failed-to-build-asset)
-    + [error TS2307: Cannot find module ‘osml-cdk-constructs’](#error-ts2307-cannot-find-module-osml-cdk-constructs)
-    + [OSML-DCDataplane Stack Creation Failure](#osml-dcdataplane-stack-creation-failure)
+    + [OSML-DataIntake-Dataplane Stack Creation Failure](#osml-dataintake-dataplane-stack-creation-failure)
 - [Support & Feedback](#support--feedback)
 - [Security](#security)
 - [License](#license)
+
+## Architecture Overview
+
+This guidance package orchestrates the deployment of several independent OSML components, each responsible for a distinct part of the imagery processing pipeline. The components are designed to be modular — you can deploy them together for a turnkey experience or integrate individual components into your existing infrastructure.
+
+### Core Services
+
+- **[osml-model-runner](https://github.com/awslabs/osml-model-runner)** — The central image processing engine. It monitors an SQS queue for image processing requests, decomposes large images into tiles, invokes ML models hosted on SageMaker endpoints, and aggregates the results into geolocated feature collections. Runs as a scalable ECS Fargate service.
+
+- **[osml-models](https://github.com/awslabs/osml-models)** — Production ML models (currently SAM3 from Meta AI) packaged for deployment as SageMaker real-time endpoints. Provides text-prompted object detection and segmentation on geospatial imagery. Deploying this component requires downloading the SAM3 model checkpoint (~3GB) from [Hugging Face](https://huggingface.co/facebook/sam3) ahead of time (a Hugging Face account with model access is required). Place the downloaded `sam3.pt` file in a local directory and set `sam3PtLocalPath` in your deployment configuration. See the [osml-models README](https://github.com/awslabs/osml-models#quick-start) for detailed instructions.
+
+- **[osml-tile-server](https://github.com/awslabs/osml-tile-server)** — A dynamic tile serving service that renders map tiles from large imagery on demand. Runs as an ECS Fargate service behind an internal Application Load Balancer.
+
+- **[osml-data-intake](https://github.com/awslabs/osml-data-intake)** — Handles ingestion of imagery metadata into a STAC (SpatioTemporal Asset Catalog) backed by OpenSearch. Provides a STAC-compliant API for querying and discovering imagery assets.
+
+- **[osml-geo-agents](https://github.com/awslabs/osml-geo-agents)** — Geospatial AI agent tools exposed through a Model Context Protocol (MCP) server. Provides operations like feature clustering, dataset correlation, geometry transformations, and more for use by AI agents.
+
+### Foundation and Integration
+
+- **osml-vpc** — A sample VPC configuration included in this repository (`lib/osml-vpc`) that provides the shared networking infrastructure (VPC, subnets, NAT gateways) used by all components. This is provided for convenience — in production deployments, you will likely bring your own VPC by specifying `networkConfig.VPC_ID` in each component's configuration.
+
+- **[osml-apis](lib/osml-apis)** — An API Gateway layer included in this repository (`lib/osml-apis`) that provides one approach to exposing the internal service endpoints (Tile Server, Data Intake, Geo Agents) externally with JWT-based authentication. This is one example of how these services can be integrated — the underlying components expose their own ALBs and Lambda functions that can be wired into your existing API infrastructure however you see fit.
+
+- **[amazon-mission-solutions-auth-server](https://github.com/awslabs/amazon-mission-solutions-auth-server)** — A Keycloak-based OIDC authentication server. This is provided for deployments where an existing OIDC identity provider is not available. If you already have an OIDC solution (e.g., Cognito, Okta, Auth0), you can skip this component and configure `osml-apis` to validate tokens against your existing provider.
+
+### How They Fit Together
+
+```
+Wave 1 (Foundation)           Wave 2 (Core Services)      Wave 3 (API Layer)
+┌──────────┐                  ┌───────────────────┐
+│ osml-vpc │─────────────────▶│ osml-model-runner │
+└──────────┘        │         ├───────────────────┤
+                    ├────────▶│ osml-models       │
+┌──────────────┐    │         ├───────────────────┤         ┌───────────┐
+│ auth-server  │────┤────────▶│ osml-tile-server  │────────▶│ osml-apis │
+│ (optional)   │    │         ├───────────────────┤         │ (optional)│
+└──────────────┘    ├────────▶│ osml-data-intake  │────────▶│           │
+                    │         ├───────────────────┤         │           │
+                    └────────▶│ osml-geo-agents   │────────▶│           │
+                              └───────────────────┘         └───────────┘
+```
+
+The deploy script handles this orchestration automatically using dependency-based topological sort, including passing outputs (VPC IDs, ALB URLs, Lambda ARNs) between dependent components.
 
 ## Installation
 
 ### MacOS
 
-If on a Mac without NPM/Node.js version 18 installed, run:
+If on a Mac without NPM/Node.js version 24 installed, run:
 
 ```bash
 brew install npm
-brew install node@18
+brew install node@24
 ```
 
 Alternatively, NPM/Node.js can be installed through the NVM:
 
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 source ~/.bash_profile
-nvm install 18
+nvm install 24
 ```
 
 If on a Mac without git-lfs installed, run:
@@ -50,27 +90,157 @@ brew install git-lfs
 
 Otherwise, consult the official git-lfs [installation documentation](https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing).
 
-Clone the repository and pull lfs files for deployment:
+Clone the repository:
 
 ```bash
 git clone https://github.com/aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws.git
 cd guidance-for-processing-overhead-imagery-on-aws
-git-lfs pull
 ```
 
-### Ubuntu (EC2)
+### EC2 Instance
 
-A bootstrap script is available in `./scripts/ec2_bootstrap_ubuntu.sh` to automatically install all necessary
-dependencies for an Ubuntu EC2 instance to deploy the OSML demo.
+A bootstrap script is available at `./scripts/ec2_bootstrap.sh` that automatically installs all necessary dependencies and clones the OSML repository. The script supports multiple operating systems:
 
-This requires EC2 instance with internet connectivity. Insert into EC2 User Data during instance configuration
-or run as root once EC2 instance is running.
+- Amazon Linux 2 / 2023
+- Ubuntu 22.04+
 
-Known good configuration for EC2 instance:
+Insert into EC2 User Data during instance configuration or run as root once the EC2 instance is running. The script requires internet connectivity.
 
-* 22.04 Ubuntu LTS (ami-08116b9957a259459)
-* Instance Type: t3.medium
-* 50 GiB gp2 root volume
+Known good configurations:
+
+* Amazon Linux 2023 AMI, t3.medium, 50 GiB gp2 root volume
+* Ubuntu 22.04 LTS AMI, t3.medium, 50 GiB gp2 root volume
+
+The bootstrap script will:
+1. Install system packages (git, git-lfs, Docker, AWS CLI)
+2. Install Node.js 24 via nvm
+3. Clone the OSML repository to your home directory
+4. Install npm dependencies
+
+After the script completes, log out and back in to activate Docker group membership, then configure your deployment as described in the [Configuration](#configuration) section.
+
+## Configuration
+
+Before deploying, you need to create a configuration file that specifies your AWS account details and component settings.
+
+### Creating the Configuration File
+
+Copy the example configuration file to create your deployment configuration:
+
+```bash
+cp bin/deployment.json.example bin/deployment.json
+```
+
+### Configuration Structure
+
+The `bin/deployment.json` file has the following structure:
+
+```json
+{
+  "account": {
+    "id": "123456789012",
+    "region": "us-west-2",
+    "prodLike": false,
+    "isAdc": false
+  },
+  "osml-vpc": { ... },
+  "amazon-mission-solutions-auth-server": { ... },
+  "osml-model-runner": { ... },
+  "osml-models": { ... },
+  "osml-tile-server": { ... },
+  "osml-data-intake": { ... },
+  "osml-geo-agents": { ... },
+  "osml-apis": { ... }
+}
+```
+
+### Required Fields
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `account.id` | Your 12-digit AWS account ID | `"123456789012"` |
+| `account.region` | AWS region for deployment | `"us-west-2"` |
+
+### Optional Account Fields
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `account.prodLike` | Enable production-like settings (stricter security, higher availability) | `false` |
+| `account.isAdc` | Set to `true` if deploying to an Amazon Dedicated Cloud region | `false` |
+
+### Component Configuration
+
+Each OSML component supports the following fields:
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| `deploy` | Set to `true` to deploy this component, `false` to skip | Yes |
+| `retry` | Number of retry attempts if deployment fails (useful for transient errors like race conditions). Default: `0` | No |
+| `dependsOn` | Array of component names that must be deployed first | No |
+| `gitUrl` | Git repository URL for the component source code | No |
+| `gitTarget` | Git branch, tag, or commit to checkout | No |
+| `config` | Component-specific configuration options | Yes |
+| `gitProtocol` | Git clone protocol: `"https"` (default) or `"ssh"` | No |
+| `sam3PtLocalPath` | Local path to SAM3 checkpoint file (osml-models only) | No |
+
+### Component-Specific Config Options
+
+Each component's `config` section supports:
+
+| Field | Description |
+|-------|-------------|
+| `projectName` | CloudFormation stack name prefix |
+| `networkConfig` | VPC and networking overrides |
+| `dataplaneConfig.BUILD_FROM_SOURCE` | Set to `true` to build Docker images locally |
+| `deployIntegrationTests` | Set to `true` to deploy integration test infrastructure |
+| `dataplaneConfig.authConfig` | Authentication configuration (for osml-apis) |
+| `dataplaneConfig.DOMAIN_HOSTED_ZONE_ID` | Route53 hosted zone ID for custom domains |
+| `dataplaneConfig.DOMAIN_HOSTED_ZONE_NAME` | Domain name for custom domains |
+
+### Example: Minimal Configuration
+
+For a basic deployment with default settings:
+
+```json
+{
+  "account": {
+    "id": "YOUR_ACCOUNT_ID",
+    "region": "us-west-2"
+  }
+}
+```
+
+The deploy script will use default values for any unspecified components.
+
+### Example: Selective Component Deployment
+
+To deploy only the Model Runner component:
+
+```json
+{
+  "account": {
+    "id": "YOUR_ACCOUNT_ID",
+    "region": "us-west-2"
+  },
+  "osml-vpc": {
+    "deploy": true
+  },
+  "osml-model-runner": {
+    "deploy": true,
+    "dependsOn": ["osml-vpc"],
+    "gitUrl": "https://github.com/awslabs/osml-model-runner",
+    "gitTarget": "main",
+    "config": {
+      "projectName": "OSML-ModelRunner",
+      "dataplaneConfig": {
+        "BUILD_FROM_SOURCE": true
+      }
+    }
+  }
+}
+```
+
+Components not listed or with `"deploy": false` will be skipped.
 
 ## Deployment
 
@@ -78,22 +248,22 @@ Known good configuration for EC2 instance:
 
 1. Pull your latest credentials into `~/.aws/credentials` and run `aws configure` - follow the prompts to set your default region.
 
-1. Update the deployment configuration you want per the [deployment guidance](documentation/deployment/README.md).
+1. Configure your deployment by copying the example configuration file:
 
-1. Optional: If you want to enable Authentication, please head over to [Enabling Authentication](#enabling-authentication) in this README.
+   ```bash
+   cp bin/deployment.json.example bin/deployment.json
+   ```
+
+   Edit `bin/deployment.json` and update the required fields:
+   - `account.id`: Your 12-digit AWS account ID
+   - `account.region`: The AWS region for deployment (e.g., `us-west-2`)
+
+   See the [Configuration](#configuration) section for more details on available options.
 
 1. Go into `guidance-for-processing-overhead-imagery-on-aws` directory and execute the following commands to install npm packages:
 
    ```
    npm i
-   ```
-
-1. If this is your first time deploying stacks to your account, please see below (Step 9). If not, skip this step:
-
-   ```
-   npm install -g aws-cdk
-   cdk synth
-   cdk bootstrap
    ```
 
 1. Make sure Docker is running on your machine:
@@ -108,10 +278,21 @@ Known good configuration for EC2 instance:
     npm run deploy
     ```
 
-1. If you want to validate the deployment with integration tests:
+    By default, `npm run deploy` uses whatever code exists in the `lib/` directories. If you want to force a fresh clone of all component repositories from their configured `gitUrl` and `gitTarget`, use:
 
     ```
-    npm run integ
+    npm run deploy -- --git-clone-force
+    ```
+
+    The deploy script automatically handles CDK bootstrapping on first deployment.
+
+1. If you want to validate the deployment with integration tests, run the component-specific test commands:
+
+    ```bash
+    npm run integ:model-runner   # Run Model Runner integration tests
+    npm run integ:tile-server    # Run Tile Server integration tests
+    npm run integ:data-intake    # Run Data Intake integration tests
+    npm run integ:geo-agents     # Run Geo Agents integration tests
     ```
 
 1. When you are done, you can clean up the deployment:
@@ -120,113 +301,40 @@ Known good configuration for EC2 instance:
     npm run destroy
     ```
 
-### Deploying local osml-cdk-constructs
-
-By default, this package uses the osml-cdk-constructs defined in the [official NPM repository](https://www.npmjs.com/package/osml-cdk-constructs?activeTab=readme). If you wish to make changes to the `lib/osml-cdk-constructs` submodule in this project and want to use those changes when deploying, then follow these steps to switch out the remote NPM package for the local package.
-
-1. Pull down the submodules for development
-    ```bash
-    git submodule update --recursive --remote
-    git-lfs clone --recurse-submodules
-    ```
-
-   If you want to pull subsequent changes to submodule packages, run:
-
-    ```bash
-    git submodule update --init --recursive
-    ```
-
-1. In `package.json`, locate `osml-cdk-constructs` under `devDependencies`. By default, it points to the latest NPM package version, but swaps out the version number with `"file:lib/osml-cdk-constructs"`. This will tell package.json to use the local package instead. The dependency will now look like this:
-
-    ```bash
-    "osml-cdk-constructs": "file:lib/osml-cdk-constructs",
-    ```
-
-1. Then cd into `lib/osml-cdk-construct` directory by executing: ```cd lib/osml-cdk-constructs```
-1. Execute ```npm i; npm run build``` to make sure everything is installed and building correctly.
-1. You can now follow the [normal deployment](#deployment) steps to deploy your local changes in `osml-cdk-constructs`.
-
-
-## Model Runner Usage
-
-To start a job, place an `ImageRequest` on the `ImageRequestQueue` by going into your AWS Console > Simple Queue System > `ImageRequestQueue` > Send and receive messages > and enter the provided sample for an `ImageRequest`:
-
-**Sample ImageRequest:**
-
-```json
-{
-   "jobId": "<job_id>",
-   "jobName": "<job_name>",
-   "imageUrls": ["<image_url>"],
-   "outputs": [
-      {"type": "S3", "bucket": "<result_bucket_name>", "prefix": "<job_name>/"},
-      {"type": "Kinesis", "stream": "<result_stream_name>", "batchSize": 1000}
-   ],
-   "imageProcessor": {"name": "<sagemaker_endpoint_name>", "type": "SM_ENDPOINT"},
-   "imageProcessorTileSize": 512,
-   "imageProcessorTileOverlap": 32,
-   "imageProcessorTileFormat": "< NITF | JPEG | PNG | GTIFF >",
-   "imageProcessorTileCompression": "< NONE | JPEG | J2K | LZW >"
-}
-```
-
-Below are additional details about each key-value pair in the image request:
-
-| key                           | value                                                                                                                                                                | type                 | details                                                                                                                                                                                                                                                                                      |
-|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| jobId                         | `<job_id>`                                                                                                                                                           | string               | Unique id for a job, ex: `testId1`                                                                                                                                                                                                                                                           |
-| jobName                       | `<job_name>`                                                                                                                                                         | string               | Name of the job, ex: `jobtest-testId1`                                                                                                                                                                                                                                                       |
-| imageUrls                     | `["<image_url>"]`                                                                                                                                                    | list[string]         | List of S3 image path, which can be found by going to your S3 bucket, ex: `s3://test-images-0123456789/tile.tif`                                                                                                                                                                             |
-| outputs                       | ```{"type": "S3", "bucket": "<result_bucket_name>", "prefix": "<job_name>/"},```</br> ```{"type": "Kinesis", "stream": "<result_stream_name>", "batchSize": 1000}``` | dict[string, string] | Once the OSML has processed an image request, it will output its GeoJson files into two services, Kinesis and S3. The Kinesis and S3 are defined in `osml-cdk-constructs` package which can be found there. ex: `"bucket":"test-results-0123456789"` and `"stream":"test-stream-0123456789"` |
-| imageProcessor                | ```{"name": "<sagemaker_endpoint_name>", "type": "SM_ENDPOINT"}```                                                                                                   | dict[string, string] | Select a model that you want to run your image request against, you can find the list of models by going to AWS Console > SageMaker Console > Click `Inference` (left sidebar) > Click `Endpoints` > Copy the name of any model. ex: `aircraft`                                              |
-| imageProcessorTileSize        | 512                                                                                                                                                                  | integer              | Tile size represents width x height pixels and split the images into it. ex: `512`                                                                                                                                                                                                           |
-| imageProcessorTileOverlap     | 32                                                                                                                                                                   | integer              | Tile overlap represents the width x height pixels and how much to overlap the existing tile, ex: `32`                                                                                                                                                                                        |
-| imageProcessorTileFormat      | `NTIF / JPEF / PNG / GTIFF`                                                                                                                                          | string               | Tile format to use for tiling. I comes with 4 formats, ex: `GTIFF`                                                                                                                                                                                                                           |
-| imageProcessorTileCompression | `NONE / JPEG / J2K / LZW`                                                                                                                                            | string               | The compression used for the target image. It comes with 4 formats, ex: `NONE`                                                                                                                                                                                                               |
-
-Here is an example of a complete image request:
-
-**Example ImageRequest:**
-
-```json
-{
-   "jobId": "testid1",
-   "jobName": "jobtest-testid1",
-   "imageUrls": [ "s3://test-images-0123456789/tile.tif" ],
-   "outputs": [
-      { "type": "S3", "bucket": "test-results-0123456789", "prefix": "jobtest-testid1/" },
-      { "type": "Kinesis", "stream": "test-stream-0123456789", "batchSize": 1000 }
-   ],
-   "imageProcessor": { "name": "aircraft", "type": "SM_ENDPOINT" },
-   "imageProcessorTileSize": 512,
-   "imageProcessorTileOverlap": 32,
-   "imageProcessorTileFormat": "GTIFF",
-   "imageProcessorTileCompression": "NONE"
-}
-```
-
 ## Supporting OSML Repositories
 
-Here is some useful information about each of the OSML components:
+Here is some useful information about each of the active OSML component repositories:
 
-* [osml-cdk-constructs](https://github.com/aws-solutions-library-samples/osml-cdk-constructs)
-* [osml-cesium-globe](https://github.com/aws-solutions-library-samples/osml-cesium-globe)
-* [osml-imagery-toolkit](https://github.com/aws-solutions-library-samples/osml-imagery-toolkit)
-* [osml-model-runner](https://github.com/aws-solutions-library-samples/osml-model-runner)
-* [osml-model-runner-test](https://github.com/aws-solutions-library-samples/osml-model-runner-test)
-* [osml-models](https://github.com/aws-solutions-library-samples/osml-models)
-* [osml-tile-server](https://github.com/aws-solutions-library-samples/osml-tile-server)
-* [osml-tile-server-test](https://github.com/aws-solutions-library-samples/osml-tile-server-test)
-* [osml-data-intake](https://github.com/aws-solutions-library-samples/osml-data-intake)
+* [osml-model-runner](https://github.com/awslabs/osml-model-runner) - Core image processing and ML inference service
+* [osml-models](https://github.com/awslabs/osml-models) - Production ML models (SAM3) for SageMaker deployment
+* [osml-tile-server](https://github.com/awslabs/osml-tile-server) - Dynamic tile serving for large imagery
+* [osml-data-intake](https://github.com/awslabs/osml-data-intake) - Data ingestion and STAC catalog management
+* [osml-geo-agents](https://github.com/awslabs/osml-geo-agents) - Geospatial AI agent tools via MCP server
+* [amazon-mission-solutions-auth-server](https://github.com/awslabs/amazon-mission-solutions-auth-server) - Keycloak-based authentication server
+* [osml-imagery-toolkit](https://github.com/awslabs/osml-imagery-toolkit) - Library of common imagery processing utilities
 
 ## Useful Commands
 
+### Build Commands
+
 * `npm run build` compile typescript to js
 * `npm run watch` watch for changes and compile
-* `npm run deploy` deploy all stacks to your account
-* `npm run integ` run integration tests against deployment
 * `npm run clean` clean up build files and node modules
-* `npm run synth` synthesizes CloudFormation templates for deployments
+
+### Deployment Commands
+
+* `npm run deploy` deploy all stacks to your account (uses existing lib/ contents)
+* `npm run deploy -- --git-clone-force` force fresh clone of all component repositories before deploying
+* `npm run destroy` tear down all deployed stacks
+
+### Integration Test Commands
+
+* `npm run integ:model-runner` run Model Runner integration tests
+* `npm run integ:tile-server` run Tile Server integration tests
+* `npm run integ:data-intake` run Data Intake integration tests
+* `npm run integ:geo-agents` run Geo Agents integration tests
+
+> **Note:** By default, `npm run deploy` uses whatever code exists in the `lib/` directories. If your local code diverges from the configured `gitTarget` in `bin/deployment.json`, a warning will be displayed but deployment will proceed. Use `--git-clone-force` to reset to the configured state.
 
 ## Troubleshooting
 
@@ -252,10 +360,6 @@ The restriction stems from the limitations of your AWS account. To address this 
 
 To access further details regarding this matter, please visit: [AWS Lambda Memory Quotas](https://docs.aws.amazon.com/lambda/latest/dg/troubleshooting-deployment.html#troubleshooting-deployment-quotas) and [AWS Service Quotas](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html).
 
-#### Permission Denied for submodules
-
-If you are facing a permission denied issue where you are trying to `git submodule update --init --recursive`, ensure that you have [ssh-key](https://docs.github.com/authentication/connecting-to-github-with-ssh) setup.
-
 #### Exit code: 137; Deployment failed: Error: Failed to build asset
 
 If you are facing this error while trying to execute `npm run deploy`,
@@ -268,22 +372,12 @@ You can increase memory by completing the following steps:
 1. Click `Advanced` on the left sidebar menu
 1. Find `Memory` and adjust it to 12 GB
 
-#### error TS2307: Cannot find module ‘osml-cdk-constructs’
-
-If you encounter an error while running `npm i` that leads to an error:
-
-> error TS2307: Cannot find module ‘osml-cdk-constructs’ or its corresponding type declarations.
-
-Please execute the following command and try again:
-
-> npm install osml-cdk-constructs
-
-#### OSML-DCDataplane Stack Creation Failure
+#### OSML-DataIntake-Dataplane Stack Creation Failure
 
 If you encounter the following error during the deployment of the OSML-DCDataplane stack:
 
 ```
-OSML-DCDataplane failed: Error: The stack named OSML-DCDataplane failed creation, it may need to be manually deleted
+OSML-DataIntake-Dataplane failed: Error: The stack named OSML-DataIntake-Dataplane failed creation, it may need to be manually deleted
 from the AWS console: ROLLBACK_COMPLETE: Resource handler returned message: "Invalid request provided: Before you can
 proceed, you must enable a service-linked role to give Amazon OpenSearch Service permissions to access your VPC.
 (Service: OpenSearch, Status Code: 400, Request ID: 11ab9b5f-b59b-418a-9f89-98b1700bd248)"
@@ -293,7 +387,7 @@ This error indicates that the deployment could not proceed because the required 
 OpenSearch Service to access your VPC is not enabled. This is actually an issue with dependency on the custom
 cloud formation resources used to provision the role; see [link](https://github.com/aws/aws-cdk/issues/27203)
 
-**Resolution:** Simply re-running your deployment should resolve the issue as the service-linked role will be automatically enabled during the subsequent deployment attempt.
+**Resolution:** The example configuration sets `"retry": 1` for the `osml-data-intake` component, which causes the deploy script to automatically retry the deployment after a 30-second delay. This is typically sufficient to resolve the issue since the service-linked role will be available on the second attempt. If you removed the `retry` setting or encounter this with a fresh configuration, simply re-running `npm run deploy` will also resolve it.
 
 ## Support & Feedback
 

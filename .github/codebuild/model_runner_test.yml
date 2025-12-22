@@ -1,9 +1,12 @@
 version: 0.2
+
 phases:
   pre_build:
     commands:
-      - git submodule update --init --recursive
-      - python3 -m pip install lib/osml-model-runner-test/
+      - yum install -y git-lfs
+      - GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/awslabs/osml-model-runner.git lib/osml-model-runner
+      - cd lib/osml-model-runner && git lfs pull && pip install -r test/integ/requirements.txt pytest
+
   build:
     commands:
-      - bash scripts/model_runner_integ.sh
+      - npm run integ:model-runner

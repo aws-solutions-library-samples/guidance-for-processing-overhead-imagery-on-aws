@@ -1,6 +1,16 @@
 name: 'Build and Test OSML'
 
 on:
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Target environment (maps to branch-keyed secrets)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - main
   pull_request:
     branches:
       - dev
@@ -9,6 +19,7 @@ on:
 env:
   AWS_REGION: "us-west-2"
   AWS_PAGER: ""
+  IS_MAIN: ${{ github.base_ref == 'main' || inputs.target_env == 'main' }}
 
 permissions:
   id-token: write
@@ -30,18 +41,26 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          role-duration-seconds: 7200
+          role-duration-seconds: 14400
       - name: Deploy and Build OSML
         uses: aws-actions/aws-codebuild-run-build@v1
         with:
           project-name: CodeBuild-BuildGithubOSML
           buildspec-override: .github/codebuild/build.yml
           env-vars-for-codebuild: |
-            BASE_REF
+            BASE_REF,
+            AWS_REGION,
+            AWS_ACCOUNT,
+            DOMAIN_HOSTED_ZONE_ID,
+            DOMAIN_HOSTED_ZONE_NAME
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || inputs.target_env }}
+          AWS_ACCOUNT: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}
+          DOMAIN_HOSTED_ZONE_ID: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.DOMAIN_HOSTED_ZONE_ID_MAIN || secrets.DOMAIN_HOSTED_ZONE_ID_DEV }}
+          DOMAIN_HOSTED_ZONE_NAME: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.DOMAIN_HOSTED_ZONE_NAME_MAIN || secrets.DOMAIN_HOSTED_ZONE_NAME_DEV }}
+  # Wave 1: Model Runner and Tile Server tests (parallel)
   RunModelRunnerTest:
     runs-on: ubuntu-latest
     needs: BuildOSML
@@ -50,7 +69,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Model Runner Integration Tests
         uses: aws-actions/aws-codebuild-run-build@v1
@@ -65,23 +84,54 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
       - name: Tile Server Integration Tests
         uses: aws-actions/aws-codebuild-run-build@v1
         with:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/tile_server_test.yml
+  # Wave 2: Geo Agents and Data Intake tests (parallel, after wave 1 completes)
+  RunGeoAgentsTest:
+    runs-on: ubuntu-latest
+    needs: [ RunModelRunnerTest, RunTileServerTest ]
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+      - name: Geo Agents Integration Tests
+        uses: aws-actions/aws-codebuild-run-build@v1
+        with:
+          project-name: CodeBuild-TestGithubOSML
+          buildspec-override: .github/codebuild/geo_agents_test.yml
+  RunDataIntakeTest:
+    runs-on: ubuntu-latest
+    needs: [ RunModelRunnerTest, RunTileServerTest ]
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+      - name: Data Intake Integration Tests
+        uses: aws-actions/aws-codebuild-run-build@v1
+        with:
+          project-name: CodeBuild-TestGithubOSML
+          buildspec-override: .github/codebuild/data_intake_test.yml
   DestroyOSML:
     if: ${{ always() && ( needs.CheckPendingWorkflow.result == 'success' )}}
-    needs: [ CheckPendingWorkflow, BuildOSML, RunTileServerTest, RunModelRunnerTest ]
+    needs: [ CheckPendingWorkflow, BuildOSML, RunTileServerTest, RunModelRunnerTest, RunDataIntakeTest, RunGeoAgentsTest ]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets[format('OSML_{0}', github.base_ref)] }}:role/GithubAction-AssumeRoleWithAction
+          role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           role-duration-seconds: 14400
       - name: Destroy OSML stack(s)
@@ -90,6 +140,13 @@ jobs:
           project-name: CodeBuild-DestroyGithubOSML
           buildspec-override: .github/codebuild/destroy.yml
           env-vars-for-codebuild: |
-            BASE_REF
+            BASE_REF,
+            AWS_REGION,
+            AWS_ACCOUNT,
+            DOMAIN_HOSTED_ZONE_ID,
+            DOMAIN_HOSTED_ZONE_NAME
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || inputs.target_env }}
+          AWS_ACCOUNT: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}
+          DOMAIN_HOSTED_ZONE_ID: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.DOMAIN_HOSTED_ZONE_ID_MAIN || secrets.DOMAIN_HOSTED_ZONE_ID_DEV }}
+          DOMAIN_HOSTED_ZONE_NAME: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.DOMAIN_HOSTED_ZONE_NAME_MAIN || secrets.DOMAIN_HOSTED_ZONE_NAME_DEV }}

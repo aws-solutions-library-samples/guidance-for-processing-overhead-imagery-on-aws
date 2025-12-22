@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2020", "dom"],
+    "outDir": "dist",
+    "rootDir": ".",
+    "declarationDir": "dist/types"
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "cdk.out", "dist"]
+}

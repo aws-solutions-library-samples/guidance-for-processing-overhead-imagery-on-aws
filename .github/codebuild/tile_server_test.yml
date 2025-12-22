@@ -1,5 +1,11 @@
 version: 0.2
+
 phases:
+  pre_build:
+    commands:
+      - yum install -y git-lfs
+      - GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/awslabs/osml-tile-server.git lib/osml-tile-server
+
   build:
     commands:
-      - bash scripts/tile_server_integ.sh
+      - npm run integ:tile-server

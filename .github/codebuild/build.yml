@@ -3,34 +3,41 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 18
+      nodejs: 24
     commands:
       - npm install -g aws-cdk
 
   pre_build:
     commands:
-      - yum install -y git-lfs
-      - cp .github/cdk.context.github.json cdk.context.json
-      - git submodule update --init --recursive
+      # git-lfs needed for child component repos that use LFS
+      - yum install -y jq git-lfs
+      # Generate deployment.json from example, substituting account ID, region,
+      # hosted zone config, and disabling osml-models (requires SAM3 checkpoint)
       - |
-        if [[ "$BASE_REF" == "dev" ]]; then
-          echo "Building from source for dev branch"
-          sed -i 's/"BUILD_FROM_SOURCE": false/"BUILD_FROM_SOURCE": true/' cdk.context.json
-        else
-          echo "Not building from source for main branch"
-        fi
-      - sed -i "s/1234567890123/$AWS_ACCOUNT/" cdk.context.json
-      - cat cdk.context.json
-      - git lfs pull
-      - git submodule foreach git lfs pull
+        jq --arg account "$AWS_ACCOUNT" \
+           --arg region "$AWS_REGION" \
+           --arg hz_id "$DOMAIN_HOSTED_ZONE_ID" \
+           --arg hz_name "$DOMAIN_HOSTED_ZONE_NAME" \
+           '
+           .account.id = $account |
+           .account.region = $region |
+           .["osml-models"].deploy = false |
+           .["amazon-mission-solutions-auth-server"].config.dataplaneConfig.DOMAIN_HOSTED_ZONE_ID = $hz_id |
+           .["amazon-mission-solutions-auth-server"].config.dataplaneConfig.DOMAIN_HOSTED_ZONE_NAME = $hz_name |
+           .["amazon-mission-solutions-auth-server"].config.dataplaneConfig.DOMAIN_INTERNET_FACING = true |
+           .["osml-apis"].config.dataplaneConfig.DOMAIN_HOSTED_ZONE_ID = $hz_id |
+           .["osml-apis"].config.dataplaneConfig.DOMAIN_HOSTED_ZONE_NAME = $hz_name
+           ' \
+           bin/deployment.json.example > bin/deployment.json
+      - cat bin/deployment.json
       - npm install
 
   build:
     commands:
-      - cdk bootstrap --force
-      - npm run deploy
+      # Deploy using the script with force clone to get fresh repos
+      # The deploy script handles CDK bootstrapping automatically
+      - npm run deploy -- --git-clone-force
 
   post_build:
     commands:
       - echo "Build completed on $(date)"
-

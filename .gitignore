@@ -8,10 +8,20 @@ dist/
 dist-electron/
 dist-ssr/
 cdk.out/
+cdk-list-output/
 release/
 temp/
 *.egg-info/
 cdk.context.json
+cdk-outputs.json
+cdk-nag-suppressions-report.txt
+.cdk-nag-suppressions-temp.json
+
+# External components (managed by scripts/deploy.sh)
+# Note: Native components like lib/osml-vpc/ and lib/osml-apis/ are NOT excluded
+lib/*
+!lib/osml-vpc/
+!lib/osml-apis/
 
 # Python cache files
 __pycache__/
@@ -36,6 +46,9 @@ nohup.out
 # Local configuration files
 *.local
 .eslintcache
+lib/osml-vpc/cdk/bin/deployment/deployment.json
+lib/osml-apis/cdk/bin/deployment/deployment.json
+bin/deployment.json
 
 # Temporary files
 *.attach*

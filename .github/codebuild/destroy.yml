@@ -3,27 +3,45 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 18
+      nodejs: 24
     commands:
       - npm install -g aws-cdk
 
   pre_build:
     commands:
-      - yum install -y git-lfs
-      - cp .github/cdk.context.github.json cdk.context.json
-      - git submodule update --init --recursive
+      - yum install -y jq git-lfs
+      # Generate deployment.json with the same config as the build step
       - |
-        if [[ "$BASE_REF" == "dev" ]]; then
-          echo "Building from source"
-          sed -i 's/"BUILD_FROM_SOURCE": false,/"BUILD_FROM_SOURCE": true,/' cdk.context.json
-        else
-          echo "Not building from source"
-        fi
-      - sed -i "s/1234567890123/$AWS_ACCOUNT/" cdk.context.json
-      - cat cdk.context.json
-      - git lfs pull
-      - git submodule foreach git lfs pull
+        jq --arg account "$AWS_ACCOUNT" \
+           --arg region "$AWS_REGION" \
+           --arg hz_id "$DOMAIN_HOSTED_ZONE_ID" \
+           --arg hz_name "$DOMAIN_HOSTED_ZONE_NAME" \
+           '
+           .account.id = $account |
+           .account.region = $region |
+           .["osml-models"].deploy = false |
+           .["amazon-mission-solutions-auth-server"].config.dataplaneConfig.DOMAIN_HOSTED_ZONE_ID = $hz_id |
+           .["amazon-mission-solutions-auth-server"].config.dataplaneConfig.DOMAIN_HOSTED_ZONE_NAME = $hz_name |
+           .["amazon-mission-solutions-auth-server"].config.dataplaneConfig.DOMAIN_INTERNET_FACING = true |
+           .["osml-apis"].config.dataplaneConfig.DOMAIN_HOSTED_ZONE_ID = $hz_id |
+           .["osml-apis"].config.dataplaneConfig.DOMAIN_HOSTED_ZONE_NAME = $hz_name |
+           .["osml-apis"].config.dataplaneConfig.authConfig.authority = "https://placeholder.example.com/realms/osml"
+           ' \
+           bin/deployment.json.example > bin/deployment.json
+      - cat bin/deployment.json
       - npm install
+      # Clone component repos and generate configs without deploying
+      - npm run deploy -- --git-clone-force --stage
+      # Pre-install dependencies sequentially to avoid OOM during parallel destruction
+      - |
+        for dir in lib/*/cdk; do
+          if [ -f "$dir/package.json" ]; then
+            echo "Installing dependencies for $dir..."
+            (cd "$dir" && npm install --silent)
+            # Pre-bundle Lambda assets if needed for CDK synthesis during destroy
+            (cd "$dir" && npm run prebundle:lambda --if-present)
+          fi
+        done
 
   build:
     commands:
