@@ -7,14 +7,14 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
-    rev: 25.1.0
+    rev: 26.1.0
     hooks:
       - id: black
         args: ["--line-length=125"]
         types: [file, python]
 
   - repo: https://github.com/PyCQA/isort
-    rev: 6.0.1
+    rev: 8.0.1
     hooks:
       - id: isort
         args: ["--line-length=125", "--profile=black"]
@@ -25,18 +25,6 @@ repos:
     hooks:
       - id: flake8
         args: ["--ignore=E203,W503,W605", "--max-line-length=125"]
-        types: [file, python]
-
-  - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v2.0.4
-    hooks:
-      - id: autopep8
-        args:
-          [
-            '--ignore=["E203","W503","W605"]',
-            "--max-line-length=125",
-            "--in-place"
-          ]
         types: [file, python]
 
   - repo: local

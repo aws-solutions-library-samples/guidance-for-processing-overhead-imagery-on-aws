@@ -161,9 +161,7 @@ export class Network extends Construct {
       // the minimum permissions needed to write to CloudWatch Logs.
       NagSuppressions.addResourceSuppressionsByPath(
         stack,
-        [
-          `${this.node.path}/VPC/VPCFlowLog/IAMRole/DefaultPolicy/Resource`
-        ],
+        [`${this.node.path}/VPC/VPCFlowLog/IAMRole/DefaultPolicy/Resource`],
         [
           {
             id: "AwsSolutions-IAM5",

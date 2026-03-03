@@ -220,12 +220,23 @@ describe("OSMLApisStack Property Tests", () => {
 
           let expectedIntegrationCount = 0;
           // VPC Link integrations require both URL and ALB ARN
-          if (integrationsConfig.TILE_SERVER_URL && integrationsConfig.TILE_SERVER_ALB_ARN) expectedIntegrationCount++;
+          if (
+            integrationsConfig.TILE_SERVER_URL &&
+            integrationsConfig.TILE_SERVER_ALB_ARN
+          )
+            expectedIntegrationCount++;
           if (integrationsConfig.DATA_INTAKE_LAMBDA_ARN)
             expectedIntegrationCount++;
-          if (integrationsConfig.GEO_AGENTS_MCP_URL && integrationsConfig.GEO_AGENTS_ALB_ARN) expectedIntegrationCount++;
+          if (
+            integrationsConfig.GEO_AGENTS_MCP_URL &&
+            integrationsConfig.GEO_AGENTS_ALB_ARN
+          )
+            expectedIntegrationCount++;
 
-          if (integrationsConfig.TILE_SERVER_URL && integrationsConfig.TILE_SERVER_ALB_ARN) {
+          if (
+            integrationsConfig.TILE_SERVER_URL &&
+            integrationsConfig.TILE_SERVER_ALB_ARN
+          ) {
             expect(stack.tileServerIntegration).toBeDefined();
             expect(stack.tileServerIntegration?.effectiveUrl).toBeDefined();
           } else {
@@ -239,7 +250,10 @@ describe("OSMLApisStack Property Tests", () => {
             expect(stack.dataIntakeIntegration).toBeUndefined();
           }
 
-          if (integrationsConfig.GEO_AGENTS_MCP_URL && integrationsConfig.GEO_AGENTS_ALB_ARN) {
+          if (
+            integrationsConfig.GEO_AGENTS_MCP_URL &&
+            integrationsConfig.GEO_AGENTS_ALB_ARN
+          ) {
             expect(stack.geoAgentsMcpIntegration).toBeDefined();
             expect(stack.geoAgentsMcpIntegration?.effectiveUrl).toBeDefined();
           } else {
@@ -303,7 +317,8 @@ describe("OSMLApisStack Property Tests", () => {
         property(urlArb, (TILE_SERVER_URL) => {
           const { stack } = createTestStack({
             TILE_SERVER_URL,
-            TILE_SERVER_ALB_ARN: "arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/tile-server/abc123"
+            TILE_SERVER_ALB_ARN:
+              "arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/tile-server/abc123"
           });
 
           expect(stack.tileServerIntegration).toBeDefined();
@@ -332,7 +347,8 @@ describe("OSMLApisStack Property Tests", () => {
         property(urlArb, (GEO_AGENTS_MCP_URL) => {
           const { stack } = createTestStack({
             GEO_AGENTS_MCP_URL,
-            GEO_AGENTS_ALB_ARN: "arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/geo-agents/def456"
+            GEO_AGENTS_ALB_ARN:
+              "arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/geo-agents/def456"
           });
 
           expect(stack.tileServerIntegration).toBeUndefined();
@@ -367,7 +383,10 @@ describe("OSMLApisStack Property Tests", () => {
           const { template } = createTestStack(integrationsConfig);
           const outputs = template.findOutputs("*");
 
-          if (integrationsConfig.TILE_SERVER_URL && integrationsConfig.TILE_SERVER_ALB_ARN) {
+          if (
+            integrationsConfig.TILE_SERVER_URL &&
+            integrationsConfig.TILE_SERVER_ALB_ARN
+          ) {
             expect(outputs).toHaveProperty("TileServerApiUrl");
           } else {
             expect(outputs).not.toHaveProperty("TileServerApiUrl");
@@ -399,7 +418,10 @@ describe("OSMLApisStack Property Tests", () => {
           const { template } = createTestStack(integrationsConfig);
           const outputs = template.findOutputs("*");
 
-          if (integrationsConfig.GEO_AGENTS_MCP_URL && integrationsConfig.GEO_AGENTS_ALB_ARN) {
+          if (
+            integrationsConfig.GEO_AGENTS_MCP_URL &&
+            integrationsConfig.GEO_AGENTS_ALB_ARN
+          ) {
             expect(outputs).toHaveProperty("GeoAgentsMcpApiUrl");
           } else {
             expect(outputs).not.toHaveProperty("GeoAgentsMcpApiUrl");
@@ -417,7 +439,10 @@ describe("OSMLApisStack Property Tests", () => {
 
           expect(outputs).toHaveProperty("AuthorizerFunctionArn");
 
-          if (integrationsConfig.TILE_SERVER_URL && integrationsConfig.TILE_SERVER_ALB_ARN) {
+          if (
+            integrationsConfig.TILE_SERVER_URL &&
+            integrationsConfig.TILE_SERVER_ALB_ARN
+          ) {
             expect(outputs).toHaveProperty("TileServerApiUrl");
           } else {
             expect(outputs).not.toHaveProperty("TileServerApiUrl");
@@ -429,7 +454,10 @@ describe("OSMLApisStack Property Tests", () => {
             expect(outputs).not.toHaveProperty("DataIntakeApiUrl");
           }
 
-          if (integrationsConfig.GEO_AGENTS_MCP_URL && integrationsConfig.GEO_AGENTS_ALB_ARN) {
+          if (
+            integrationsConfig.GEO_AGENTS_MCP_URL &&
+            integrationsConfig.GEO_AGENTS_ALB_ARN
+          ) {
             expect(outputs).toHaveProperty("GeoAgentsMcpApiUrl");
           } else {
             expect(outputs).not.toHaveProperty("GeoAgentsMcpApiUrl");

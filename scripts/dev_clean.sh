@@ -42,19 +42,19 @@ for component_dir in lib/*/; do
     if [[ -d "${component_dir}cdk" ]]; then
         component_name=$(basename "${component_dir}")
         echo "Cleaning ${component_name}..."
-        
+
         # Remove CDK build artifacts
         if [[ -d "${component_dir}cdk/cdk.out" ]]; then
             echo "  Removing cdk.out..."
             rm -rf "${component_dir}cdk/cdk.out"
         fi
-        
+
         # Remove node_modules
         if [[ -d "${component_dir}cdk/node_modules" ]]; then
             echo "  Removing node_modules..."
             rm -rf "${component_dir}cdk/node_modules"
         fi
-        
+
         # Remove dist
         if [[ -d "${component_dir}cdk/dist" ]]; then
             echo "  Removing dist..."

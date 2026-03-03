@@ -19,7 +19,6 @@ on:
 env:
   AWS_REGION: "us-west-2"
   AWS_PAGER: ""
-  IS_MAIN: ${{ github.base_ref == 'main' || inputs.target_env == 'main' }}
 
 permissions:
   id-token: write
@@ -33,8 +32,68 @@ jobs:
       with:
         delay: 300000
         timeout: 7200000
-  BuildOSML:
+
+  Lint:
     needs: CheckPendingWorkflow
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Install npm dependencies
+        run: |
+          npm ci
+          cd lib/osml-vpc/cdk && npm ci
+          cd ../../../lib/osml-apis/cdk && npm ci
+
+      - name: Run pre-commit on changed files
+        run: pre-commit run --from-ref origin/${{ github.base_ref || inputs.target_env }} --to-ref HEAD
+
+  BuildAndTest:
+    needs: CheckPendingWorkflow
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd lib/osml-vpc/cdk && npm ci
+          cd ../../../lib/osml-apis/cdk && npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+  DeployOSML:
+    needs: [ Lint, BuildAndTest ]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -44,11 +103,11 @@ jobs:
           role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           role-duration-seconds: 14400
-      - name: Deploy and Build OSML
+      - name: Deploy OSML
         uses: aws-actions/aws-codebuild-run-build@v1
         with:
           project-name: CodeBuild-BuildGithubOSML
-          buildspec-override: .github/codebuild/build.yml
+          buildspec-override: .github/codebuild/deploy.yml
           env-vars-for-codebuild: |
             BASE_REF,
             AWS_REGION,
@@ -60,11 +119,11 @@ jobs:
           AWS_ACCOUNT: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}
           DOMAIN_HOSTED_ZONE_ID: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.DOMAIN_HOSTED_ZONE_ID_MAIN || secrets.DOMAIN_HOSTED_ZONE_ID_DEV }}
           DOMAIN_HOSTED_ZONE_NAME: ${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.DOMAIN_HOSTED_ZONE_NAME_MAIN || secrets.DOMAIN_HOSTED_ZONE_NAME_DEV }}
+
   # Wave 1: Model Runner and Tile Server tests (parallel)
-  RunModelRunnerTest:
+  RunModelRunnerIntegTest:
     runs-on: ubuntu-latest
-    needs: BuildOSML
-    timeout-minutes: 60
+    needs: DeployOSML
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -77,10 +136,10 @@ jobs:
         with:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/model_runner_test.yml
-  RunTileServerTest:
+
+  RunTileServerIntegTest:
     runs-on: ubuntu-latest
-    needs: BuildOSML
-    timeout-minutes: 30
+    needs: DeployOSML
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -93,10 +152,11 @@ jobs:
         with:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/tile_server_test.yml
+
   # Wave 2: Geo Agents and Data Intake tests (parallel, after wave 1 completes)
-  RunGeoAgentsTest:
+  RunGeoAgentsIntegTest:
     runs-on: ubuntu-latest
-    needs: [ RunModelRunnerTest, RunTileServerTest ]
+    needs: [ RunModelRunnerIntegTest, RunTileServerIntegTest ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -109,9 +169,10 @@ jobs:
         with:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/geo_agents_test.yml
-  RunDataIntakeTest:
+
+  RunDataIntakeIntegTest:
     runs-on: ubuntu-latest
-    needs: [ RunModelRunnerTest, RunTileServerTest ]
+    needs: [ RunModelRunnerIntegTest, RunTileServerIntegTest ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -124,9 +185,10 @@ jobs:
         with:
           project-name: CodeBuild-TestGithubOSML
           buildspec-override: .github/codebuild/data_intake_test.yml
+
   DestroyOSML:
-    if: ${{ always() && ( needs.CheckPendingWorkflow.result == 'success' )}}
-    needs: [ CheckPendingWorkflow, BuildOSML, RunTileServerTest, RunModelRunnerTest, RunDataIntakeTest, RunGeoAgentsTest ]
+    if: ${{ always() && needs.CheckPendingWorkflow.result == 'success' && needs.DeployOSML.result != 'skipped' }}
+    needs: [ CheckPendingWorkflow, DeployOSML, RunTileServerIntegTest, RunModelRunnerIntegTest, RunDataIntakeIntegTest, RunGeoAgentsIntegTest ]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials

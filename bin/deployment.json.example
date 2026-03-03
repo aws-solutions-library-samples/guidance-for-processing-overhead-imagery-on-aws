@@ -110,7 +110,8 @@
       },
       "deployIntegrationTests": true,
       "integrationTestConfig": {
-        "BUILD_FROM_SOURCE": true
+        "BUILD_FROM_SOURCE": true,
+        "MAX_WAIT_SECONDS": "180"
       }
     }
   },
