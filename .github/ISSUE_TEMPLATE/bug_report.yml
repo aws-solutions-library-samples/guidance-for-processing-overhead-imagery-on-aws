@@ -11,7 +11,7 @@ body:
       label: Prerequisites
       description: Please ensure you have completed all of the following.
       options:
-        - label: I have searched for [existing issues](https://github.com/aws-solutions-library-samples/guidance-for-overhead-imagery-inference-on-aws/issues) that already report this problem, without success.
+        - label: I have searched for [existing issues](https://github.com/aws-solutions-library-samples/guidance-for-processing-overhead-imagery-on-aws/issues) that already report this problem, without success.
           required: true
 
   - type: dropdown

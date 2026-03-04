@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - yum install -y git-lfs
+      - GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/awslabs/osml-data-intake.git lib/osml-data-intake
+      - pip install -r lib/osml-data-intake/test/integ/requirements.txt
+
+  build:
+    commands:
+      - npm run integ:data-intake

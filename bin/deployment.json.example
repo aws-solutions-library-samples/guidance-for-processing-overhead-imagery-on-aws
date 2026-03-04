@@ -1,0 +1,143 @@
+{
+  "account": {
+    "id": "123456789012",
+    "region": "us-west-2",
+    "prodLike": false,
+    "isAdc": false
+  },
+  "osml-vpc": {
+    "deploy": true,
+    "config": {
+      "projectName": "OSML-VPC"
+    }
+  },
+  "amazon-mission-solutions-auth-server": {
+    "deploy": true,
+    "gitUrl": "https://github.com/awslabs/amazon-mission-solutions-auth-server",
+    "gitTarget": "main",
+    "config": {
+      "projectName": "OSML-AuthServer",
+      "dataplaneConfig": {
+        "KEYCLOAK_IMAGE": "quay.io/keycloak/keycloak:latest",
+        "DOMAIN_INTERNET_FACING": false,
+        "KEYCLOAK_AUTH_CONFIG": {
+          "realm": "osml",
+          "enabled": true,
+          "clients": [
+            {
+              "clientId": "osml-client",
+              "publicClient": true,
+              "authorizationServicesEnabled": false,
+              "websiteUri": "https://example.com",
+              "redirectUris": ["__PLACEHOLDER_REDIRECT_URI__"],
+              "postLogoutRedirectUris": ["__PLACEHOLDER_REDIRECT_URI__"],
+              "webOrigins": ["__PLACEHOLDER_WEB_ORIGIN__"]
+            }
+          ],
+          "users": [
+            {
+              "username": "osml",
+              "generatePassword": true,
+              "firstName": "OversightML",
+              "lastName": "User",
+              "enabled": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "osml-model-runner": {
+    "deploy": true,
+    "dependsOn": ["osml-vpc"],
+    "gitUrl": "https://github.com/awslabs/osml-model-runner",
+    "gitTarget": "main",
+    "config": {
+      "projectName": "OSML-ModelRunner",
+      "networkConfig": {},
+      "dataplaneConfig": {
+        "BUILD_FROM_SOURCE": true
+      },
+      "deployIntegrationTests": true,
+      "testModelsConfig": {
+        "BUILD_FROM_SOURCE": true
+      }
+    }
+  },
+  "osml-models": {
+    "deploy": true,
+    "dependsOn": ["osml-vpc"],
+    "gitUrl": "https://github.com/awslabs/osml-models",
+    "gitTarget": "main",
+    "sam3PtLocalPath": "~/Downloads/sam3.pt",
+    "config": {
+      "projectName": "OSML-Models",
+      "networkConfig": {},
+      "modelEndpointConfig": {
+        "BUILD_FROM_SOURCE": true,
+        "INSTANCE_TYPE": "ml.g6.4xlarge"
+      }
+    }
+  },
+  "osml-tile-server": {
+    "deploy": true,
+    "dependsOn": ["osml-vpc"],
+    "gitUrl": "https://github.com/awslabs/osml-tile-server",
+    "gitTarget": "main",
+    "config": {
+      "projectName": "OSML-TileServer",
+      "networkConfig": {},
+      "dataplaneConfig": {
+        "BUILD_FROM_SOURCE": true
+      },
+      "deployIntegrationTests": true,
+      "testConfig": {
+        "BUILD_FROM_SOURCE": true
+      }
+    }
+  },
+  "osml-data-intake": {
+    "deploy": true,
+    "retry": 1,
+    "dependsOn": ["osml-vpc"],
+    "gitUrl": "https://github.com/awslabs/osml-data-intake",
+    "gitTarget": "main",
+    "config": {
+      "projectName": "OSML-DataCatalog",
+      "networkConfig": {},
+      "dataplaneConfig": {
+        "BUILD_FROM_SOURCE": true
+      },
+      "deployIntegrationTests": true,
+      "integrationTestConfig": {
+        "BUILD_FROM_SOURCE": true,
+        "MAX_WAIT_SECONDS": "180"
+      }
+    }
+  },
+  "osml-geo-agents": {
+    "deploy": true,
+    "dependsOn": ["osml-vpc"],
+    "gitUrl": "https://github.com/awslabs/osml-geo-agents",
+    "gitTarget": "main",
+    "config": {
+      "projectName": "OSML-GeoAgents",
+      "deployIntegrationTests": true,
+      "testConfig": {
+        "BUILD_FROM_SOURCE": true
+      }
+    }
+  },
+  "osml-apis": {
+    "deploy": true,
+    "dependsOn": ["osml-vpc", "amazon-mission-solutions-auth-server", "osml-tile-server", "osml-data-intake", "osml-geo-agents"],
+    "config": {
+      "projectName": "OSML-APIs",
+      "dataplaneConfig": {
+        "authConfig": {
+          "audience": "account"
+        }
+      }
+    }
+  }
+}

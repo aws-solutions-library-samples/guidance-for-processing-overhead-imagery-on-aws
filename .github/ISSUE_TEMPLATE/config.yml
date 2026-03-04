@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Official OSML Homepage
-    url: https://aws.amazon.com/solutions/guidance/overhead-imagery-inference-on-aws/
+    url: https://aws.amazon.com/solutions/guidance/processing-overhead-imagery-on-aws/
     about: More info about the OSML architecture diagram, implementation resources, etc
