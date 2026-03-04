@@ -1,0 +1,30 @@
+{
+  "name": "osml-network",
+  "version": "1.0.0",
+  "description": "OSML Network CDK Stack - Shared VPC infrastructure for OSML components",
+  "main": "dist/lib/index.js",
+  "types": "dist/types/index.d.ts",
+  "bin": {
+    "osml-network": "bin/app.ts"
+  },
+  "scripts": {
+    "synth": "cdk synth",
+    "deploy": "cdk deploy --require-approval never",
+    "destroy": "cdk destroy",
+    "test": "jest"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.232.2",
+    "cdk-nag": "^2.37.55",
+    "constructs": "^10.4.2",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "aws-cdk": "^2.1106.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2"
+  }
+}

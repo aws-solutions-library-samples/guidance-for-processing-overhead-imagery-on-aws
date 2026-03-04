@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - yum install -y git-lfs
+      - GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/awslabs/osml-geo-agents.git lib/osml-geo-agents
+
+  build:
+    commands:
+      - npm run integ:geo-agents

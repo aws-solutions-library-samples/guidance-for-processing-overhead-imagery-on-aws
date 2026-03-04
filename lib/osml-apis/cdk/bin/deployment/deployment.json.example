@@ -1,0 +1,27 @@
+{
+  "projectName": "OSML-APIs",
+  "account": {
+    "id": "YOUR_AWS_ACCOUNT_ID",
+    "region": "us-west-2",
+    "prodLike": false,
+    "isAdc": false
+  },
+  "networkConfig": {
+    "VPC_ID": "vpc-xxxxxxxxxxxxxxxxx",
+    "TARGET_SUBNETS": ["subnet-xxxxxxxxxxxxxxxxx", "subnet-yyyyyyyyyyyyyyyyy"],
+    "SECURITY_GROUP_ID": "sg-xxxxxxxxxxxxxxxxx"
+  },
+  "dataplaneConfig": {
+    "authConfig": {
+      "authority": "https://your-keycloak-server.example.com/realms/osml",
+      "audience": "osml-client"
+    },
+    "TILE_SERVER_URL": "http://internal-osml-tile-server-alb.region.elb.amazonaws.com",
+    "DATA_INTAKE_LAMBDA_ARN": "arn:aws:lambda:region:account:function:data-catalog-stac",
+    "GEO_AGENTS_MCP_URL": "http://internal-osml-geo-agents-alb.region.elb.amazonaws.com",
+    "CORS_ALLOWED_ORIGINS": ["https://your-app.example.com"],
+    "DOMAIN_HOSTED_ZONE_ID": "Z1234567890ABC",
+    "DOMAIN_HOSTED_ZONE_NAME": "example.com",
+    "DOMAIN_CERTIFICATE_ARN": "arn:aws:acm:us-west-2:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+  }
+}
