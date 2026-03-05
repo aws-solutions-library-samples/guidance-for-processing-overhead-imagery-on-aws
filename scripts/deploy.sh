@@ -2059,6 +2059,20 @@ main() {
         exit ${EXIT_SUCCESS}
     fi
 
+    # Bootstrap CDK toolkit stack (latest) once before parallel deploys to avoid race conditions.
+    if [[ "${DRY_RUN}" != "true" && "${STAGE_ONLY}" != "true" ]]; then
+        local bootstrap_account bootstrap_region
+        bootstrap_account=$(echo "${CONFIG_JSON}" | jq -r '.account.id')
+        bootstrap_region=$(echo "${CONFIG_JSON}" | jq -r '.account.region')
+        log_info "Bootstrapping CDK environment aws://${bootstrap_account}/${bootstrap_region}"
+
+        if ! cdk bootstrap "aws://${bootstrap_account}/${bootstrap_region}" 2>&1; then
+            exit_cdk_error "CDK bootstrap failed for aws://${bootstrap_account}/${bootstrap_region}"
+        fi
+
+        log_success "CDK environment bootstrapped successfully"
+    fi
+
     # Execute deployment waves using topological sort
     local wave_num=0
 
