@@ -9,15 +9,6 @@
  * - A shared Lambda authorizer for JWT validation
  * - Conditional API Gateway integrations for Tile Server, Data Intake, and Geo Agents MCP
  * - Stack outputs for cross-stack references
- *
- * Requirements addressed:
- * - 2.1: Lambda authorizer always deployed
- * - 2.7: Lambda authorizer deployed within VPC
- * - 2.8: Lambda authorizer configurable with authority and audience
- * - 3.1, 3.2: Conditional Tile Server integration
- * - 4.1, 4.2: Conditional Data Intake integration
- * - 5.1, 5.2: Conditional Geo Agents MCP integration
- * - 8.1, 8.2, 8.3, 8.4: Stack outputs for API URLs and authorizer ARN
  */
 
 import {
@@ -31,6 +22,7 @@ import {
 } from "aws-cdk-lib";
 import {
   BasePathMapping,
+  CfnAccount,
   DomainName,
   EndpointType,
   SecurityPolicy
@@ -132,6 +124,27 @@ export class OSMLApisStack extends Stack {
       authConfig.audience
     );
 
+    // Configure required API Gateway account-level CloudWatch Logs role.
+    const apiGatewayCloudWatchRole = new Role(
+      this,
+      "ApiGatewayCloudWatchRole",
+      {
+        assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+        managedPolicies: [
+          ManagedPolicy.fromAwsManagedPolicyName(
+            "service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+          )
+        ]
+      }
+    );
+
+    const apiGatewayAccount = new CfnAccount(this, "ApiGatewayAccount", {
+      cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn
+    });
+
+    // Ensure the account-level setting is applied before any REST API stages
+    apiGatewayAccount.node.addDependency(apiGatewayCloudWatchRole);
+
     // Output authorizer ARN (always)
     new CfnOutput(this, "AuthorizerFunctionArn", {
       value: this.authorizerFunction.functionArn,
@@ -202,6 +215,19 @@ export class OSMLApisStack extends Stack {
     let tileServerEffectiveUrl = this.tileServerIntegration?.effectiveUrl;
     let dataIntakeEffectiveUrl = this.dataIntakeIntegration?.effectiveUrl;
     let geoAgentsEffectiveUrl = this.geoAgentsMcpIntegration?.effectiveUrl;
+
+    // Ensure API Gateway account-level CloudWatch role is set before any stage is created.
+    if (this.tileServerIntegration) {
+      this.tileServerIntegration.restApi.node.addDependency(apiGatewayAccount);
+    }
+    if (this.dataIntakeIntegration) {
+      this.dataIntakeIntegration.restApi.node.addDependency(apiGatewayAccount);
+    }
+    if (this.geoAgentsMcpIntegration) {
+      this.geoAgentsMcpIntegration.restApi.node.addDependency(
+        apiGatewayAccount
+      );
+    }
 
     // Create custom domain names if hosted zone configuration is provided
     const hostedZoneId = dataplaneConfig.DOMAIN_HOSTED_ZONE_ID;
@@ -476,25 +502,12 @@ def lambda_handler(event, context):
   /**
    * Adds CDK NAG suppressions for the authorizer Lambda function.
    *
-   * These suppressions document justified deviations from AWS best practices
-   * for the Lambda authorizer component. Each suppression includes a detailed
-   * reason explaining why the deviation is acceptable.
-   *
-   * Requirements addressed:
-   * - 7.1: Lambda authorizer has minimal permissions for CloudWatch Logs and VPC
-   * - 7.2: IAM roles use least-privilege principles with documented exceptions
-   * - 7.3: All suppressions include documented justifications
-   *
    * @param role - The IAM role for the authorizer
    * @param _fn - The Lambda function (unused, kept for API compatibility)
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   private addAuthorizerNagSuppressions(role: Role, _fn: Function): void {
     // Suppress warnings for AWS managed policies
-    // Justification: These are standard AWS-provided policies specifically designed
-    // for Lambda functions. AWSLambdaBasicExecutionRole provides minimal CloudWatch
-    // Logs permissions, and AWSLambdaVPCAccessExecutionRole provides minimal ENI
-    // permissions required for VPC-attached Lambda functions.
     NagSuppressions.addResourceSuppressions(
       role,
       [
@@ -513,8 +526,6 @@ def lambda_handler(event, context):
       ],
       true
     );
-
-    // Note: No L1 suppression needed - using Python 3.13 which is the latest runtime
   }
 
   /**
@@ -525,7 +536,6 @@ def lambda_handler(event, context):
    */
   private addStackNagSuppressions(): void {
     // Suppress warnings for API Gateway CloudWatch role
-    // This is created automatically by CDK when deploying REST APIs
     NagSuppressions.addStackSuppressions(
       this,
       [
