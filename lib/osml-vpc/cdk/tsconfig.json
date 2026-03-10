@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "declarationDir": "dist/types"
+    "declarationDir": "dist/types",
+    "skipLibCheck": true
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "cdk.out", "dist"]

@@ -4,7 +4,8 @@
     "lib": ["es2020", "dom"],
     "outDir": "dist",
     "rootDir": ".",
-    "declarationDir": "dist/types"
+    "declarationDir": "dist/types",
+    "skipLibCheck": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "cdk.out", "dist"]
