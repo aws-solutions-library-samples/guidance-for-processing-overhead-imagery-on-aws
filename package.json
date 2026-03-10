@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "license": "MIT No Attribution",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit",
     "test": "jest --config jest.config.ts",
+    "test:root": "jest --config jest.config.ts --roots '<rootDir>/test'",
+    "test:osml-vpc": "jest --config jest.config.ts --roots '<rootDir>/lib/osml-vpc/cdk/test'",
+    "test:osml-apis": "jest --config jest.config.ts --roots '<rootDir>/lib/osml-apis/cdk/test'",
     "deploy": "bash scripts/deploy.sh",
     "destroy": "bash scripts/destroy.sh",
     "clean": "bash scripts/dev_clean.sh",
@@ -36,6 +39,6 @@
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "~5.9.3"
   }
 }

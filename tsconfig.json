@@ -4,6 +4,7 @@
     "module": "commonjs",
     "lib": ["es2020"],
     "declaration": true,
+    "outDir": "dist",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -20,5 +21,15 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "isolatedModules": true
-  }
+  },
+  "include": [
+    "jest.config.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "dist",
+    "cdk.out"
+  ]
 }
