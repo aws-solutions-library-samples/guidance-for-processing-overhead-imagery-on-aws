@@ -1,2 +1,2 @@
-PyJWT[crypto]==2.11.0
+PyJWT[crypto]==2.12.0
 requests==2.32.5
