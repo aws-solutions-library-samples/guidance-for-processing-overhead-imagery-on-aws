@@ -59,7 +59,7 @@ const networkStack = new NetworkStack(
       region: deployment.account.region
     },
     deployment: deployment,
-    description: "OSML-APIs, Network infrastructure (SO9240)"
+    description: "OSML APIs, Network infrastructure (SO9240)"
   }
 );
 

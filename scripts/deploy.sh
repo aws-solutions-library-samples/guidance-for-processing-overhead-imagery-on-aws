@@ -1226,8 +1226,8 @@ inject_dependency_outputs() {
         updated_config=$(inject_osml_apis_config "${updated_config}")
     fi
 
-    # Special handling for OsmlPrototypeWebApp component - inject auth server and service URLs
-    if [[ "${component}" == "OsmlPrototypeWebApp" ]]; then
+    # Special handling for osml-web-app component - inject auth server and service URLs
+    if [[ "${component}" == "osml-web-app" ]]; then
         updated_config=$(inject_webapp_config "${updated_config}")
     fi
 
@@ -1365,7 +1365,7 @@ inject_osml_apis_config() {
     echo "${config}"
 }
 
-# Inject OsmlPrototypeWebApp specific configuration from dependency outputs
+# Inject osml-web-app specific configuration from dependency outputs
 # This function extracts auth server URL and service endpoints from deployed stacks
 # Uses flattened dataplaneConfig structure with UPPER_SNAKE_CASE property names
 inject_webapp_config() {
@@ -1603,7 +1603,7 @@ deploy_component_async() {
 
     local attempt=1
     while [[ ${attempt} -le ${max_attempts} ]]; do
-        if (cd "${component_dir}" && npx cdk deploy --all --require-approval never --outputs-file "${outputs_file}" 2>&1); then
+        if (cd "${component_dir}" && cdk deploy --all --require-approval never --outputs-file "${outputs_file}" 2>&1); then
             return 0
         fi
 
