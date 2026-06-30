@@ -1444,9 +1444,20 @@ inject_webapp_config() {
             geo_agents_url="${geo_agents_url%/}"
             log_info "      Injecting geo agents MCP API URL: ${geo_agents_url}" >&2
 
+            # Append an osml-geo-agents entry to MCP_DEFAULT_SERVERS only if no
+            # entry with that id already exists in user config.
             config=$(echo "${config}" | jq \
                 --arg url "${geo_agents_url}" \
-                '.dataplaneConfig.GEO_AGENTS_MCP_URL = (.dataplaneConfig.GEO_AGENTS_MCP_URL // $url)')
+                '.dataplaneConfig.MCP_DEFAULT_SERVERS = (.dataplaneConfig.MCP_DEFAULT_SERVERS // []) |
+                 if (.dataplaneConfig.MCP_DEFAULT_SERVERS | map(.id) | index("osml-geo-agents")) then .
+                 else .dataplaneConfig.MCP_DEFAULT_SERVERS += [{
+                   id: "osml-geo-agents",
+                   name: "OSML Geo Agent",
+                   url: $url,
+                   description: "OSML geospatial analysis tools",
+                   authMode: "session",
+                   enabled: true
+                 }] end')
         fi
 
         # Extract data intake output topic ARN
