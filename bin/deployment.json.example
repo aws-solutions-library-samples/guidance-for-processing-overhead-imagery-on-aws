@@ -18,7 +18,7 @@
     "config": {
       "projectName": "OSML-AuthServer",
       "dataplaneConfig": {
-        "KEYCLOAK_IMAGE": "quay.io/keycloak/keycloak:latest",
+        "KEYCLOAK_VERSION": "26.6.4",
         "DOMAIN_INTERNET_FACING": false,
         "KEYCLOAK_AUTH_CONFIG": {
           "realm": "osml",

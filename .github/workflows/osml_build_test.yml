@@ -39,18 +39,18 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
@@ -72,10 +72,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
@@ -95,10 +95,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
@@ -121,10 +121,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
@@ -146,7 +146,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
@@ -175,7 +175,7 @@ jobs:
     needs: DeployOSML
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
@@ -191,7 +191,7 @@ jobs:
     needs: DeployOSML
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
@@ -208,7 +208,7 @@ jobs:
     needs: [ RunModelRunnerIntegTest, RunTileServerIntegTest ]
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
@@ -224,7 +224,7 @@ jobs:
     needs: [ RunModelRunnerIntegTest, RunTileServerIntegTest ]
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction
@@ -241,7 +241,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::${{ (github.base_ref == 'main' || inputs.target_env == 'main') && secrets.OSML_MAIN || secrets.OSML_DEV }}:role/GithubAction-AssumeRoleWithAction

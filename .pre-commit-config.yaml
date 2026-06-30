@@ -80,6 +80,7 @@ repos:
             eslint\.config\.mjs$|
             jest\.config\.ts$|
             .+\.lock$|
+            .*\.dockerignore$|
             .*/node_modules/.*|
             .*/cdk\.out/.*|
             .*/dist/.*|
